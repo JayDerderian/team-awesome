@@ -1,24 +1,24 @@
-package examplefuncsplayer;
+package sprint1.robotplayer.v1;
 import battlecode.common.*;
 
-public strictfp class RobotPlayer {
+public class RobotPlayer {
     static RobotController rc;
 
     static final RobotType[] spawnableRobot = {
-        RobotType.POLITICIAN,
-        RobotType.SLANDERER,
-        RobotType.MUCKRAKER,
+            RobotType.POLITICIAN,
+            RobotType.SLANDERER,
+            RobotType.MUCKRAKER,
     };
 
     static final Direction[] directions = {
-        Direction.NORTH,
-        Direction.NORTHEAST,
-        Direction.EAST,
-        Direction.SOUTHEAST,
-        Direction.SOUTH,
-        Direction.SOUTHWEST,
-        Direction.WEST,
-        Direction.NORTHWEST,
+            Direction.NORTH,
+            Direction.NORTHEAST,
+            Direction.EAST,
+            Direction.SOUTHEAST,
+            Direction.SOUTH,
+            Direction.SOUTHWEST,
+            Direction.WEST,
+            Direction.NORTHWEST,
     };
 
     static int turnCount;
@@ -62,8 +62,7 @@ public strictfp class RobotPlayer {
     }
 
     static void runEnlightenmentCenter() throws GameActionException {
-//        RobotType toBuild = randomSpawnableRobotType();
-        RobotType toBuild = RobotType.SLANDERER;
+        RobotType toBuild = randomSpawnableRobotType();
         int influence = 50;
         for (Direction dir : directions) {
             if (rc.canBuildRobot(toBuild, dir, influence)) {
@@ -93,19 +92,43 @@ public strictfp class RobotPlayer {
             System.out.println("I moved!");
     }
 
+    /**
+     * created Muckraker
+     * 1. sense every Robot --> If enemy
+     *                              slanderer --> then expose.
+     *                              EC -->  then set a flag
+     *                              Muckraker / politician --> do nothing
+     *                      --> If Neutral EC --> set Flag
+     *
+     * 2. Did not sense Robot/ already Exposed enemies --> then Detect
+     *      detect surrounding. a. Found some robot --> Move in that direction
+     *                          b. No Robot found --> choose Random Direction with low passability.
+     */
     static void runMuckraker() throws GameActionException {
         Team enemy = rc.getTeam().opponent();
         int actionRadius = rc.getType().actionRadiusSquared;
-        for (RobotInfo robot : rc.senseNearbyRobots(actionRadius, enemy)) {
-            if (robot.type.canBeExposed()) {
-                // It's a slanderer... go get them!
-                if (rc.canExpose(robot.location)) {
-                    System.out.println("e x p o s e d");
-                    rc.expose(robot.location);
-                    return;
+        // 1. Sense Every Robot
+        for (RobotInfo robot : rc.senseNearbyRobots()) {
+            if(robot.getTeam() == enemy){
+                if (robot.type.canBeExposed()) {
+                    // It's a slanderer... go get them!
+                    if (rc.canExpose(robot.location)) {
+                        System.out.println("e x p o s e d");
+                        rc.expose(robot.location);
+//                        return;
+                    }
+                } else if(robot.type == RobotType.ENLIGHTENMENT_CENTER) {
+                    // set flag Indicating Enemy EC is found.
+                    System.out.println("Found enemy EC!");
                 }
             }
+//            else if(robot.getType().) {
+//                // Found a Neutral EC
+//                // set flag
+//            }
         }
+
+        // 2. Did not sense Robot/ already Exposed enemies
         if (tryMove(randomDirection()))
             System.out.println("I moved!");
     }
