@@ -1,6 +1,7 @@
 package politician;
 import battlecode.common.*;
 
+import javax.xml.stream.Location;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -39,6 +40,10 @@ public class RobotPlayer {
     Find the most passable square
      */
     public Direction whereToMove() throws GameActionException {
+        history.add(rc.getLocation());
+        if(history.size() > 10) {
+            history.removeLast();
+        }
         HashMap<Direction, Double> locations = new HashMap<>();
         double maxPass = 0;
         MapLocation toReturn = null;
@@ -63,10 +68,21 @@ public class RobotPlayer {
             // prefer to go toward enemy robots
             if(robot.getTeam() != rc.getTeam()) {
                 dirWeight += 1;
+                if(robot.getType() == RobotType.ENLIGHTENMENT_CENTER) {
+                    dirWeight += 1;
+                }
             } else {
                 dirWeight -= 0.5;
             }
             locations.put(robotDirection, dirWeight);
+        }
+        // prefer to go away from the way we came
+        for(MapLocation l :
+            history) {
+            if(rc.getLocation().directionTo(l) != Direction.CENTER) {
+                Direction histDirection = rc.getLocation().directionTo(l);
+                locations.put(histDirection, locations.get(histDirection) - 0.25);
+            }
         }
         // select the direction with the highest weight
         Map.Entry<Direction, Double> best = null;
