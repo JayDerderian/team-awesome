@@ -6,7 +6,7 @@ import org.junit.Test;
 public class RobotPlayerTest {
     @Test
     public void testCanCreatePolitician() {
-        RobotPlayer test = new RobotPlayer();
+        RobotPlayer test = new RobotPlayer(null);
         assertNotNull(test);
     }
 }
