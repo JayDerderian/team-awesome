@@ -1,6 +1,9 @@
 package sprint1.robotplayer.v1;
 import battlecode.common.*;
 
+import java.util.ArrayList;
+import java.util.Collections;
+
 public class RobotPlayer {
     static RobotController rc;
 
@@ -96,9 +99,9 @@ public class RobotPlayer {
      * created Muckraker
      * 1. sense every Robot --> If enemy
      *                              slanderer --> then expose.
-     *                              EC -->  then set a flag
+     *                              EC -->  then set an 'Enemy EC' flag
      *                              Muckraker / politician --> do nothing
-     *                      --> If Neutral EC --> set Flag
+     *                      --> If Neutral EC --> set 'Neutral EC' Flag
      *
      * 2. Did not sense Robot/ already Exposed enemies --> then Detect
      *      detect surrounding. a. Found some robot --> Move in that direction
@@ -107,6 +110,7 @@ public class RobotPlayer {
     static void runMuckraker() throws GameActionException {
         Team enemy = rc.getTeam().opponent();
         int actionRadius = rc.getType().actionRadiusSquared;
+        //ArrayList<Direction> nextDirection --> make a dict
         // 1. Sense Every Robot
         for (RobotInfo robot : rc.senseNearbyRobots()) {
             if(robot.getTeam() == enemy){
@@ -117,18 +121,36 @@ public class RobotPlayer {
                         rc.expose(robot.location);
 //                        return;
                     }
-                } else if(robot.type == RobotType.ENLIGHTENMENT_CENTER) {
-                    // set flag Indicating Enemy EC is found.
-                    System.out.println("Found enemy EC!");
                 }
+//                else if(robot.type == RobotType.ENLIGHTENMENT_CENTER) {
+//                    // set flag Indicating Enemy EC is found.
+//                    System.out.println("Found enemy EC!");
+//                }
             }
 //            else if(robot.getType().) {
 //                // Found a Neutral EC
 //                // set flag
 //            }
+            else if(robot.getTeam() != enemy){
+                if(rc.canGetFlag(robot.getID())){
+                    int flagSensed = rc.getFlag(robot.getID());
+ //                 update Direction dictionary.
+//                    if(flagSensed == neutralFlag){
+//                        set flag to same vale
+//                    }
+                }
+            }
         }
 
         // 2. Did not sense Robot/ already Exposed enemies
+//        ArrayList<Double> allPass = new ArrayList<Double>();
+//        for(int i=0; i<directions.length; i++){
+//            MapLocation nextLocation = rc.adjacentLocation(directions[i]);
+//            allPass.add(rc.sensePassability(nextLocation));
+//        }
+//        System.out.println("---> " + allPass);
+//        int dirIndex = allPass.indexOf(Collections.max(allPass));
+//        allPass.removeAll(allPass);
         if (tryMove(randomDirection()))
             System.out.println("I moved!");
     }
