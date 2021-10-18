@@ -1,7 +1,7 @@
 package examplefuncsplayer;
 import battlecode.common.*;
 
-public strictfp class RobotPlayer {
+public strictfp class RobotPlayerv1 {
     static RobotController rc;
 
     static final RobotType[] spawnableRobot = {
@@ -32,7 +32,7 @@ public strictfp class RobotPlayer {
 
         // This is the RobotController object. You use it to perform actions from this robot,
         // and to get information on its current status.
-        RobotPlayer.rc = rc;
+        RobotPlayerv1.rc = rc;
 
         turnCount = 0;
 
@@ -74,7 +74,9 @@ public strictfp class RobotPlayer {
 
         //sense enemy robots
         int conviction = 0;
-        int typeFlag = 25;
+        int team = 25;
+        RobotType type;
+        int typeFlag = 0;
         if(rc.canSenseRobot(rc.getID())){
             RobotInfo sense = rc.senseRobot(rc.getID());
 
@@ -83,7 +85,7 @@ public strictfp class RobotPlayer {
                 conviction = sense.conviction + 30;
                 switch (sense.type) {
                     case ENLIGHTENMENT_CENTER: typeFlag = 50;   break;
-                    case POLITICIAN:           typeFlag = 0;    break;
+                    case POLITICIAN:           typeFlag = 1;    break;
                     case SLANDERER:            typeFlag = 10;   break;
                     case MUCKRAKER:            typeFlag = 20;   break;
                 }
@@ -96,6 +98,7 @@ public strictfp class RobotPlayer {
             }
 
         }
+
 
 
         //Check the bidding conditions.
