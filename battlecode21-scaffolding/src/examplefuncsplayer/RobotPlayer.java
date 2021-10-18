@@ -71,6 +71,11 @@ public strictfp class RobotPlayer {
                 break;
             }
         }
+
+        //Check the bidding conditions.
+        if(rc.canBid(influence/4)){
+            rc.bid(influence/4);
+        }
     }
 
     static void runPolitician() throws GameActionException {
