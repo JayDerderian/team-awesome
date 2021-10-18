@@ -3,9 +3,14 @@ import battlecode.common.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class RobotPlayer {
     static RobotController rc;
+
+    static final int NEUTRAL_ENLIGHTENMENT_CENTER_FLAG = 101;
+    static final int SLANDERER_FLAG = 102;
 
     static final RobotType[] spawnableRobot = {
             RobotType.POLITICIAN,
@@ -110,7 +115,7 @@ public class RobotPlayer {
     static void runMuckraker() throws GameActionException {
         Team enemy = rc.getTeam().opponent();
         int actionRadius = rc.getType().actionRadiusSquared;
-        //ArrayList<Direction> nextDirection --> make a dict
+
         // 1. Sense Every Robot
         for (RobotInfo robot : rc.senseNearbyRobots()) {
             if(robot.getTeam() == enemy){
@@ -122,35 +127,18 @@ public class RobotPlayer {
 //                        return;
                     }
                 }
-//                else if(robot.type == RobotType.ENLIGHTENMENT_CENTER) {
-//                    // set flag Indicating Enemy EC is found.
-//                    System.out.println("Found enemy EC!");
-//                }
             }
-//            else if(robot.getType().) {
-//                // Found a Neutral EC
-//                // set flag
-//            }
             else if(robot.getTeam() != enemy){
                 if(rc.canGetFlag(robot.getID())){
                     int flagSensed = rc.getFlag(robot.getID());
- //                 update Direction dictionary.
-//                    if(flagSensed == neutralFlag){
-//                        set flag to same vale
-//                    }
+                    if(flagSensed == NEUTRAL_ENLIGHTENMENT_CENTER_FLAG){
+                        rc.setFlag(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG);
+                    }
                 }
             }
         }
 
         // 2. Did not sense Robot/ already Exposed enemies
-//        ArrayList<Double> allPass = new ArrayList<Double>();
-//        for(int i=0; i<directions.length; i++){
-//            MapLocation nextLocation = rc.adjacentLocation(directions[i]);
-//            allPass.add(rc.sensePassability(nextLocation));
-//        }
-//        System.out.println("---> " + allPass);
-//        int dirIndex = allPass.indexOf(Collections.max(allPass));
-//        allPass.removeAll(allPass);
         if (tryMove(randomDirection()))
             System.out.println("I moved!");
     }
