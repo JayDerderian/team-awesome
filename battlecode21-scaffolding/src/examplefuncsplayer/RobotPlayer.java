@@ -33,7 +33,7 @@ public strictfp class RobotPlayer {
         // This is the RobotController object. You use it to perform actions from this robot,
         // and to get information on its current status.
         RobotPlayer.rc = rc;
-
+        politician.RobotPlayer politic = new politician.RobotPlayer(rc);
         turnCount = 0;
 
         System.out.println("I'm a " + rc.getType() + " and I just got created!");
@@ -46,7 +46,7 @@ public strictfp class RobotPlayer {
                 System.out.println("I'm a " + rc.getType() + "! Location " + rc.getLocation());
                 switch (rc.getType()) {
                     case ENLIGHTENMENT_CENTER: runEnlightenmentCenter(); break;
-                    case POLITICIAN:           runPolitician();          break;
+                    case POLITICIAN:           politic.run();          break;
                     case SLANDERER:            runSlanderer();           break;
                     case MUCKRAKER:            runMuckraker();           break;
                 }
