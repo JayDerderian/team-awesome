@@ -72,6 +72,35 @@ public strictfp class RobotPlayer {
             }
         }
 
+        //sense enemy robots
+        int conviction = 0;
+        int team = 25;
+        RobotType type;
+        int typeFlag = 0;
+        if(rc.canSenseRobot(rc.getID())){
+            RobotInfo sense = rc.senseRobot(rc.getID());
+
+            //check team
+            if(sense.team != rc.getTeam()){
+                conviction = sense.conviction + 30;
+                switch (sense.type) {
+                    case ENLIGHTENMENT_CENTER: typeFlag = 50;   break;
+                    case POLITICIAN:           typeFlag = 1;    break;
+                    case SLANDERER:            typeFlag = 10;   break;
+                    case MUCKRAKER:            typeFlag = 20;   break;
+                }
+            }
+
+            //set flag
+            int flag = typeFlag + conviction;
+            if(rc.canSetFlag(flag)){
+                rc.setFlag(flag);
+            }
+
+        }
+
+
+
         //Check the bidding conditions.
         if(rc.canBid(influence/4)){
             rc.bid(influence/4);
