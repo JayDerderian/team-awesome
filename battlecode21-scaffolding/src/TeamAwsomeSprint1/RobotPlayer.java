@@ -1,8 +1,12 @@
-package examplefuncsplayer;
+package TeamAwsomeSprint1;
 import battlecode.common.*;
+import static TeamAwsomeSprint1.FlagConstants.*;
 
 public strictfp class RobotPlayer {
     static RobotController rc;
+
+//    static final int NEUTRAL_ENLIGHTENMENT_CENTER_FLAG = 50;
+//    static final int SLANDERER_FLAG = 102;
 
     static final RobotType[] spawnableRobot = {
         RobotType.POLITICIAN,
@@ -62,8 +66,7 @@ public strictfp class RobotPlayer {
     }
 
     static void runEnlightenmentCenter() throws GameActionException {
-//        RobotType toBuild = randomSpawnableRobotType();
-        RobotType toBuild = RobotType.SLANDERER;
+        RobotType toBuild = randomSpawnableRobotType();
         int influence = 50;
         for (Direction dir : directions) {
             if (rc.canBuildRobot(toBuild, dir, influence)) {
@@ -93,19 +96,43 @@ public strictfp class RobotPlayer {
             System.out.println("I moved!");
     }
 
+    /**
+     * created Muckraker
+     * 1. sense every Robot --> If enemy
+     *                              slanderer --> then expose.
+     *                              EC -->  then set an 'Enemy EC' flag
+     *                              Muckraker / politician --> do nothing
+     *                      --> If Neutral EC --> set 'Neutral EC' Flag
+     *
+     * 2. Did not sense Robot/ already Exposed enemies --> then Detect
+     *      detect surrounding. a. Found some robot --> Move in that direction
+     *                          b. No Robot found --> choose Random Direction with low passability.
+     */
     static void runMuckraker() throws GameActionException {
         Team enemy = rc.getTeam().opponent();
-        int actionRadius = rc.getType().actionRadiusSquared;
-        for (RobotInfo robot : rc.senseNearbyRobots(actionRadius, enemy)) {
-            if (robot.type.canBeExposed()) {
-                // It's a slanderer... go get them!
-                if (rc.canExpose(robot.location)) {
-                    System.out.println("e x p o s e d");
-                    rc.expose(robot.location);
-                    return;
+
+        // 1. Sense Every Robot (max actionRadiusSquared)
+        for (RobotInfo robot : rc.senseNearbyRobots()) {
+            if(robot.getTeam() == enemy){
+                if (robot.type.canBeExposed()) {
+                    // It's a slanderer... go get them!
+                    if (rc.canExpose(robot.location)) {
+                        System.out.println("e x p o s e d");
+                        rc.expose(robot.location);
+                    }
+                }
+            }
+            else if(robot.getTeam() == rc.getTeam()){
+                if(rc.canGetFlag(robot.getID())){
+                    int flagSensed = rc.getFlag(robot.getID());
+                    if(flagSensed == NEUTRAL_ENLIGHTENMENT_CENTER_FLAG){
+                        rc.setFlag(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG);
+                    }
                 }
             }
         }
+
+        // 2. Move in Random and explore map.
         if (tryMove(randomDirection()))
             System.out.println("I moved!");
     }
