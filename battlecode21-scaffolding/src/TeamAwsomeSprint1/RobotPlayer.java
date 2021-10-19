@@ -115,6 +115,7 @@ public strictfp class RobotPlayer {
 
         // 1. Sense Every Robot (max actionRadiusSquared)
         for (RobotInfo robot : rc.senseNearbyRobots()) {
+            // ENEMY
             if(robot.getTeam() == enemy){
                 if (robot.type.canBeExposed()) {
                     // It's a slanderer... go get them!
@@ -125,16 +126,23 @@ public strictfp class RobotPlayer {
                     }
                 }
             }
+            // NOT ENEMY
             else if(robot.getTeam() != enemy){
-                if(robot.getTeam()!= rc.getTeam() && robot.getType() == RobotType.ENLIGHTENMENT_CENTER){ // can scence Neutral EC
+                if(robot.getTeam()!= rc.getTeam() && robot.getType() == RobotType.ENLIGHTENMENT_CENTER){ // can sense Neutral EC
+                    // If Neutral EC nearby, get its location and set flag.
                     robot.getLocation();
                     rc.setFlag(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG);
-                } else if(rc.canGetFlag(robot.getID())){
-                    int flagSensed = rc.getFlag(robot.getID());
+                }
+                else if (rc.canGetFlag(robot.getID())){
+                    // If Same Team Robots, then get Flag and do appropriate action.
+                    int flagSensed = rc.getFlag(robot.getID()); // what info flag is telling
+
                     if(flagSensed == NEUTRAL_ENLIGHTENMENT_CENTER_FLAG){
+                        // if Neutral EC nearby sensed robot, set the flag to same value.
                         rc.setFlag(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG);
-                    } else if(flagSensed == ENEMY_SLANDERER_FLAG){
-                        // retrive direction/ location from that flag
+                    }
+                    else if(flagSensed == ENEMY_SLANDERER_NEARBY_FLAG){
+                        // if enemy slanderer, nearby sensed robot, retrieve direction/ location from that flag
                         // set Direction_of_Muckraker to that detected value
                         DetectEnemySlanderer = true;
                     }
@@ -142,7 +150,7 @@ public strictfp class RobotPlayer {
             }
         }
 
-        // 2. Move in Random and explore map/ if Direction of slanderer detected, then move in that direction.
+        // 2. Move in Random and explore map (or) if Direction of slanderer detected, then move in that direction.
         if(DetectEnemySlanderer){
             // tryMove(detectedDirection);
         } else if (tryMove(randomDirection())){
