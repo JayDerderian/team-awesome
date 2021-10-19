@@ -4,7 +4,7 @@ import battlecode.common.*;
 public strictfp class RobotPlayer {
     static RobotController rc;
 
-    static final RobotType[] spawnableRobot = {
+     static final RobotType[] spawnableRobot = {
         RobotType.POLITICIAN,
         RobotType.SLANDERER,
         RobotType.MUCKRAKER,
