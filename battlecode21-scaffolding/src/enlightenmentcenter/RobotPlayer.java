@@ -1,4 +1,4 @@
-package examplefuncsplayer;
+package enlightenmentcenter;
 import battlecode.common.*;
 
 public strictfp class RobotPlayer {
@@ -62,8 +62,7 @@ public strictfp class RobotPlayer {
     }
 
     static void runEnlightenmentCenter() throws GameActionException {
-//        RobotType toBuild = randomSpawnableRobotType();
-        RobotType toBuild = RobotType.SLANDERER;
+        RobotType toBuild = randomSpawnableRobotType();
         int influence = 50;
         for (Direction dir : directions) {
             if (rc.canBuildRobot(toBuild, dir, influence)) {
