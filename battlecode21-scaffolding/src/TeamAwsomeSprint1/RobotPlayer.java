@@ -92,6 +92,23 @@ public strictfp class RobotPlayer {
     }
 
     static void runSlanderer() throws GameActionException {
+        // The slanderer will avoid the muckrakers from enemy team.
+        Team enemy = rc.getTeam().opponent();
+        MapLocation muckraker = null;
+        MapLocation reinforce_location = null;
+        MapLocation run_away;
+        MapLocation EC = null; // might try to detect the EC later using the flag
+        if (muckraker != null || reinforce_location.isWithinDistanceSquared(rc.getLocation(), RobotType.SLANDERER.actionRadiusSquared)) {
+            run_away = muckraker != null ? muckraker : reinforce_location;
+            Direction dir = run_away.directionTo(rc.getLocation());
+            rc.adjacentLocation(dir).add(dir);
+            reinforce_location = null;
+        } else if (EC != null) {
+            // Move around the EC
+        } else {
+            // Might move to random direction
+        }
+
         if (tryMove(randomDirection()))
             System.out.println("I moved!");
     }
