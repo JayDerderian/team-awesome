@@ -1,32 +1,28 @@
-package sprint1.robotplayer.v1;
+package TeamAwsomeSprint1;
 import battlecode.common.*;
+import static TeamAwsomeSprint1.FlagConstants.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
-public class RobotPlayer {
+public strictfp class RobotPlayer {
     static RobotController rc;
 
-    static final int NEUTRAL_ENLIGHTENMENT_CENTER_FLAG = 101;
-    static final int SLANDERER_FLAG = 102;
+//    static final int NEUTRAL_ENLIGHTENMENT_CENTER_FLAG = 50;
+//    static final int SLANDERER_FLAG = 102;
 
     static final RobotType[] spawnableRobot = {
-            RobotType.POLITICIAN,
-            RobotType.SLANDERER,
-            RobotType.MUCKRAKER,
+        RobotType.POLITICIAN,
+        RobotType.SLANDERER,
+        RobotType.MUCKRAKER,
     };
 
     static final Direction[] directions = {
-            Direction.NORTH,
-            Direction.NORTHEAST,
-            Direction.EAST,
-            Direction.SOUTHEAST,
-            Direction.SOUTH,
-            Direction.SOUTHWEST,
-            Direction.WEST,
-            Direction.NORTHWEST,
+        Direction.NORTH,
+        Direction.NORTHEAST,
+        Direction.EAST,
+        Direction.SOUTHEAST,
+        Direction.SOUTH,
+        Direction.SOUTHWEST,
+        Direction.WEST,
+        Direction.NORTHWEST,
     };
 
     static int turnCount;
@@ -114,9 +110,8 @@ public class RobotPlayer {
      */
     static void runMuckraker() throws GameActionException {
         Team enemy = rc.getTeam().opponent();
-        int actionRadius = rc.getType().actionRadiusSquared;
 
-        // 1. Sense Every Robot
+        // 1. Sense Every Robot (max actionRadiusSquared)
         for (RobotInfo robot : rc.senseNearbyRobots()) {
             if(robot.getTeam() == enemy){
                 if (robot.type.canBeExposed()) {
@@ -124,11 +119,10 @@ public class RobotPlayer {
                     if (rc.canExpose(robot.location)) {
                         System.out.println("e x p o s e d");
                         rc.expose(robot.location);
-//                        return;
                     }
                 }
             }
-            else if(robot.getTeam() != enemy){
+            else if(robot.getTeam() == rc.getTeam()){
                 if(rc.canGetFlag(robot.getID())){
                     int flagSensed = rc.getFlag(robot.getID());
                     if(flagSensed == NEUTRAL_ENLIGHTENMENT_CENTER_FLAG){
@@ -138,7 +132,7 @@ public class RobotPlayer {
             }
         }
 
-        // 2. Did not sense Robot/ already Exposed enemies
+        // 2. Move in Random and explore map.
         if (tryMove(randomDirection()))
             System.out.println("I moved!");
     }
