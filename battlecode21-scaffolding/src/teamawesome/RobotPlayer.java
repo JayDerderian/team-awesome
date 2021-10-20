@@ -46,8 +46,8 @@ public strictfp class RobotPlayer {
                 System.out.println("I'm a " + rc.getType() + "! Location " + rc.getLocation());
                 switch (rc.getType()) {
                     case ENLIGHTENMENT_CENTER: runEnlightenmentCenter(); break;
-//                    case POLITICIAN:           politic.run();          break;
-                    case POLITICIAN:           runPolitician(rc);          break;
+                    case POLITICIAN:           politic.run();          break;
+//                    case POLITICIAN:           runPolitician(rc);         break;
                     case SLANDERER:            runSlanderer();           break;
                     case MUCKRAKER:            runMuckraker();           break;
                 }
@@ -131,20 +131,6 @@ public strictfp class RobotPlayer {
     static void runMuckraker() throws GameActionException {
         Muckraker muck = new Muckraker();
         muck.runMuckraker();
-//        Team enemy = rc.getTeam().opponent();
-//        int actionRadius = rc.getType().actionRadiusSquared;
-//        for (RobotInfo robot : rc.senseNearbyRobots(actionRadius, enemy)) {
-//            if (robot.type.canBeExposed()) {
-//                // It's a slanderer... go get them!
-//                if (rc.canExpose(robot.location)) {
-//                    System.out.println("e x p o s e d");
-//                    rc.expose(robot.location);
-//                    return;
-//                }
-//            }
-//        }
-//        if (tryMove(randomDirection()))
-//            System.out.println("I moved!");
     }
 
     /**
