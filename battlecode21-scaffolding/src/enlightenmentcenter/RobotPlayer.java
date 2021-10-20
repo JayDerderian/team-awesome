@@ -1,5 +1,6 @@
 package enlightenmentcenter;
 import battlecode.common.*;
+import teamawesome.Politician;
 
 public strictfp class RobotPlayer {
     static RobotController rc;
@@ -33,7 +34,7 @@ public strictfp class RobotPlayer {
         // This is the RobotController object. You use it to perform actions from this robot,
         // and to get information on its current status.
         RobotPlayer.rc = rc;
-        politician.RobotPlayer politic = new politician.RobotPlayer(rc);
+        Politician politic = new Politician(rc);
         turnCount = 0;
 
         System.out.println("I'm a " + rc.getType() + " and I just got created!");

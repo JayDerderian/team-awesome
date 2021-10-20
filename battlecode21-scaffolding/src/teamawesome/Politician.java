@@ -28,14 +28,20 @@ public class Politician {
         // check mothership for flag value
         if(mothership != -1) homeFlag = rc.getFlag(mothership);
         System.out.println("I'm a politician! My mothership is " + mothership + " and their flag is " + homeFlag);
-        Team enemy = RobotPlayer.rc.getTeam().opponent();
-        int actionRadius = RobotPlayer.rc.getType().actionRadiusSquared;
+        Team enemy = rc.getTeam().opponent();
+        int actionRadius = rc.getType().actionRadiusSquared;
         RobotInfo[] attackable = rc.senseNearbyRobots(actionRadius, enemy);
         if (attackable.length != 0 && rc.canEmpower(actionRadius)) {
             System.out.println("empowering...");
             rc.empower(actionRadius);
             System.out.println("empowered");
             return;
+        } else {
+            RobotInfo[] convertable = rc.senseNearbyRobots(actionRadius, Team.NEUTRAL);
+            if(convertable.length != 0 && rc.canEmpower(actionRadius)) {
+                System.out.println("you will be assimilated");
+                rc.empower(actionRadius);
+            }
         }
         // then try to move
         Direction d = whereToMove();

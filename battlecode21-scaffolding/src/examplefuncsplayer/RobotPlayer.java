@@ -1,5 +1,6 @@
 package examplefuncsplayer;
 import battlecode.common.*;
+import teamawesome.Politician;
 
 public strictfp class RobotPlayer {
     static RobotController rc;
@@ -33,7 +34,7 @@ public strictfp class RobotPlayer {
         // This is the RobotController object. You use it to perform actions from this robot,
         // and to get information on its current status.
         RobotPlayer.rc = rc;
-        politician.RobotPlayer politic = new politician.RobotPlayer(rc);
+        Politician politic = new Politician(rc);
         turnCount = 0;
 
         System.out.println("I'm a " + rc.getType() + " and I just got created!");
@@ -70,37 +71,6 @@ public strictfp class RobotPlayer {
             } else {
                 break;
             }
-        }
-
-        //sense enemy robots
-        int conviction = 0;
-        int typeFlag = 25;
-        if(rc.canSenseRobot(rc.getID())){
-            RobotInfo sense = rc.senseRobot(rc.getID());
-
-            //check team
-            if(sense.team != rc.getTeam()){
-                conviction = sense.conviction + 30;
-                switch (sense.type) {
-                    case ENLIGHTENMENT_CENTER: typeFlag = 50;   break;
-                    case POLITICIAN:           typeFlag = 0;    break;
-                    case SLANDERER:            typeFlag = 10;   break;
-                    case MUCKRAKER:            typeFlag = 20;   break;
-                }
-            }
-
-            //set flag
-            int flag = typeFlag + conviction;
-            if(rc.canSetFlag(flag)){
-                rc.setFlag(flag);
-            }
-
-        }
-
-
-        //Check the bidding conditions.
-        if(rc.canBid(influence)){
-            rc.bid(influence);
         }
     }
 

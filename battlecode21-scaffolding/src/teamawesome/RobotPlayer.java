@@ -33,7 +33,7 @@ public strictfp class RobotPlayer {
         // This is the RobotController object. You use it to perform actions from this robot,
         // and to get information on its current status.
         RobotPlayer.rc = rc;
-        politician.RobotPlayer politic = new politician.RobotPlayer(rc);
+        Politician politic = new Politician(rc);
         turnCount = 0;
 
         System.out.println("I'm a " + rc.getType() + " and I just got created!");
@@ -67,9 +67,8 @@ public strictfp class RobotPlayer {
         int influence = 50;
         for (Direction dir : directions) {
             if (rc.canBuildRobot(toBuild, dir, influence)) {
+                System.out.println("Building a " + toBuild + " in the " + dir + " direction!");
                 rc.buildRobot(toBuild, dir, influence);
-            } else {
-                break;
             }
         }
 
@@ -98,11 +97,11 @@ public strictfp class RobotPlayer {
 
         }
 
-
         //Check the bidding conditions.
         if(rc.canBid(influence)){
             rc.bid(influence);
         }
+
     }
 
     static void runPolitician(RobotController newRc) throws GameActionException {
@@ -123,14 +122,13 @@ public strictfp class RobotPlayer {
 
     static void runSlanderer() throws GameActionException {
         Slanderer slan = new Slanderer();
-        slan.run();
-//        if (tryMove(randomDirection()))
-//            System.out.println("I moved!");
+        slan.run(rc);
+        if (tryMove(randomDirection()))
+            System.out.println("I moved!");
     }
 
     static void runMuckraker() throws GameActionException {
-        Muckraker muck = new Muckraker();
-        muck.runMuckraker();
+        Muckraker.runMuckraker(rc);
 //        Team enemy = rc.getTeam().opponent();
 //        int actionRadius = rc.getType().actionRadiusSquared;
 //        for (RobotInfo robot : rc.senseNearbyRobots(actionRadius, enemy)) {
@@ -143,8 +141,8 @@ public strictfp class RobotPlayer {
 //                }
 //            }
 //        }
-//        if (tryMove(randomDirection()))
-//            System.out.println("I moved!");
+        if (tryMove(randomDirection()))
+            System.out.println("I moved!");
     }
 
     /**

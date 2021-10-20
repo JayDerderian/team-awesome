@@ -52,7 +52,7 @@ public strictfp class Muckraker {
                     case ENLIGHTENMENT_CENTER: runEnlightenmentCenter(); break;
                     case POLITICIAN:           runPolitician();          break;
                     case SLANDERER:            runSlanderer();           break;
-                    case MUCKRAKER:            runMuckraker();           break;
+                    case MUCKRAKER:            runMuckraker(rc);           break;
                 }
 
                 // Clock.yield() makes the robot wait until the next turn, then it will perform this loop again
@@ -108,7 +108,7 @@ public strictfp class Muckraker {
      *      detect surrounding. a. Found some robot --> Move in that direction
      *                          b. No Robot found --> choose Random Direction with low passability.
      */
-    static void runMuckraker() throws GameActionException {
+    static void runMuckraker(RobotController rc) throws GameActionException {
         Team enemy = rc.getTeam().opponent();
         boolean DetectEnemySlanderer = false;
         Direction detectedDirection = Direction.CENTER; // random value, change later
@@ -153,8 +153,8 @@ public strictfp class Muckraker {
         // 2. Move in Random and explore map (or) if Direction of slanderer detected, then move in that direction.
         if(DetectEnemySlanderer){
             // tryMove(detectedDirection);
-        } else if (tryMove(randomDirection())){
-            System.out.println("I moved!");
+//        } else if (tryMove(randomDirection())){
+//            System.out.println("I moved!");
         }
     }
 

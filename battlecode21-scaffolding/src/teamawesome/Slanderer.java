@@ -2,8 +2,9 @@ package teamawesome;
 
 import battlecode.common.*;
 
-public class Slanderer extends RobotPlayer {
-    static int ecID;
+public class Slanderer {
+    int ecID = -1;
+    RobotController rc;
     static MapLocation ecLoc;
 
     static MapLocation enemyECLoc;
@@ -12,7 +13,7 @@ public class Slanderer extends RobotPlayer {
 
     // Slanderers will run away from the enemy. If they detect a EC nearby, they will try to reach it.
 
-    static int getECID() throws GameActionException{
+    int getECID() throws GameActionException{
         RobotInfo[] robots = rc.senseNearbyRobots();
         for (RobotInfo robot : robots) {
             if (robot.type == RobotType.ENLIGHTENMENT_CENTER && robot.team == rc.getTeam()) {
@@ -22,7 +23,7 @@ public class Slanderer extends RobotPlayer {
         throw new GameActionException(GameActionExceptionType.CANT_DO_THAT, "Can't get EC");
     }
 
-    static MapLocation getLocationOfEC() throws GameActionException{
+    MapLocation getLocationOfEC() throws GameActionException{
         RobotInfo [] robots = rc.senseNearbyRobots();
         for (RobotInfo robot : robots) {
             if (robot.type == RobotType.ENLIGHTENMENT_CENTER && robot.team == rc.getTeam()) {
@@ -32,8 +33,9 @@ public class Slanderer extends RobotPlayer {
         throw new GameActionException(GameActionExceptionType.OUT_OF_RANGE, "Can't reach EC");
     }
 
-    static void run() throws GameActionException {
-        if (turnCount == 1) {
+    void run(RobotController newRc) throws GameActionException {
+        rc = newRc;
+        if (ecID == -1) {
             ecID = getECID();
             ecLoc = getLocationOfEC();
 
@@ -42,7 +44,7 @@ public class Slanderer extends RobotPlayer {
     }
 
 
-    static void moveAway() throws GameActionException {
+    void moveAway() throws GameActionException {
         RobotInfo[] enemyRobots = rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, rc.getTeam().opponent());
         RobotInfo[] closeRobots = rc.senseNearbyRobots(2, rc.getTeam());
         MapLocation ecLocTeam = rc.adjacentLocation(Direction.NORTH); // problem?
