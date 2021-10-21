@@ -5,10 +5,11 @@ import javax.xml.stream.Location;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Set;
 
 public class Politician {
 
-    static RobotController rc;
+    RobotController rc;
     LinkedList<MapLocation> history;
     HashMap<Direction, Double> momentum;
     int mothership = -1;
@@ -69,18 +70,13 @@ public class Politician {
             history.removeLast();
         }
         // degrade momentum values
+        Set<Map.Entry<Direction, Double>> entries = momentum.entrySet();
         for (Map.Entry<Direction, Double> e:
-                momentum.entrySet()) {
+                entries) {
             e.setValue(e.getValue() * 0.9);
-            // if this momentum term is too degraded to be useful, delete it
-            if(e.getValue() < 0.1) {
-                momentum.remove(e.getKey());
-            }
         }
         // location hashmap for decision making
         HashMap<Direction, Double> locations = new HashMap<>();
-        double maxPass = 0;
-        MapLocation toReturn = null;
         Direction toMove = null;
         // check the squares in each direction for passability
         // this forms the basis for direction weights
