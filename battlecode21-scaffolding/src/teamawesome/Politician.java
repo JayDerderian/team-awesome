@@ -5,10 +5,11 @@ import javax.xml.stream.Location;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Set;
 
 public class Politician {
 
-    static RobotController rc;
+    RobotController rc;
     LinkedList<MapLocation> history;
     HashMap<Direction, Double> momentum;
     int mothership = -1;
@@ -49,12 +50,13 @@ public class Politician {
             // move and increment the momentum for that direction
             RobotPlayer.rc.move(d);
             System.out.println("I Moved! Direction: " + d.toString() + " | Momentum: " + momentum.get(d));
-            momentum.put(d, momentum.get(d) + 1);
+            if(momentum.containsKey(d)) momentum.put(d, momentum.get(d) + 1);
+            else momentum.put(d, 1.0);
         } else {
             // if the robot can't move that direction, degrade momentum
             System.out.println("I'm Stuck! | Momentum: " + momentum.get(d));
-            momentum.put(d, momentum.get(d) - 1);
-
+            if(momentum.containsKey(d)) momentum.put(d, momentum.get(d) - 1);
+            else momentum.put(d, 1.0);
         }
     }
 
@@ -68,13 +70,13 @@ public class Politician {
             history.removeLast();
         }
         // degrade momentum values
+        Set<Map.Entry<Direction, Double>> entries = momentum.entrySet();
         for (Map.Entry<Direction, Double> e:
-                momentum.entrySet()) {
+                entries) {
             e.setValue(e.getValue() * 0.9);
         }
+        // location hashmap for decision making
         HashMap<Direction, Double> locations = new HashMap<>();
-        double maxPass = 0;
-        MapLocation toReturn = null;
         Direction toMove = null;
         // check the squares in each direction for passability
         // this forms the basis for direction weights
