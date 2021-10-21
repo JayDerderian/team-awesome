@@ -49,12 +49,13 @@ public class Politician {
             // move and increment the momentum for that direction
             RobotPlayer.rc.move(d);
             System.out.println("I Moved! Direction: " + d.toString() + " | Momentum: " + momentum.get(d));
-            momentum.put(d, momentum.get(d) + 1);
+            if(momentum.containsKey(d)) momentum.put(d, momentum.get(d) + 1);
+            else momentum.put(d, 1.0);
         } else {
             // if the robot can't move that direction, degrade momentum
             System.out.println("I'm Stuck! | Momentum: " + momentum.get(d));
-            momentum.put(d, momentum.get(d) - 1);
-
+            if(momentum.containsKey(d)) momentum.put(d, momentum.get(d) - 1);
+            else momentum.put(d, 1.0);
         }
     }
 
@@ -71,7 +72,12 @@ public class Politician {
         for (Map.Entry<Direction, Double> e:
                 momentum.entrySet()) {
             e.setValue(e.getValue() * 0.9);
+            // if this momentum term is too degraded to be useful, delete it
+            if(e.getValue() < 0.1) {
+                momentum.remove(e.getKey());
+            }
         }
+        // location hashmap for decision making
         HashMap<Direction, Double> locations = new HashMap<>();
         double maxPass = 0;
         MapLocation toReturn = null;

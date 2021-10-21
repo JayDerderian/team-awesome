@@ -47,7 +47,7 @@ public strictfp class RobotPlayer {
                 switch (rc.getType()) {
                     case ENLIGHTENMENT_CENTER: runEnlightenmentCenter(); break;
 //                    case POLITICIAN:           politic.run();          break;
-                    case POLITICIAN:           runPolitician(rc);          break;
+                    case POLITICIAN:           runPolitician(politic);          break;
                     case SLANDERER:            runSlanderer();           break;
                     case MUCKRAKER:            runMuckraker();           break;
                 }
@@ -104,8 +104,7 @@ public strictfp class RobotPlayer {
 
     }
 
-    static void runPolitician(RobotController newRc) throws GameActionException {
-        Politician pol = new Politician(newRc);
+    static void runPolitician(Politician pol) throws GameActionException {
         pol.run();
 //        Team enemy = rc.getTeam().opponent();
 //        int actionRadius = rc.getType().actionRadiusSquared;
