@@ -15,13 +15,12 @@ import java.util.Set;
  */
 public class Politician extends GenericRobot {
 
-    RobotController rc;
     LinkedList<MapLocation> history;
     HashMap<Direction, Double> momentum;
     int mothership = -1;
     int homeFlag = -1;
     public Politician(RobotController newRc) {
-        rc = newRc;
+        super(newRc);
         history = new LinkedList<>();
         // initialize momentum to 0 in all directions
         momentum = new HashMap<>();

@@ -17,8 +17,9 @@ import battlecode.common.RobotController;
  */
 
 abstract public class GenericRobot {
-    public GenericRobot() {
-        // default constructor - nothing to do here
+    RobotController rc;
+    public GenericRobot(RobotController newRc) {
+        rc = newRc;
     }
 
     abstract void turn() throws GameActionException;

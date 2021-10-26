@@ -10,7 +10,7 @@ public strictfp class RobotPlayer {
     static RobotController rc;
 
     // list of robots that can be spawned - ECs cannot be spawned
-    static final RobotType[] spawnableRobot = {
+    public static final RobotType[] spawnableRobot = {
             RobotType.POLITICIAN,
             RobotType.SLANDERER,
             RobotType.MUCKRAKER,
@@ -18,7 +18,7 @@ public strictfp class RobotPlayer {
 
     // list of usable directions - center is omitted because for most game
     // actions center is irrelevant
-    static final Direction[] directions = {
+    public static final Direction[] directions = {
             Direction.NORTH,
             Direction.NORTHEAST,
             Direction.EAST,
@@ -43,19 +43,30 @@ public strictfp class RobotPlayer {
         RobotPlayer.rc = rc;
         Politician politic = new Politician(rc);
         turnCount = 0;
+        GenericRobot robot; // the identity for this robot
+        // initialize the robot identity according to the type stored in rc
+        switch (rc.getType()) {
+            case ENLIGHTENMENT_CENTER: robot = new EnlightenmentCenter(rc); break;
+            case POLITICIAN:           robot = new Politician(rc);          break;
+            case SLANDERER:            robot = new EnlightenmentCenter(rc);           break;
+            case MUCKRAKER:            robot = new EnlightenmentCenter(rc);           break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + rc.getType());
+        }
 
         System.out.println("I'm a " + rc.getType() + " and I just got created!");
         while (true) {
             turnCount += 1;
             // Try/catch blocks stop unhandled exceptions, which cause your robot to freeze
+            // special case: slanderers become politicians after some time
+
             try {
                 // Here, we've separated the controls into a different method for each RobotType.
                 // You may rewrite this into your own control structure if you wish.
                 System.out.println("I'm a " + rc.getType() + "! Location " + rc.getLocation());
                 switch (rc.getType()) {
-                    case ENLIGHTENMENT_CENTER: runEnlightenmentCenter(); break;
-//                    case POLITICIAN:           politic.run();          break;
-                    case POLITICIAN:           runPolitician(politic);          break;
+                    case ENLIGHTENMENT_CENTER:
+                    case POLITICIAN:           robot.turn();          break;
                     case SLANDERER:            runSlanderer();           break;
                     case MUCKRAKER:            runMuckraker();           break;
                 }
@@ -70,63 +81,6 @@ public strictfp class RobotPlayer {
         }
     }
 
-    static void runEnlightenmentCenter() throws GameActionException {
-        RobotType toBuild = randomSpawnableRobotType();
-        int influence = 50;
-        for (Direction dir : directions) {
-            if (rc.canBuildRobot(toBuild, dir, influence)) {
-                System.out.println("Building a " + toBuild + " in the " + dir + " direction!");
-                rc.buildRobot(toBuild, dir, influence);
-            }
-        }
-
-        //sense enemy robots
-        int conviction = 0;
-        int typeFlag = 25;
-        if(rc.canSenseRobot(rc.getID())){
-            RobotInfo sense = rc.senseRobot(rc.getID());
-
-            //check team
-            if(sense.team != rc.getTeam()){
-                conviction = sense.conviction + 30;
-                switch (sense.type) {
-                    case ENLIGHTENMENT_CENTER: typeFlag = 50;   break;
-                    case POLITICIAN:           typeFlag = 0;    break;
-                    case SLANDERER:            typeFlag = 10;   break;
-                    case MUCKRAKER:            typeFlag = 20;   break;
-                }
-            }
-
-            //set flag
-            int flag = typeFlag + conviction;
-            if(rc.canSetFlag(flag)){
-                rc.setFlag(flag);
-            }
-
-        }
-
-        //Check the bidding conditions.
-        if(rc.canBid(influence)){
-            rc.bid(influence);
-        }
-
-    }
-
-    static void runPolitician(Politician pol) throws GameActionException {
-        pol.turn();
-//        Team enemy = rc.getTeam().opponent();
-//        int actionRadius = rc.getType().actionRadiusSquared;
-//        RobotInfo[] attackable = rc.senseNearbyRobots(actionRadius, enemy);
-//        if (attackable.length != 0 && rc.canEmpower(actionRadius)) {
-//            System.out.println("empowering...");
-//            rc.empower(actionRadius);
-//            System.out.println("empowered");
-//            return;
-//        }
-//        if (tryMove(randomDirection()))
-//            System.out.println("I moved!");
-    }
-
     static void runSlanderer() throws GameActionException {
         Slanderer slan = new Slanderer();
         slan.run(rc);
@@ -136,18 +90,6 @@ public strictfp class RobotPlayer {
 
     static void runMuckraker() throws GameActionException {
         Muckraker.runMuckraker(rc);
-//        Team enemy = rc.getTeam().opponent();
-//        int actionRadius = rc.getType().actionRadiusSquared;
-//        for (RobotInfo robot : rc.senseNearbyRobots(actionRadius, enemy)) {
-//            if (robot.type.canBeExposed()) {
-//                // It's a slanderer... go get them!
-//                if (rc.canExpose(robot.location)) {
-//                    System.out.println("e x p o s e d");
-//                    rc.expose(robot.location);
-//                    return;
-//                }
-//            }
-//        }
         if (tryMove(randomDirection()))
             System.out.println("I moved!");
     }
@@ -161,14 +103,7 @@ public strictfp class RobotPlayer {
         return directions[(int) (Math.random() * directions.length)];
     }
 
-    /**
-     * Returns a random spawnable RobotType
-     *
-     * @return a random RobotType
-     */
-    static RobotType randomSpawnableRobotType() {
-        return spawnableRobot[(int) (Math.random() * spawnableRobot.length)];
-    }
+
 
     /**
      * Attempts to move in a given direction.
