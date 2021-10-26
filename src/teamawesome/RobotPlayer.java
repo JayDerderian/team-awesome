@@ -49,7 +49,7 @@ public strictfp class RobotPlayer {
             case ENLIGHTENMENT_CENTER: robot = new EnlightenmentCenter(rc); break;
             case POLITICIAN:           robot = new Politician(rc);          break;
             case SLANDERER:            robot = new Slanderer(rc);           break;
-            case MUCKRAKER:            robot = new EnlightenmentCenter(rc);           break;
+            case MUCKRAKER:            robot = new Muckraker(rc);           break;
             default:
                 throw new IllegalStateException("Unexpected value: " + rc.getType());
         }
@@ -57,21 +57,14 @@ public strictfp class RobotPlayer {
         System.out.println("I'm a " + rc.getType() + " and I just got created!");
         while (true) {
             turnCount += 1;
-            // Try/catch blocks stop unhandled exceptions, which cause your robot to freeze
             // special case: slanderers become politicians after some time
             if(robot.getClass() == Slanderer.class && rc.getType() == RobotType.POLITICIAN) {
                 robot = new Politician(robot.rc); // remake this robot as a politician
             }
             try {
-                // Here, we've separated the controls into a different method for each RobotType.
-                // You may rewrite this into your own control structure if you wish.
+                // actuate the robot for one round
                 System.out.println("I'm a " + rc.getType() + "! Location " + rc.getLocation());
-                switch (rc.getType()) {
-                    case ENLIGHTENMENT_CENTER:
-                    case POLITICIAN:
-                    case SLANDERER:            robot.turn();             break;
-                    case MUCKRAKER:            runMuckraker();           break;
-                }
+                robot.turn();
 
                 // Clock.yield() makes the robot wait until the next turn, then it will perform this loop again
                 Clock.yield();
@@ -81,37 +74,5 @@ public strictfp class RobotPlayer {
                 e.printStackTrace();
             }
         }
-    }
-
-    static void runMuckraker() throws GameActionException {
-        Muckraker.runMuckraker(rc);
-        if (tryMove(randomDirection()))
-            System.out.println("I moved!");
-    }
-
-    /**
-     * Returns a random Direction.
-     *
-     * @return a random Direction
-     */
-    static Direction randomDirection() {
-        return directions[(int) (Math.random() * directions.length)];
-    }
-
-
-
-    /**
-     * Attempts to move in a given direction.
-     *
-     * @param dir The intended direction of movement
-     * @return true if a move was performed
-     * @throws GameActionException
-     */
-    static boolean tryMove(Direction dir) throws GameActionException {
-        System.out.println("I am trying to move " + dir + "; " + rc.isReady() + " " + rc.getCooldownTurns() + " " + rc.canMove(dir));
-        if (rc.canMove(dir)) {
-            rc.move(dir);
-            return true;
-        } else return false;
     }
 }

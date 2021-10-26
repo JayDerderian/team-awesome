@@ -30,6 +30,11 @@ public class Politician extends GenericRobot {
         }
     }
 
+    /**
+     * Politician's turn, attempts to empower enemies first, then neutral ECs
+     * then moves.
+     * @throws GameActionException
+     */
     public void turn() throws GameActionException {
         // check mothership for flag value
         if(mothership != -1) homeFlag = rc.getFlag(mothership);
@@ -65,8 +70,10 @@ public class Politician extends GenericRobot {
         }
     }
 
-    /*
-    Find the most passable square
+    /**
+     * Function for the politician to decide which direction to move
+     * @return optimum direction to go
+     * @throws GameActionException
      */
     public Direction whereToMove() throws GameActionException {
         // record this location in the history list

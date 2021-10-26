@@ -13,7 +13,8 @@ import battlecode.common.RobotController;
  * 25 October 2021
  * Currently this is just a base class all the robots can share so we can take
  * advantage of polymorphism in storing robots. Eventually this class will
- * implement common functions like signaling
+ * implement common functions like signaling. For now it contains the utility
+ * functions from the examplefuncsplayer's RobotPlayer
  *
  */
 
@@ -23,10 +24,15 @@ abstract public class GenericRobot {
         rc = newRc;
     }
 
+    /**
+     * Abstract method for actuating the robot for one turn
+     * Must be implemented by child class
+     * @throws GameActionException
+     */
     abstract void turn() throws GameActionException;
 
     /**
-     * Returns a random Direction.
+     * Borrowed from examplefuncsplayer, Returns a random Direction.
      *
      * @return a random Direction
      */
@@ -37,7 +43,7 @@ abstract public class GenericRobot {
 
 
     /**
-     * Attempts to move in a given direction.
+     * Borrowed from examplefuncsplayer, Attempts to move in a given direction.
      *
      * @param dir The intended direction of movement
      * @return true if a move was performed
