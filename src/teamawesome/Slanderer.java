@@ -39,6 +39,7 @@ public class Slanderer extends GenericRobot{
     }
 
     void turn() throws GameActionException {
+        /*
         if (ecID == -1) {
             // badaid
             try {
@@ -46,8 +47,9 @@ public class Slanderer extends GenericRobot{
             }catch(GameActionException e){
                 ecID = 0;
             }
-            ecLoc = getLocationOfEC();
+            //ecLoc = getLocationOfEC();
         }
+        */
         if (tryMove(randomDirection()))
             System.out.println("I moved!");
     }
