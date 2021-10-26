@@ -2,14 +2,19 @@ package teamawesome;
 
 import battlecode.common.*;
 
-public class Slanderer {
+import java.awt.*;
+
+public class Slanderer extends GenericRobot{
     int ecID = -1;
-    RobotController rc;
-    static MapLocation ecLoc;
+    private MapLocation ecLoc;
 
-    static MapLocation enemyECLoc;
+    private MapLocation enemyECLoc;
 
-    static Direction dir;
+    private Direction dir;
+
+    public Slanderer(RobotController newRc) {
+        super(newRc);
+    }
 
     // Slanderers will run away from the enemy. If they detect a EC nearby, they will try to reach it.
 
@@ -33,8 +38,7 @@ public class Slanderer {
         throw new GameActionException(GameActionExceptionType.OUT_OF_RANGE, "Can't reach EC");
     }
 
-    void run(RobotController newRc) throws GameActionException {
-        rc = newRc;
+    void turn() throws GameActionException {
         if (ecID == -1) {
             // badaid
             try {
@@ -43,9 +47,9 @@ public class Slanderer {
                 ecID = 0;
             }
             ecLoc = getLocationOfEC();
-
         }
-
+        if (tryMove(randomDirection()))
+            System.out.println("I moved!");
     }
 
 

@@ -83,6 +83,12 @@ public strictfp class RobotPlayer {
             rc.empower(actionRadius);
             System.out.println("empowered");
             return;
+        } else {
+            RobotInfo[] convertable = rc.senseNearbyRobots(actionRadius, Team.NEUTRAL);
+            if(convertable.length != 0 && rc.canEmpower(actionRadius)) {
+                System.out.println("you will be assimilated");
+                rc.empower(actionRadius);
+            }
         }
         if (tryMove(randomDirection()))
             System.out.println("I moved!");

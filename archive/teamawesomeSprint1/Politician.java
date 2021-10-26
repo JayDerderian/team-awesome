@@ -7,20 +7,15 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Politician
- *
- * the politician robot. constructor requires a RobotController object
- * RobotPlayer should call turn() once per turn to exercise the robot
- */
-public class Politician extends GenericRobot {
+public class Politician {
 
+    RobotController rc;
     LinkedList<MapLocation> history;
     HashMap<Direction, Double> momentum;
     int mothership = -1;
     int homeFlag = -1;
     public Politician(RobotController newRc) {
-        super(newRc);
+        rc = newRc;
         history = new LinkedList<>();
         // initialize momentum to 0 in all directions
         momentum = new HashMap<>();
@@ -30,12 +25,7 @@ public class Politician extends GenericRobot {
         }
     }
 
-    /**
-     * Politician's turn, attempts to empower enemies first, then neutral ECs
-     * then moves.
-     * @throws GameActionException
-     */
-    public void turn() throws GameActionException {
+    public void run() throws GameActionException {
         // check mothership for flag value
         if(mothership != -1) homeFlag = rc.getFlag(mothership);
         System.out.println("I'm a politician! My mothership is " + mothership + " and their flag is " + homeFlag);
@@ -70,10 +60,8 @@ public class Politician extends GenericRobot {
         }
     }
 
-    /**
-     * Function for the politician to decide which direction to move
-     * @return optimum direction to go
-     * @throws GameActionException
+    /*
+    Find the most passable square
      */
     public Direction whereToMove() throws GameActionException {
         // record this location in the history list

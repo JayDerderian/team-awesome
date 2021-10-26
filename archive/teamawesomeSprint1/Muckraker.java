@@ -1,24 +1,28 @@
-package slanderer;
+package teamawesome;
 import battlecode.common.*;
+import static teamawesome.FlagConstants.*;
 
-public strictfp class RobotPlayer {
+public strictfp class Muckraker {
     static RobotController rc;
 
+//    static final int NEUTRAL_ENLIGHTENMENT_CENTER_FLAG = 50;
+//    static final int SLANDERER_FLAG = 102;
+
     static final RobotType[] spawnableRobot = {
-        RobotType.POLITICIAN,
-        RobotType.SLANDERER,
-        RobotType.MUCKRAKER,
+            RobotType.POLITICIAN,
+            RobotType.SLANDERER,
+            RobotType.MUCKRAKER,
     };
 
     static final Direction[] directions = {
-        Direction.NORTH,
-        Direction.NORTHEAST,
-        Direction.EAST,
-        Direction.SOUTHEAST,
-        Direction.SOUTH,
-        Direction.SOUTHWEST,
-        Direction.WEST,
-        Direction.NORTHWEST,
+            Direction.NORTH,
+            Direction.NORTHEAST,
+            Direction.EAST,
+            Direction.SOUTHEAST,
+            Direction.SOUTH,
+            Direction.SOUTHWEST,
+            Direction.WEST,
+            Direction.NORTHWEST,
     };
 
     static int turnCount;
@@ -33,6 +37,7 @@ public strictfp class RobotPlayer {
         // This is the RobotController object. You use it to perform actions from this robot,
         // and to get information on its current status.
         RobotPlayer.rc = rc;
+
         turnCount = 0;
 
         System.out.println("I'm a " + rc.getType() + " and I just got created!");
@@ -47,7 +52,7 @@ public strictfp class RobotPlayer {
                     case ENLIGHTENMENT_CENTER: runEnlightenmentCenter(); break;
                     case POLITICIAN:           runPolitician();          break;
                     case SLANDERER:            runSlanderer();           break;
-                    case MUCKRAKER:            runMuckraker();           break;
+                    case MUCKRAKER:            runMuckraker(rc);           break;
                 }
 
                 // Clock.yield() makes the robot wait until the next turn, then it will perform this loop again
@@ -70,37 +75,6 @@ public strictfp class RobotPlayer {
                 break;
             }
         }
-
-        //sense enemy robots
-        int conviction = 0;
-        int typeFlag = 25;
-        if(rc.canSenseRobot(rc.getID())){
-            RobotInfo sense = rc.senseRobot(rc.getID());
-
-            //check team
-            if(sense.team != rc.getTeam()){
-                conviction = sense.conviction + 30;
-                switch (sense.type) {
-                    case ENLIGHTENMENT_CENTER: typeFlag = 50;   break;
-                    case POLITICIAN:           typeFlag = 0;    break;
-                    case SLANDERER:            typeFlag = 10;   break;
-                    case MUCKRAKER:            typeFlag = 20;   break;
-                }
-            }
-
-            //set flag
-            int flag = typeFlag + conviction;
-            if(rc.canSetFlag(flag)){
-                rc.setFlag(flag);
-            }
-
-        }
-
-
-        //Check the bidding conditions.
-        if(rc.canBid(influence)){
-            rc.bid(influence);
-        }
     }
 
     static void runPolitician() throws GameActionException {
@@ -122,21 +96,66 @@ public strictfp class RobotPlayer {
             System.out.println("I moved!");
     }
 
-    static void runMuckraker() throws GameActionException {
+    /**
+     * created Muckraker
+     * 1. sense every Robot --> If enemy
+     *                              slanderer --> then expose.
+     *                              EC -->  then set an 'Enemy EC' flag
+     *                              Muckraker / politician --> do nothing
+     *                      --> If Neutral EC --> set 'Neutral EC' Flag
+     *
+     * 2. Did not sense Robot/ already Exposed enemies --> then Detect
+     *      detect surrounding. a. Found some robot --> Move in that direction
+     *                          b. No Robot found --> choose Random Direction with low passability.
+     */
+    static void runMuckraker(RobotController rc) throws GameActionException {
         Team enemy = rc.getTeam().opponent();
-        int actionRadius = rc.getType().actionRadiusSquared;
-        for (RobotInfo robot : rc.senseNearbyRobots(actionRadius, enemy)) {
-            if (robot.type.canBeExposed()) {
-                // It's a slanderer... go get them!
-                if (rc.canExpose(robot.location)) {
-                    System.out.println("e x p o s e d");
-                    rc.expose(robot.location);
-                    return;
+        boolean DetectEnemySlanderer = false;
+        Direction detectedDirection = Direction.CENTER; // random value, change later
+
+        // 1. Sense Every Robot (max actionRadiusSquared)
+        for (RobotInfo robot : rc.senseNearbyRobots()) {
+            // ENEMY
+            if(robot.getTeam() == enemy){
+                if (robot.type.canBeExposed()) {
+                    // It's a slanderer... go get them!
+                    if (rc.canExpose(robot.location)) {
+                        System.out.println("e x p o s e d");
+                        rc.expose(robot.location);
+                        return;
+                    }
+                }
+            }
+            // NOT ENEMY
+            else if(robot.getTeam() != enemy){
+                if(robot.getTeam()!= rc.getTeam() && robot.getType() == RobotType.ENLIGHTENMENT_CENTER){ // can sense Neutral EC
+                    // If Neutral EC nearby, get its location and set flag.
+                    robot.getLocation();
+                    rc.setFlag(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG);
+                }
+                else if (rc.canGetFlag(robot.getID())){
+                    // If Same Team Robots, then get Flag and do appropriate action.
+                    int flagSensed = rc.getFlag(robot.getID()); // what info flag is telling
+
+                    if(flagSensed == NEUTRAL_ENLIGHTENMENT_CENTER_FLAG){
+                        // if Neutral EC nearby sensed robot, set the flag to same value.
+                        rc.setFlag(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG);
+                    }
+                    else if(flagSensed == ENEMY_SLANDERER_NEARBY_FLAG){
+                        // if enemy slanderer, nearby sensed robot, retrieve direction/ location from that flag
+                        // set Direction_of_Muckraker to that detected value
+                        DetectEnemySlanderer = true;
+                    }
                 }
             }
         }
-        if (tryMove(randomDirection()))
-            System.out.println("I moved!");
+
+        // 2. Move in Random and explore map (or) if Direction of slanderer detected, then move in that direction.
+        if(DetectEnemySlanderer){
+            // tryMove(detectedDirection);
+//        } else if (tryMove(randomDirection())){
+//            System.out.println("I moved!");
+        }
     }
 
     /**
