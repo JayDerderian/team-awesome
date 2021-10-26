@@ -1,28 +1,28 @@
-package TeamAwsomeSprint1;
+package teamawesome;
 import battlecode.common.*;
-import static TeamAwsomeSprint1.FlagConstants.*;
+import static teamawesome.FlagConstants.*;
 
-public strictfp class RobotPlayer {
+public strictfp class Muckraker {
     static RobotController rc;
 
 //    static final int NEUTRAL_ENLIGHTENMENT_CENTER_FLAG = 50;
 //    static final int SLANDERER_FLAG = 102;
 
     static final RobotType[] spawnableRobot = {
-        RobotType.POLITICIAN,
-        RobotType.SLANDERER,
-        RobotType.MUCKRAKER,
+            RobotType.POLITICIAN,
+            RobotType.SLANDERER,
+            RobotType.MUCKRAKER,
     };
 
     static final Direction[] directions = {
-        Direction.NORTH,
-        Direction.NORTHEAST,
-        Direction.EAST,
-        Direction.SOUTHEAST,
-        Direction.SOUTH,
-        Direction.SOUTHWEST,
-        Direction.WEST,
-        Direction.NORTHWEST,
+            Direction.NORTH,
+            Direction.NORTHEAST,
+            Direction.EAST,
+            Direction.SOUTHEAST,
+            Direction.SOUTH,
+            Direction.SOUTHWEST,
+            Direction.WEST,
+            Direction.NORTHWEST,
     };
 
     static int turnCount;
@@ -52,7 +52,7 @@ public strictfp class RobotPlayer {
                     case ENLIGHTENMENT_CENTER: runEnlightenmentCenter(); break;
                     case POLITICIAN:           runPolitician();          break;
                     case SLANDERER:            runSlanderer();           break;
-                    case MUCKRAKER:            runMuckraker();           break;
+                    case MUCKRAKER:            runMuckraker(rc);           break;
                 }
 
                 // Clock.yield() makes the robot wait until the next turn, then it will perform this loop again
@@ -108,7 +108,7 @@ public strictfp class RobotPlayer {
      *      detect surrounding. a. Found some robot --> Move in that direction
      *                          b. No Robot found --> choose Random Direction with low passability.
      */
-    static void runMuckraker() throws GameActionException {
+    static void runMuckraker(RobotController rc) throws GameActionException {
         Team enemy = rc.getTeam().opponent();
         boolean DetectEnemySlanderer = false;
         Direction detectedDirection = Direction.CENTER; // random value, change later
@@ -153,8 +153,8 @@ public strictfp class RobotPlayer {
         // 2. Move in Random and explore map (or) if Direction of slanderer detected, then move in that direction.
         if(DetectEnemySlanderer){
             // tryMove(detectedDirection);
-        } else if (tryMove(randomDirection())){
-            System.out.println("I moved!");
+//        } else if (tryMove(randomDirection())){
+//            System.out.println("I moved!");
         }
     }
 

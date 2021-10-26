@@ -1,4 +1,4 @@
-package TeamAwsomeSprint1;
+package teamawesome;
 
 public interface FlagConstants {
 

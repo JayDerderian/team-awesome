@@ -1,23 +1,15 @@
 package teamawesome;
 import battlecode.common.*;
 
-/**
- * RobotPlayer
- * This is the class that is called by the client environment to invoke a new robot
- * this class is static but its methods instantiate the robot objects
- */
 public strictfp class RobotPlayer {
     static RobotController rc;
 
-    // list of robots that can be spawned - ECs cannot be spawned
     static final RobotType[] spawnableRobot = {
             RobotType.POLITICIAN,
             RobotType.SLANDERER,
             RobotType.MUCKRAKER,
     };
 
-    // list of usable directions - center is omitted because for most game
-    // actions center is irrelevant
     static final Direction[] directions = {
             Direction.NORTH,
             Direction.NORTHEAST,
@@ -113,7 +105,7 @@ public strictfp class RobotPlayer {
     }
 
     static void runPolitician(Politician pol) throws GameActionException {
-        pol.turn();
+        pol.run();
 //        Team enemy = rc.getTeam().opponent();
 //        int actionRadius = rc.getType().actionRadiusSquared;
 //        RobotInfo[] attackable = rc.senseNearbyRobots(actionRadius, enemy);

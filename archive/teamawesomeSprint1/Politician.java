@@ -7,13 +7,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Politician
- *
- * the politician robot. constructor requires a RobotController object
- * RobotPlayer should call turn() once per turn to exercise the robot
- */
-public class Politician extends GenericRobot {
+public class Politician {
 
     RobotController rc;
     LinkedList<MapLocation> history;
@@ -31,7 +25,7 @@ public class Politician extends GenericRobot {
         }
     }
 
-    public void turn() throws GameActionException {
+    public void run() throws GameActionException {
         // check mothership for flag value
         if(mothership != -1) homeFlag = rc.getFlag(mothership);
         System.out.println("I'm a politician! My mothership is " + mothership + " and their flag is " + homeFlag);
