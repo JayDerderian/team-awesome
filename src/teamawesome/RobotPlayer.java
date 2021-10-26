@@ -48,7 +48,7 @@ public strictfp class RobotPlayer {
         switch (rc.getType()) {
             case ENLIGHTENMENT_CENTER: robot = new EnlightenmentCenter(rc); break;
             case POLITICIAN:           robot = new Politician(rc);          break;
-            case SLANDERER:            robot = new EnlightenmentCenter(rc);           break;
+            case SLANDERER:            robot = new Slanderer(rc);           break;
             case MUCKRAKER:            robot = new EnlightenmentCenter(rc);           break;
             default:
                 throw new IllegalStateException("Unexpected value: " + rc.getType());
@@ -59,15 +59,17 @@ public strictfp class RobotPlayer {
             turnCount += 1;
             // Try/catch blocks stop unhandled exceptions, which cause your robot to freeze
             // special case: slanderers become politicians after some time
-
+            if(robot.getClass() == Slanderer.class && rc.getType() == RobotType.POLITICIAN) {
+                robot = new Politician(robot.rc); // remake this robot as a politician
+            }
             try {
                 // Here, we've separated the controls into a different method for each RobotType.
                 // You may rewrite this into your own control structure if you wish.
                 System.out.println("I'm a " + rc.getType() + "! Location " + rc.getLocation());
                 switch (rc.getType()) {
                     case ENLIGHTENMENT_CENTER:
-                    case POLITICIAN:           robot.turn();          break;
-                    case SLANDERER:            runSlanderer();           break;
+                    case POLITICIAN:
+                    case SLANDERER:            robot.turn();             break;
                     case MUCKRAKER:            runMuckraker();           break;
                 }
 
@@ -79,13 +81,6 @@ public strictfp class RobotPlayer {
                 e.printStackTrace();
             }
         }
-    }
-
-    static void runSlanderer() throws GameActionException {
-        Slanderer slan = new Slanderer();
-        slan.run(rc);
-        if (tryMove(randomDirection()))
-            System.out.println("I moved!");
     }
 
     static void runMuckraker() throws GameActionException {

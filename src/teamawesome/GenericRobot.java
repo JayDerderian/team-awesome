@@ -1,5 +1,6 @@
 package teamawesome;
 
+import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 
@@ -23,4 +24,30 @@ abstract public class GenericRobot {
     }
 
     abstract void turn() throws GameActionException;
+
+    /**
+     * Returns a random Direction.
+     *
+     * @return a random Direction
+     */
+    protected Direction randomDirection() {
+        return RobotPlayer.directions[(int) (Math.random() * RobotPlayer.directions.length)];
+    }
+
+
+
+    /**
+     * Attempts to move in a given direction.
+     *
+     * @param dir The intended direction of movement
+     * @return true if a move was performed
+     * @throws GameActionException
+     */
+    protected boolean tryMove(Direction dir) throws GameActionException {
+        System.out.println("I am trying to move " + dir + "; " + rc.isReady() + " " + rc.getCooldownTurns() + " " + rc.canMove(dir));
+        if (rc.canMove(dir)) {
+            rc.move(dir);
+            return true;
+        } else return false;
+    }
 }
