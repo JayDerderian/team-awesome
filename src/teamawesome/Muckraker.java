@@ -9,6 +9,7 @@ public strictfp class Muckraker extends GenericRobot {
      */
     public String robotStatement = "I'm a " + rc.getType() + "! Location " + rc.getLocation();
     public boolean exposedSuccess = false;
+    public MapLocation neutralLocation;
 
     /**
      * constructor
@@ -46,9 +47,10 @@ public strictfp class Muckraker extends GenericRobot {
             }
             // NEUTRAL EC
             if(robot.getTeam() == Team.NEUTRAL) {
-                robot.getLocation();
+                neutralLocation = robot.getLocation();
                 // generate flag and set flag
-                rc.setFlag(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG);
+                if(rc.canSetFlag(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG))
+                    rc.setFlag(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG);
             }
             // OUR TEAM ROBOT
             else if(robot.getTeam() != enemy) {
