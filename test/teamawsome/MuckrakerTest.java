@@ -26,6 +26,12 @@ public class MuckrakerTest {
     RobotInfo neutralEC2 = new RobotInfo(5, Team.NEUTRAL, RobotType.ENLIGHTENMENT_CENTER, 0, 0, new MapLocation(20100, 20100));
     RobotInfo[] neutralECRobotInfoArray = { neutralEC1 };
 
+    RobotInfo teamBot1 = new RobotInfo(6, Team.A, RobotType.SLANDERER, 1, 1, new MapLocation(20200, 20200));
+    RobotInfo teamBot2 = new RobotInfo(7, Team.A, RobotType.MUCKRAKER, 1, 1, new MapLocation(20200, 20200));
+    RobotInfo teamBot3 = new RobotInfo(8, Team.A, RobotType.POLITICIAN, 1, 1, new MapLocation(20200, 20200));
+    RobotInfo teamBot4 = new RobotInfo(9, Team.A, RobotType.ENLIGHTENMENT_CENTER, 1, 1, new MapLocation(20200, 20200));
+    RobotInfo[] teamRobotInfoArray = {teamBot1};
+
 //    NeutralEC
 //123+xx (type+location)
 //1231(location)-->(x,y)?
@@ -71,6 +77,21 @@ public class MuckrakerTest {
         assertEquals(robot.neutralLocation.x, 20100 );
         assertEquals(robot.neutralLocation.y, 20100);
         assertEquals(rc.getFlag(rc.getID()), 1231);
+    }
+
+    @Test
+    public void ifTeamRobotDetectedThenGetItsFlag() throws GameActionException {
+        RobotController rc = mock(RobotController.class);
+        when(rc.getType()).thenReturn(RobotType.MUCKRAKER);
+        when(rc.getTeam()).thenReturn(Team.A);
+        when(rc.senseNearbyRobots()).thenReturn(teamRobotInfoArray);
+        when(rc.canGetFlag(6)).thenReturn(true);
+        when(rc.getFlag(6)).thenReturn(20200);
+
+        Muckraker robot = new Muckraker(rc);
+        robot.turn();
+
+        assertEquals(robot.flagSensed, 20200);
     }
 
 }

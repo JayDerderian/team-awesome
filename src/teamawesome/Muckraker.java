@@ -10,6 +10,7 @@ public strictfp class Muckraker extends GenericRobot {
     public String robotStatement = "I'm a " + rc.getType() + "! Location " + rc.getLocation();
     public boolean exposedSuccess = false;
     public MapLocation neutralLocation;
+    public int flagSensed = 00000;
 
     /**
      * constructor
@@ -56,7 +57,7 @@ public strictfp class Muckraker extends GenericRobot {
             else if(robot.getTeam() != enemy) {
                 if (rc.canGetFlag(robot.getID())){
                     // Get the Flag
-                    int flagSensed = rc.getFlag(robot.getID());
+                    flagSensed = rc.getFlag(robot.getID());
                     // Decode the Flag
                     // yet to implement...
                     // Flag about Neutral EC
