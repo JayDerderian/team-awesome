@@ -3,27 +3,28 @@ import battlecode.common.*;
 import static teamawesome.FlagConstants.*;
 
 public strictfp class Muckraker extends GenericRobot {
+
+    /**
+     * Variables of Muckraker
+     */
     public String robotStatement = "I'm a " + rc.getType() + "! Location " + rc.getLocation();
     public boolean exposedSuccess = false;
+
+    /**
+     * constructor
+     * @param newRc - new RobotController Object
+     */
     public Muckraker(RobotController newRc) {
         super(newRc);
     }
 
     /**
-     * created Muckraker
-     * 1. sense every Robot --> If enemy
-     *                              slanderer --> then expose.
-     *                              EC -->  then set an 'Enemy EC' flag
-     *                              Muckraker / politician --> do nothing
-     *                      --> If Neutral EC --> set 'Neutral EC' Flag
-     *
-     * 2. Did not sense Robot/ already Exposed enemies --> then Detect
-     *      detect surrounding. a. Found some robot --> Move in that direction
-     *                          b. No Robot found --> choose Random Direction with low passability.
+     * Muckraker logic
+     * @throws GameActionException
      */
     public void turn() throws GameActionException {
-//         System.out.println("I'm a " + rc.getType() + "! Location " + rc.getLocation());
-         System.out.println(robotStatement);
+        System.out.println(robotStatement);
+
         Team enemy = rc.getTeam().opponent();
         boolean DetectEnemySlanderer = false;
         Direction detectedDirection = Direction.CENTER; // random value, change later
@@ -43,36 +44,38 @@ public strictfp class Muckraker extends GenericRobot {
                     }
                 }
             }
-            // NOT ENEMY
-            else if(robot.getTeam() != enemy){
-                if(robot.getTeam()!= rc.getTeam() && robot.getType() == RobotType.ENLIGHTENMENT_CENTER){ // can sense Neutral EC
-                    // If Neutral EC nearby, get its location and set flag.
-                    robot.getLocation();
-                    rc.setFlag(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG);
-                }
-                else if (rc.canGetFlag(robot.getID())){
-                    // If Same Team Robots, then get Flag and do appropriate action.
-                    int flagSensed = rc.getFlag(robot.getID()); // what info flag is telling
-
+            // NEUTRAL EC
+            if(robot.getTeam() == Team.NEUTRAL) {
+                robot.getLocation();
+                // generate flag and set flag
+                rc.setFlag(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG);
+            }
+            // OUR TEAM ROBOT
+            else if(robot.getTeam() != enemy) {
+                if (rc.canGetFlag(robot.getID())){
+                    // Get the Flag
+                    int flagSensed = rc.getFlag(robot.getID());
+                    // Decode the Flag
+                    // yet to implement...
+                    // Flag about Neutral EC
                     if(flagSensed == NEUTRAL_ENLIGHTENMENT_CENTER_FLAG){
-                        // if Neutral EC nearby sensed robot, set the flag to same value.
                         rc.setFlag(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG);
                     }
+                    // Flag about Enemy Slanderer
                     else if(flagSensed == ENEMY_SLANDERER_NEARBY_FLAG){
-                        // if enemy slanderer, nearby sensed robot, retrieve direction/ location from that flag
-                        // set Direction_of_Muckraker to that detected value
                         DetectEnemySlanderer = true;
+                        // decode their location
+                        // set own flag value
                     }
                 }
             }
         }
 
-        // 2. Move in Random and explore map (or) if Direction of slanderer detected, then move in that direction.
+        // 2. Muckraker move --> toward Enemy slanderer (or) random direction
         if(DetectEnemySlanderer){
              tryMove(detectedDirection);
         } else if (tryMove(randomDirection())){
             System.out.println("I moved!");
         }
     }
-
 }
