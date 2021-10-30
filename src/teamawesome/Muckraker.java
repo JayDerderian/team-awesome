@@ -3,6 +3,7 @@ import battlecode.common.*;
 import static teamawesome.FlagConstants.*;
 
 public strictfp class Muckraker extends GenericRobot {
+    public String robotStatement = "I'm a " + rc.getType() + "! Location " + rc.getLocation();
     public Muckraker(RobotController newRc) {
         super(newRc);
     }
@@ -20,6 +21,8 @@ public strictfp class Muckraker extends GenericRobot {
      *                          b. No Robot found --> choose Random Direction with low passability.
      */
      void turn() throws GameActionException {
+//         System.out.println("I'm a " + rc.getType() + "! Location " + rc.getLocation());
+         System.out.println(robotStatement);
         Team enemy = rc.getTeam().opponent();
         boolean DetectEnemySlanderer = false;
         Direction detectedDirection = Direction.CENTER; // random value, change later
