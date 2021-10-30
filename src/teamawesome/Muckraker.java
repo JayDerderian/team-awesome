@@ -4,6 +4,7 @@ import static teamawesome.FlagConstants.*;
 
 public strictfp class Muckraker extends GenericRobot {
     public String robotStatement = "I'm a " + rc.getType() + "! Location " + rc.getLocation();
+    public boolean exposedSuccess = false;
     public Muckraker(RobotController newRc) {
         super(newRc);
     }
@@ -20,7 +21,7 @@ public strictfp class Muckraker extends GenericRobot {
      *      detect surrounding. a. Found some robot --> Move in that direction
      *                          b. No Robot found --> choose Random Direction with low passability.
      */
-     void turn() throws GameActionException {
+    public void turn() throws GameActionException {
 //         System.out.println("I'm a " + rc.getType() + "! Location " + rc.getLocation());
          System.out.println(robotStatement);
         Team enemy = rc.getTeam().opponent();
@@ -29,11 +30,13 @@ public strictfp class Muckraker extends GenericRobot {
 
         // 1. Sense Every Robot (max actionRadiusSquared)
         for (RobotInfo robot : rc.senseNearbyRobots()) {
+            exposedSuccess = false;
             // ENEMY
             if(robot.getTeam() == enemy){
                 if (robot.type.canBeExposed()) {
                     // It's a slanderer... go get them!
                     if (rc.canExpose(robot.location)) {
+                        exposedSuccess = true;
                         System.out.println("e x p o s e d");
                         rc.expose(robot.location);
                         return;
