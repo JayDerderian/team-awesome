@@ -3,73 +3,85 @@ package teamawesome;
 import battlecode.common.*;
 
 import java.awt.*;
+import java.util.ArrayList;
 
 public class Slanderer extends GenericRobot{
-    int ecID = -1;
-    private MapLocation ecLoc;
+    static int direction;
+    static int x;
+    static int y;
 
-    private MapLocation enemyECLoc;
+    static RobotInfo [] nearbyRobots;
+    static RobotController rc;
 
-    private Direction dir;
+    static final Direction[] directions = {Direction.NORTH, Direction.NORTHEAST, Direction.NORTHWEST, Direction.SOUTH, Direction.SOUTHEAST, Direction.SOUTHWEST, Direction.EAST, Direction.WEST};
+
 
     public Slanderer(RobotController newRc) {
         super(newRc);
     }
 
-    // Slanderers will run away from the enemy. If they detect a EC nearby, they will try to reach it.
-
-    int getECID() throws GameActionException{
-        RobotInfo[] robots = rc.senseNearbyRobots();
-        for (RobotInfo robot : robots) {
-            if (robot.type == RobotType.ENLIGHTENMENT_CENTER && robot.team == rc.getTeam()) {
-                return robot.ID;
-            }
-        }
-        throw new GameActionException(GameActionExceptionType.CANT_DO_THAT, "Can't get EC");
-    }
-
-    MapLocation getLocationOfEC() throws GameActionException{
-        RobotInfo [] robots = rc.senseNearbyRobots();
-        for (RobotInfo robot : robots) {
-            if (robot.type == RobotType.ENLIGHTENMENT_CENTER && robot.team == rc.getTeam()) {
-                return robot.location;
-            }
-        }
-        throw new GameActionException(GameActionExceptionType.OUT_OF_RANGE, "Can't reach EC");
-    }
+//    static void getDirection() throws GameActionException {
+//        direction = this.randomDirection();
+//    }
 
     void turn() throws GameActionException {
-        /*
-        if (ecID == -1) {
-            // badaid
-            try {
-                ecID = getECID();
-            }catch(GameActionException e){
-                ecID = 0;
-            }
-            //ecLoc = getLocationOfEC();
-        }
-        */
-        if (tryMove(randomDirection()))
-            System.out.println("I moved!");
+        x = 0;
+        y = 0;
+        analyzeMove();
+        move();
     }
 
+    static void analyzeMove() throws GameActionException {
+        nearbyRobots = rc.senseNearbyRobots();
+        if (nearbyRobots.length == 0) {
+            System.out.println("i'm alone");
+            return;
+        }
+        int xDir = rc.getLocation().x;
+        int yDir = rc.getLocation().y;
+        for (RobotInfo robot : nearbyRobots) {
+            if (robot.getTeam() == rc.getTeam().opponent()) {
+                x += robot.getLocation().x - xDir;
+                y += robot.getLocation().y - yDir;
+            }
+        }
+    }
 
-    void moveAway() throws GameActionException {
-        RobotInfo[] enemyRobots = rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, rc.getTeam().opponent());
-        RobotInfo[] closeRobots = rc.senseNearbyRobots(2, rc.getTeam());
-        MapLocation ecLocTeam = rc.adjacentLocation(Direction.NORTH); // problem?
-        boolean closeToEC = false;
-        for (RobotInfo robot : closeRobots) {
-            if (robot.getType() == RobotType.ENLIGHTENMENT_CENTER) {
-                closeToEC = true;
-                ecLocTeam = robot.location;
+    static void move() throws GameActionException {
+        // Move randomly if no one nearby
+        if (x == 0 && y == 0) {
+            int [] dir = {0, 1, -1, 2, -2, 3, -3, 4, -4};
+            for (int i : dir) {
+                if (rc.canMove(directions[generateRandomDirection((direction + 1), directions.length)])) {
+                    rc.move(directions[generateRandomDirection((direction + 1), directions.length)]);
+                    direction += i;
+                    break;
+                }
             }
         }
 
-        // Do something if enemy is nearby
-
-        // Do something if the EC is nearby
-
+        // If someone is nearby
+        else {
+            if (Math.abs(x) > 2 * Math.abs(y)) {
+                y = 0;
+            } else if (Math.abs(y) > 2 * Math.abs(x)) {
+                x = 0;
+            }
+            for (Direction dir : directions) {
+                if (dir.getDeltaX() == x && dir.getDeltaX() == y) {
+                    System.out.println("Moving to " + dir);
+                    if (rc.canMove(dir)) {
+                        rc.move(dir);
+                    }
+                    return;
+                }
+            }
+            System.out.println("Cannot Move!!!");
+        }
     }
+
+    static int generateRandomDirection(int i, int j) {
+        return (((i % j) + j) % j);
+    }
+
 }
