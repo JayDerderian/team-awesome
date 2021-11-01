@@ -19,8 +19,12 @@ public class Politician extends GenericRobot {
     HashMap<Direction, Double> momentum;
     int mothership = -1;
     int homeFlag = -1;
+    public String robotStatement = "I'm a " + rc.getType() + "! Location " + rc.getLocation();
+    public boolean empowered;
+
     public Politician(RobotController newRc) {
         super(newRc);
+        empowered = false;
         history = new LinkedList<>();
         // initialize momentum to 0 in all directions
         momentum = new HashMap<>();
@@ -46,19 +50,22 @@ public class Politician extends GenericRobot {
             System.out.println("empowering...");
             rc.empower(actionRadius);
             System.out.println("empowered");
+            empowered = true;
             return;
         } else {
             RobotInfo[] convertable = rc.senseNearbyRobots(actionRadius, Team.NEUTRAL);
             if(convertable.length != 0 && rc.canEmpower(actionRadius)) {
                 System.out.println("you will be assimilated");
                 rc.empower(actionRadius);
+                empowered = true;
+                return;
             }
         }
         // then try to move
         Direction d = whereToMove();
-        if(RobotPlayer.rc.canMove(d)) {
+        if(rc.canMove(d)) {
             // move and increment the momentum for that direction
-            RobotPlayer.rc.move(d);
+            rc.move(d);
             System.out.println("I Moved! Direction: " + d.toString() + " | Momentum: " + momentum.get(d));
             if(momentum.containsKey(d)) momentum.put(d, momentum.get(d) + 1);
             else momentum.put(d, 1.0);
@@ -141,7 +148,7 @@ public class Politician extends GenericRobot {
         }
         System.out.println("My Weights Are: " + s + " |");
         if(best == null) {
-            toMove = Direction.EAST;
+            toMove = Direction.SOUTH;
         } else {
             toMove = best.getKey();
         }
