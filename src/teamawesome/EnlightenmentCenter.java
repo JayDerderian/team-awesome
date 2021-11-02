@@ -4,6 +4,11 @@ import battlecode.common.*;
 
 public class EnlightenmentCenter extends GenericRobot{
 
+    /**
+     * Enlightenment Center Variables
+     */
+    public String robotStatement = "I'm an " + rc.getType() + "! Location " + rc.getLocation();
+
     public EnlightenmentCenter(RobotController newRc) {
         super(newRc);
     }
@@ -11,7 +16,7 @@ public class EnlightenmentCenter extends GenericRobot{
     @Override
     void turn() throws GameActionException {
         RobotType toBuild = randomSpawnableRobotType();
-        int influence = 50;
+        int influence = 15;
         for (Direction dir : teamawesome.RobotPlayer.directions) {
             if (rc.canBuildRobot(toBuild, dir, influence)) {
                 System.out.println("Building a " + toBuild + " in the " + dir + " direction!");
@@ -45,10 +50,11 @@ public class EnlightenmentCenter extends GenericRobot{
         }
 
         //Check the bidding conditions.
-        if(rc.canBid(influence)){
-            rc.bid(influence);
+        int round = rc.getRoundNum();
+        double toBid = Math.pow((round - 0.7), 5) + Math.pow((round - 0.2), 3) + 0.2;
+        if(rc.canBid((int)toBid)){
+            rc.bid((int)toBid);
         }
-
     }
     /**
      * Returns a random spawnable RobotType
