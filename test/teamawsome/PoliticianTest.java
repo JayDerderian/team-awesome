@@ -84,7 +84,7 @@ public class PoliticianTest {
     }
 
     @Test
-    public void givenNoOtherStimulusPoliticianGoesSouth() throws GameActionException {
+    public void politicianMovesIfNoEmpowerableRobots() throws GameActionException {
         RobotController rc = mock(RobotController.class);
         when(rc.getType()).thenReturn(RobotType.POLITICIAN);
         when(rc.getTeam()).thenReturn(Team.A);
@@ -103,7 +103,7 @@ public class PoliticianTest {
         assertFalse(robot.empowered);
 
         verify(rc).move(dir.capture());
-        assertEquals(dir.getValue(), Direction.SOUTH);
+        assertNotNull(dir.getValue());
     }
 
 }
