@@ -14,7 +14,7 @@ public class EnlightenmentCenter extends GenericRobot{
     }
 
     @Override
-    void turn() throws GameActionException {
+    public void turn() throws GameActionException {
         RobotType toBuild = randomSpawnableRobotType();
         int influence = 15;
         for (Direction dir : teamawesome.RobotPlayer.directions) {
@@ -41,12 +41,11 @@ public class EnlightenmentCenter extends GenericRobot{
                 }
             }
 
-            //set flag
-            int flag = typeFlag + conviction;
-            if(rc.canSetFlag(flag)){
-                rc.setFlag(flag);
-            }
-
+        }
+        //set flag
+        int flag = typeFlag + conviction;
+        if(rc.canSetFlag(flag)){
+            rc.setFlag(flag);
         }
 
         //Check the bidding conditions.
