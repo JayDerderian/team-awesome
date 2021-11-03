@@ -2,7 +2,6 @@ package teamawesome;
 import static teamawesome.FlagConstants.*;
 
 import battlecode.common.*;
-import scala.Int;
 
 import java.util.Hashtable;
 
@@ -70,13 +69,16 @@ abstract public class GenericRobot {
             // get flag from given bot (id)
             int flag = rc.getFlag(id);
             // convert flag to string for parsing purposes
+            // System.out.print("getFlag() - I just got the flag: " + flag + "from ID: " + id);
             String flagStr = String.valueOf(flag);
+            // System.out.print("getFlag() - flag string: " + flagStr);
             // is this one of our flags? get first two
             // characters and convert back to an int to test...
             // ... i know, it's silly.
             int firstTwo = Integer.parseInt(flagStr.substring(0,1));
+            //System.out.print("The first two digits are:" + firstTwo);
             if (firstTwo != PASSWORD){
-                System.out.print("Not one of our flags!");
+                // System.out.print("Not one of our flags!");
                 res.put(ERROR, 0);
                 return res;
             }
@@ -87,7 +89,7 @@ abstract public class GenericRobot {
             }
         }
         else {
-            System.out.print("Could not get flag with a given ID!");
+            //System.out.print("Could not get flag with a given ID!");
             res.put(ERROR, 0);
             return res;
         }
@@ -98,6 +100,7 @@ abstract public class GenericRobot {
         Hashtable<Integer, Integer> results = new Hashtable<>();
         // This is an alert!
         if (flagStr.length() == 4){
+            // System.out.print("I received an ALERT!");
             // remove first two digits (pw), then
             // determine alert type
             String alert = flagStr.substring(2,3);
@@ -149,7 +152,7 @@ abstract public class GenericRobot {
         }
         // Something else!
         else{
-            System.out.print("Unable tp parse flag!");
+            // System.out.print("Unable tp parse flag!");
             results.put(ERROR,0);
         }
         return results;
@@ -184,12 +187,12 @@ abstract public class GenericRobot {
 
                     // Neutral EC!
                     if (info.type == RobotType.ENLIGHTENMENT_CENTER) {
-                        String flagStr = pwStr + NEUTRAL_ENLIGHTENMENT_CENTER_FLAG + NORTH;
-                        flag = Integer.valueOf(flagStr);
+                        String flagStr = pwStr + NEUTRAL_ENLIGHTENMENT_CENTER_FLAG + NORTH_WEST;
+                        flag = Integer.parseInt(flagStr);
                     }
                 }
                 else{
-                    System.out.print("Unable to detect robot!");
+                    // System.out.print("Unable to detect robot!");
                     return ERROR;
                 }
             }
@@ -215,38 +218,38 @@ abstract public class GenericRobot {
                     // figure out  EC location in relation to current bots location
                     int conv = info.getConviction();
                     int typeAndConv = ENEMY_POLITICIAN_FLAG + conv;
-                    // NOTE NORTH is a place holder until I can figure out how to get a bot
+                    // NOTE NORTH is a placeholder until I can figure out how to get a bot
                     // directions to the location they need to go. TBD.
-                    String flagStr = pwStr + typeAndConv + NORTH;
+                    String flagStr = pwStr + typeAndConv + NORTH_WEST;
                     // finally, convert it all back to an int and set for current bot.
-                    flag = Integer.valueOf(flagStr);
+                    flag = Integer.parseInt(flagStr);
                     rc.setFlag(flag);
                 }
                 // Found a Slanderer!
                 else if (info.type == RobotType.SLANDERER){
                     String typeStr = String.valueOf(ENEMY_SLANDERER_NEARBY_FLAG);
-                    String flagStr = pwStr + typeStr + NORTH;
-                    flag = Integer.valueOf(flagStr);
+                    String flagStr = pwStr + typeStr + NORTH_WEST;
+                    flag = Integer.parseInt(flagStr);
                     rc.setFlag(flag);
                 }
                 // Found a Muckraker!
                 else if (info.type == RobotType.MUCKRAKER){
                     String typeStr = String.valueOf(ENEMY_MUCKRAKER_NEARBY_FLAG);
-                    String flagStr = pwStr + typeStr + NORTH;
-                    flag = Integer.valueOf(flagStr);
+                    String flagStr = pwStr + typeStr + NORTH_WEST;
+                    flag = Integer.parseInt(flagStr);
                     rc.setFlag(flag);
                 }
                 // Found an enemy Enlightenment Center!
                 else if (info.type == RobotType.ENLIGHTENMENT_CENTER){
                     String typeStr = String.valueOf(ENEMY_ENLIGHTENMENT_CENTER_FLAG);
-                    String flagStr = pwStr + typeStr + NORTH;
-                    flag = Integer.valueOf(flagStr);
+                    String flagStr = pwStr + typeStr + NORTH_WEST;
+                    flag = Integer.parseInt(flagStr);
                     rc.setFlag(flag);
 
                 }
             }
             else{
-                System.out.print("Unable to sense bot with given id!");
+                // System.out.print("Unable to sense bot with given id!");
                 return ERROR;
             }
 

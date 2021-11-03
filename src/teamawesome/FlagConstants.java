@@ -20,16 +20,10 @@ public interface FlagConstants {
     static final int ENEMY_MUCKRAKER_NEARBY_FLAG = 300;
     static final int ENEMY_ENLIGHTENMENT_CENTER_FLAG = 400;
 
-
     // Direction Ints
     static final int LOCATION = 9;
-    static final int NORTH = 1;
-    static final int NORTH_EAST = 2;
-    static final int EAST = 3;
+    static final int NORTH_EAST = 1;
+    static final int NORTH_WEST = 2;
+    static final int SOUTH_WEST = 3;
     static final int SOUTH_EAST = 4;
-    static final int SOUTH = 5;
-    static final int SOUTH_WEST = 6;
-    static final int WEST = 7;
-    static final int NORTH_WEST = 8;
-
 }
