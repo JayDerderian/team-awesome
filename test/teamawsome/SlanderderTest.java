@@ -9,8 +9,8 @@ import static org.mockito.Mockito.*;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import teamawesome.Muckraker;
 import teamawesome.Politician;
+import teamawesome.Slanderer;
 
 public class SlanderderTest {
     RobotInfo enemy1 = new RobotInfo(1, Team.B, RobotType.MUCKRAKER, 1, 1, new MapLocation(20000, 20000));
@@ -35,7 +35,7 @@ public class SlanderderTest {
         RobotController rc = mock(RobotController.class);
         when(rc.getType()).thenReturn(RobotType.SLANDERER);
 
-        Muckraker robot = new Muckraker(rc);
+        Slanderer robot = new Slanderer(rc);
 
         assertThat(robot.robotStatement, containsString("I'm a SLANDERER"));
     }
