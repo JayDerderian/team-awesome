@@ -1,78 +1,85 @@
 package teamawesome;
 
-import battlecode.common.*;
+import battlecode.common.Direction;
+import battlecode.common.GameActionException;
+import battlecode.common.RobotController;
+import battlecode.common.RobotInfo;
 
-import java.awt.*;
-import java.util.ArrayList;
+public class Slanderer extends GenericRobot {
+    static int dirIdx;
 
-public class Slanderer extends GenericRobot{
-    static int direction;
-    static int x;
-    static int y;
+    static int xLean;
+    static int yLean;
 
-    static RobotInfo [] nearbyRobots;
-    static RobotController rc;
+    static RobotInfo[] nearby;
 
-    static final Direction[] directions = {Direction.NORTH, Direction.NORTHEAST, Direction.NORTHWEST, Direction.SOUTH, Direction.SOUTHEAST, Direction.SOUTHWEST, Direction.EAST, Direction.WEST};
-
+    static final Direction[] directions = {
+            Direction.NORTH,
+            Direction.NORTHEAST,
+            Direction.EAST,
+            Direction.SOUTHEAST,
+            Direction.SOUTH,
+            Direction.SOUTHWEST,
+            Direction.WEST,
+            Direction.NORTHWEST,
+    };
 
     public Slanderer(RobotController newRc) {
         super(newRc);
     }
 
-//    static void getDirection() throws GameActionException {
-//        direction = this.randomDirection();
-//    }
+    // Setup the slanderer
+    static void setup() throws GameActionException {
+        dirIdx = (int) (Math.random() * directions.length);
 
-    void turn() throws GameActionException {
-        x = 0;
-        y = 0;
-        analyzeMove();
-        move();
     }
 
-    static void analyzeMove() throws GameActionException {
-        nearbyRobots = rc.senseNearbyRobots();
-        if (nearbyRobots.length == 0) {
-            System.out.println("i'm alone");
+    // Run the slanderer
+    public void turn() throws GameActionException {
+        xLean = 0; yLean = 0; // Reset guiding
+        analyze();
+        move();
+
+    }
+
+    public void analyze() throws GameActionException {
+        nearby = rc.senseNearbyRobots();
+        if (nearby.length == 0) {
+            System.out.println("No one nearby.");
             return;
         }
-        int xDir = rc.getLocation().x;
-        int yDir = rc.getLocation().y;
-        for (RobotInfo robot : nearbyRobots) {
+        int x = rc.getLocation().x;
+        int y = rc.getLocation().y;
+        for (RobotInfo robot : nearby) {
             if (robot.getTeam() == rc.getTeam().opponent()) {
-                x += robot.getLocation().x - xDir;
-                y += robot.getLocation().y - yDir;
+                xLean += robot.getLocation().x - x;
+                yLean += robot.getLocation().y - y;
             }
         }
     }
 
-    static void move() throws GameActionException {
-        // Move randomly if no one nearby
-        if (x == 0 && y == 0) {
-            int [] dir = {0, 1, -1, 2, -2, 3, -3, 4, -4};
-            for (int i : dir) {
-                if (rc.canMove(directions[generateRandomDirection((direction + 1), directions.length)])) {
-                    rc.move(directions[generateRandomDirection((direction + 1), directions.length)]);
-                    direction += i;
+    public void move() throws GameActionException {
+        // Random movement if not leans
+        if (xLean == 0 && yLean == 0) {
+            int[] x = {0, 1, -1, 3, -3, 2, -2, 4, -4};
+            for (int i: x) {
+                if (rc.canMove(directions[myMod((dirIdx + i), directions.length)])) {
+                    rc.move(directions[myMod((dirIdx + i), directions.length)]);
+                    dirIdx += i;
                     break;
                 }
             }
         }
-
-        // If someone is nearby
         else {
-            if (Math.abs(x) > 2 * Math.abs(y)) {
-                y = 0;
-            } else if (Math.abs(y) > 2 * Math.abs(x)) {
-                x = 0;
-            }
+            // Clean the leans somewhat
+            if (Math.abs(xLean) > 2 * Math.abs(yLean)) {yLean = 0;}
+            else if (Math.abs(yLean) > 2 * Math.abs(xLean)) {xLean = 0;}
+            xLean = Math.min(1, Math.max(-1, xLean)) * -1;
+            yLean = Math.min(1, Math.max(-1, yLean)) * -1;
             for (Direction dir : directions) {
-                if (dir.getDeltaX() == x && dir.getDeltaX() == y) {
-                    System.out.println("Moving to " + dir);
-                    if (rc.canMove(dir)) {
-                        rc.move(dir);
-                    }
+                if (dir.getDeltaY() == yLean && dir.getDeltaX() == xLean) {
+                    System.out.println("I'm moving to " + dir);
+                    if (rc.canMove(dir)) { rc.move(dir); }
                     return;
                 }
             }
@@ -80,8 +87,7 @@ public class Slanderer extends GenericRobot{
         }
     }
 
-    static int generateRandomDirection(int i, int j) {
+    public int myMod(int i, int j) {
         return (((i % j) + j) % j);
     }
-
 }
