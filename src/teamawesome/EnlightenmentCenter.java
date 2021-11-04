@@ -8,6 +8,7 @@ public class EnlightenmentCenter extends GenericRobot{
      * Enlightenment Center Variables
      */
     public String robotStatement = "I'm an " + rc.getType() + "! Location " + rc.getLocation();
+    protected static final int SLAN_RUSH = 300;
 
     public EnlightenmentCenter(RobotController newRc) {
         super(newRc);
@@ -15,8 +16,14 @@ public class EnlightenmentCenter extends GenericRobot{
 
     @Override
     public void turn() throws GameActionException {
-        RobotType toBuild = randomSpawnableRobotType();
-        int influence = 15;
+        RobotType toBuild;
+        // build only slanderers for the first SLAN_RUSH rounds
+        if(rc.getRoundNum() < SLAN_RUSH) {
+            toBuild = RobotType.SLANDERER;
+        } else {
+            toBuild = randomSpawnableRobotType();
+        }
+        int influence = 50;
         for (Direction dir : teamawesome.RobotPlayer.directions) {
             if (rc.canBuildRobot(toBuild, dir, influence)) {
                 System.out.println("Building a " + toBuild + " in the " + dir + " direction!");

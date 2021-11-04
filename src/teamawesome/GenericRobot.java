@@ -1,4 +1,5 @@
 package teamawesome;
+
 import static teamawesome.FlagConstants.*;
 
 import battlecode.common.*;
