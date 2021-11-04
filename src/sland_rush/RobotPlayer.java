@@ -1,4 +1,4 @@
-package examplefuncsplayer;
+package sland_rush;
 import battlecode.common.*;
 
 public strictfp class RobotPlayer {
