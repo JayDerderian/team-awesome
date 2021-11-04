@@ -57,9 +57,17 @@ public class EnlightenmentCenter extends GenericRobot{
 
         //Check the bidding conditions.
         int round = rc.getRoundNum();
-        double toBid = Math.pow((round - 0.7), 5) + Math.pow((round - 0.2), 3) + 0.2;
+        int myInfluence = rc.getInfluence();
+        double toBid = (Math.pow((round - 0.7), 5) + Math.pow((round - 0.2), 3) + 0.2) / 1E+10;
+        System.out.println("I would like to bid " + toBid);
         if(rc.canBid((int)toBid)){
             rc.bid((int)toBid);
+            System.out.println("And I did!");
+        } else if((int)toBid > myInfluence) {
+            System.out.println("But I only have " + myInfluence);
+            if(round % 10 == 0) {
+                rc.bid(myInfluence);
+            }
         }
     }
     /**
