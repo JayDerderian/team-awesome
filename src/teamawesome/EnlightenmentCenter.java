@@ -24,6 +24,8 @@ public class EnlightenmentCenter extends GenericRobot{
             }
         }
 
+        //test
+
         //sense enemy robots
         int conviction = 0;
         int typeFlag = 25;
