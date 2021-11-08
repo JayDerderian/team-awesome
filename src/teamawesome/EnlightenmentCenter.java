@@ -16,24 +16,16 @@ public class EnlightenmentCenter extends GenericRobot{
 
     @Override
     public void turn() throws GameActionException {
-        RobotType toBuild;
-        // build only slanderers for the first SLAN_RUSH rounds
-        if(rc.getRoundNum() < RUSH) {
-            if(rc.getRoundNum() % 2 == 0) {
-                toBuild = RobotType.SLANDERER;
-            } else {
-                toBuild = RobotType.POLITICIAN;
-            }
-        } else {
-            toBuild = randomSpawnableRobotType();
-        }
-        int influence = 50;
+        RobotType toBuild = randomSpawnableRobotType();
+        int round = rc.getRoundNum();
         for (Direction dir : teamawesome.RobotPlayer.directions) {
-            if (rc.canBuildRobot(toBuild, dir, influence)) {
+            if (rc.canBuildRobot(toBuild, dir, round)) {
                 System.out.println("Building a " + toBuild + " in the " + dir + " direction!");
-                rc.buildRobot(toBuild, dir, influence);
+                rc.buildRobot(toBuild, dir, (round/2 + 2));
             }
         }
+
+        //test
 
         //sense enemy robots
         int conviction = 0;
@@ -55,10 +47,12 @@ public class EnlightenmentCenter extends GenericRobot{
         }
         //set flag
         int flag = typeFlag + conviction;
-        int round = rc.getRoundNum();
-        int myInfluence = rc.getInfluence();
-        double toBid = (Math.pow((round - 0.7), 5) + Math.pow((round - 0.2), 3) + 0.2) / 1E+10;
-        System.out.println("I would like to bid " + toBid);
+        if(rc.canSetFlag(flag)){
+            rc.setFlag(flag);
+        }
+
+        //Check the bidding conditions.
+        double toBid = Math.pow((round - 0.7), 5) + Math.pow((round - 0.2), 3) + 0.2;
         if(rc.canBid((int)toBid)){
             rc.bid((int)toBid);
             System.out.println("And I did!");
