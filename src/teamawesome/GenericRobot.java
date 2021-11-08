@@ -74,21 +74,18 @@ abstract public class GenericRobot {
         // 5 digit flags
         else if (type == ENEMY_INFO){
             if(flag == ENEMY_POLITICIAN_FLAG){
-                String EF = Integer.toString(ENEMY_POLITICIAN_FLAG);
-                String convStr = Integer.toString(conv);
-                String flagStr = pw + EF + convStr;
+                String EF = Integer.toString(ENEMY_POLITICIAN_FLAG + conv);
+                String flagStr = pw + EF;
                 newFlag = Integer.parseInt(flagStr);
             }
             else if(flag == ENEMY_SLANDERER_NEARBY_FLAG){
-                String EF = Integer.toString(ENEMY_SLANDERER_NEARBY_FLAG);
-                String convStr = Integer.toString(conv);
-                String flagStr = pw + EF + convStr;
+                String EF = Integer.toString(ENEMY_SLANDERER_NEARBY_FLAG + conv);
+                String flagStr = pw + EF;
                 newFlag = Integer.parseInt(flagStr);
             }
             else if (flag == ENEMY_ENLIGHTENMENT_CENTER_FLAG){
-                String EF = Integer.toString(ENEMY_ENLIGHTENMENT_CENTER_FLAG);
-                String convStr = Integer.toString(conv);
-                String flagStr = pw + EF + convStr;
+                String EF = Integer.toString(ENEMY_ENLIGHTENMENT_CENTER_FLAG + conv);
+                String flagStr = pw + EF;
                 newFlag = Integer.parseInt(flagStr);
             }
         }
