@@ -15,6 +15,19 @@ public strictfp class Muckraker extends GenericRobot {
     public MapLocation[] surroundingLocationArray;
     public Direction nextMoveDir;
     boolean nextMoveDirSet = false;
+    public int xLean;
+    public int yLean;
+    public int dirIdx;
+    public final Direction[] directions = {
+            Direction.NORTH,
+            Direction.NORTHEAST,
+            Direction.EAST,
+            Direction.SOUTHEAST,
+            Direction.SOUTH,
+            Direction.SOUTHWEST,
+            Direction.WEST,
+            Direction.NORTHWEST,
+    };
 
     /**
      * constructor
@@ -52,9 +65,13 @@ public strictfp class Muckraker extends GenericRobot {
                 } else if (robot.getType() == RobotType.ENLIGHTENMENT_CENTER) { // Enemy enlightenment center
                     enemyECLocation = robot.getLocation();
                     determineNextMoveDir(enemyECLocation);
-                } else {
-                    determineNextMoveDir(robot.getLocation());
+//                    nextMove(enemyECLocation);
                 }
+//                else {
+//                    enemyECLocation = robot.getLocation();
+////                    determineNextMoveDir(enemyECLocation);
+//                    nextMove(enemyECLocation);
+//                }
             }
             // NEUTRAL EC
             if(robot.getTeam() == Team.NEUTRAL) {
