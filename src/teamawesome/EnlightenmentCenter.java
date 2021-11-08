@@ -8,7 +8,7 @@ public class EnlightenmentCenter extends GenericRobot{
      * Enlightenment Center Variables
      */
     public String robotStatement = "I'm an " + rc.getType() + "! Location " + rc.getLocation();
-    protected static final int SLAN_RUSH = 300;
+    protected static final int RUSH = 300;
 
     public EnlightenmentCenter(RobotController newRc) {
         super(newRc);
@@ -18,8 +18,12 @@ public class EnlightenmentCenter extends GenericRobot{
     public void turn() throws GameActionException {
         RobotType toBuild;
         // build only slanderers for the first SLAN_RUSH rounds
-        if(rc.getRoundNum() < SLAN_RUSH) {
-            toBuild = RobotType.SLANDERER;
+        if(rc.getRoundNum() < RUSH) {
+            if(rc.getRoundNum() % 2 == 0) {
+                toBuild = RobotType.SLANDERER;
+            } else {
+                toBuild = RobotType.POLITICIAN;
+            }
         } else {
             toBuild = randomSpawnableRobotType();
         }
@@ -51,11 +55,6 @@ public class EnlightenmentCenter extends GenericRobot{
         }
         //set flag
         int flag = typeFlag + conviction;
-        if(rc.canSetFlag(flag)){
-            rc.setFlag(flag);
-        }
-
-        //Check the bidding conditions.
         int round = rc.getRoundNum();
         int myInfluence = rc.getInfluence();
         double toBid = (Math.pow((round - 0.7), 5) + Math.pow((round - 0.2), 3) + 0.2) / 1E+10;
@@ -66,7 +65,7 @@ public class EnlightenmentCenter extends GenericRobot{
         } else if((int)toBid > myInfluence) {
             System.out.println("But I only have " + myInfluence);
             if(round % 10 == 0) {
-                rc.bid(myInfluence);
+                rc.bid(myInfluence / 9);
             }
         }
     }
