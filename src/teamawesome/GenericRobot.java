@@ -50,7 +50,6 @@ abstract public class GenericRobot {
      *
      * @return Integer
      */
-
     protected Integer makeFlag(int type, int flag, int conv) {
         int newFlag = 0;
         String pw = Integer.toString(PASSWORD);
@@ -123,9 +122,8 @@ abstract public class GenericRobot {
             RobotInfo info = rc.senseRobot(id);
             int flag = rc.getFlag(info.getID());
             // make sure this is one of ours!
-            if(isOurs(flag)){
+            if(isOurs(flag))
                 return parseFlag(info, flag);
-            }
             else{
                 // add our own location since the table requires a MapLocation
                 System.out.println("Could not retrieve flag!");
@@ -152,38 +150,30 @@ abstract public class GenericRobot {
         if (len == 3){
             // remove first two digits, then test against constants
             int flag = flagOrig % 10;
-            if (flag == NEUTRAL_ENLIGHTENMENT_CENTER_FLAG){
+            if (flag == NEUTRAL_ENLIGHTENMENT_CENTER_FLAG)
                 res.put(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG, info.getLocation());
-            }
-            else if (flag == NEED_HELP){
+            else if (flag == NEED_HELP)
                 res.put(NEED_HELP, info.getLocation());
-            }
-            else{
+            else
                 res.put(ERROR, rc.getLocation());
-            }
         }
         // this is enemy info!
         else if (len == 5){
             // remove first two digits, then test against constants
             int flag = flagOrig % 1000;
-            if(flag == ENEMY_ENLIGHTENMENT_CENTER_FLAG){
+            if(flag == ENEMY_ENLIGHTENMENT_CENTER_FLAG)
                 res.put(ENEMY_ENLIGHTENMENT_CENTER_FLAG, info.getLocation());
-            }
             // enemy politician!
-            if (flag / 100 == 1){
+            if(flag/100 == 1)
                 res.put(ENEMY_POLITICIAN_FLAG, info.getLocation());
-            }
             // enemy slanderer!
-            else if(flag/100 == 2){
+            else if(flag/100 == 2)
                 res.put(ENEMY_POLITICIAN_FLAG, info.getLocation());
-            }
             // enemy muckraker!
-            else if (flag/100 == 3){
+            else if (flag/100 == 3)
                 res.put(ENEMY_POLITICIAN_FLAG, info.getLocation());
-            }
-            else {
+            else
                 res.put(ERROR, rc.getLocation());
-            }
         }
         return res;
     }
@@ -197,7 +187,7 @@ abstract public class GenericRobot {
 
     private Boolean isOurs(int flag){
         int len = countDigis(flag);
-        if (len > 5 || len == 4 || len < 2) {
+        if (len > 5 || len == 4 || len < 3) {
             System.out.print("Not one of our flags!");
             return false;
         }
