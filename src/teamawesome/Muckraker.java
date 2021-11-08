@@ -15,19 +15,6 @@ public strictfp class Muckraker extends GenericRobot {
     public MapLocation[] surroundingLocationArray;
     public Direction nextMoveDir;
     boolean nextMoveDirSet = false;
-    public int xLean;
-    public int yLean;
-    public int dirIdx;
-    public final Direction[] directions = {
-            Direction.NORTH,
-            Direction.NORTHEAST,
-            Direction.EAST,
-            Direction.SOUTHEAST,
-            Direction.SOUTH,
-            Direction.SOUTHWEST,
-            Direction.WEST,
-            Direction.NORTHWEST,
-    };
 
     /**
      * constructor
@@ -64,7 +51,9 @@ public strictfp class Muckraker extends GenericRobot {
                     }
                 } else if (robot.getType() == RobotType.ENLIGHTENMENT_CENTER) { // Enemy enlightenment center
                     enemyECLocation = robot.getLocation();
-                    determineNextMoveDir(enemyECLocation);
+                    nextMoveDir = Direction.EAST;
+//                    nextMoveDir = robot.location.directionTo(enemyECLocation);
+//                    determineNextMoveDir(enemyECLocation);
 //                    nextMove(enemyECLocation);
                 }
 //                else {
@@ -85,10 +74,13 @@ public strictfp class Muckraker extends GenericRobot {
                 if (rc.canGetFlag(robot.getID())){
                     // Get the Flag
                     flagSensed = rc.getFlag(robot.getID());
+                    if(robot.getType() == RobotType.ENLIGHTENMENT_CENTER){
+                        nextMoveDir = Direction.EAST;
+                    }
                     // Decode the Flag
                     // yet to implement...
                     // Flag about Neutral EC
-                    if(flagSensed == NEUTRAL_ENLIGHTENMENT_CENTER_FLAG){
+                    else if(flagSensed == NEUTRAL_ENLIGHTENMENT_CENTER_FLAG){
                         rc.setFlag(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG);
                     }
                     // Flag about Enemy Slanderer
@@ -111,53 +103,31 @@ public strictfp class Muckraker extends GenericRobot {
         }
     }
 
-    private void determineNextMoveDir(MapLocation enemyLocation) throws GameActionException {
-//        // North
-//        MapLocation N = new MapLocation(enemyLocation.x, enemyLocation.y-1);
-//        // East
-//        MapLocation E = new MapLocation(enemyLocation.x+1, enemyLocation.y);
-//        // South
-//        MapLocation S = new MapLocation(enemyLocation.x, enemyLocation.y+1);
-//        // West
-//        MapLocation W = new MapLocation(enemyLocation.x-1, enemyLocation.y);
-//        // NorthEast
-//        MapLocation NE = new MapLocation(enemyLocation.x+1, enemyLocation.y-1);
-//        // SouthEast
-//        MapLocation SE = new MapLocation(enemyLocation.x+1, enemyLocation.y+1);
-//        // SouthWest
-//        MapLocation SW = new MapLocation(enemyLocation.x-1, enemyLocation.y+1);
-//        // NorthWest
-//        MapLocation NW = new MapLocation(enemyLocation.x-1, enemyLocation.y-1);
-//
-//        surroundingLocationArray = new MapLocation[]{N, E, S, W, NE, SE, SW, NW};
-//        if (rc.canDetectLocation(N) && !rc.isLocationOccupied(N)) {
-//
+//    private void determineNextMoveDir(MapLocation enemyLocation) throws GameActionException {
+//        MapLocation myLocation = rc.getLocation();
+//        int x = myLocation.x - enemyLocation.x;
+//        int y = myLocation.y - enemyLocation.y;
+//        if(x == 0) {
+//            if(y > 0)
+//                nextMoveDir = Direction.SOUTH;
+//            if(y < 0)
+//                nextMoveDir = Direction.NORTH;
+//        } else if(y == 0) {
+//            if(x > 0)
+//                nextMoveDir = Direction.WEST;
+//            if(x < 0)
+//                nextMoveDir = Direction.EAST;
+//        } else if(x > 0 && y > 0) {
+//            nextMoveDir = Direction.SOUTHWEST;
+//        } else if(x > 0 && y < 0) {
+//            nextMoveDir = Direction.NORTHWEST;
+//        } else if(x < 0 && y < 0) {
+//            nextMoveDir = Direction.NORTHEAST;
+//        } else if(x < 0 && y > 0) {
+//            nextMoveDir = Direction.SOUTHEAST;
+//        } else {
+//            nextMoveDir = randomDirection();
 //        }
-
-        MapLocation myLocation = rc.getLocation();
-        int x = myLocation.x - enemyLocation.x;
-        int y = myLocation.y - enemyLocation.y;
-        if(x == 0) {
-            if(y > 0)
-                nextMoveDir = Direction.SOUTH;
-            if(y < 0)
-                nextMoveDir = Direction.NORTH;
-        } else if(y == 0) {
-            if(x > 0)
-                nextMoveDir = Direction.WEST;
-            if(x < 0)
-                nextMoveDir = Direction.EAST;
-        } else if(x > 0 && y > 0) {
-            nextMoveDir = Direction.SOUTHWEST;
-        } else if(x > 0 && y < 0) {
-            nextMoveDir = Direction.NORTHWEST;
-        } else if(x < 0 && y < 0) {
-            nextMoveDir = Direction.NORTHEAST;
-        } else if(x < 0 && y > 0) {
-            nextMoveDir = Direction.SOUTHEAST;
-        } else {
-            nextMoveDir = randomDirection();
-        }
-
-    }
+//
+//    }
 }
