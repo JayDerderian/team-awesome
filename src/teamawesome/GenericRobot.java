@@ -50,44 +50,40 @@ abstract public class GenericRobot {
      *
      * @return Integer
      */
-    protected Integer makeFlag(int type, int flag, int conv) {
+    protected Integer makeFlag(int flag, int conv) {
         int newFlag = 0;
         String pw = Integer.toString(PASSWORD);
         // 3 digit flags
-        if (type == ALERT){
-            if (flag == NEED_HELP){
-                String nh = Integer.toString(NEED_HELP);
-                String flagStr = pw + nh;
-                newFlag = Integer.parseInt(flagStr);
-            }
-            else if (flag == GO_HERE){
-                String gh = Integer.toString(GO_HERE);
-                String flagStr = pw + gh;
-                newFlag = Integer.parseInt(flagStr);
-            }
-            else if (flag == NEUTRAL_ENLIGHTENMENT_CENTER_FLAG){
-                String nec = Integer.toString(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG);
-                String flagStr = pw + nec;
-                newFlag = Integer.parseInt(flagStr);
-            }
+        if (flag == NEED_HELP){
+            String nh = Integer.toString(NEED_HELP);
+            String flagStr = pw + nh;
+            newFlag = Integer.parseInt(flagStr);
+        }
+        else if (flag == GO_HERE){
+            String gh = Integer.toString(GO_HERE);
+            String flagStr = pw + gh;
+            newFlag = Integer.parseInt(flagStr);
+        }
+        else if (flag == NEUTRAL_ENLIGHTENMENT_CENTER_FLAG){
+            String nec = Integer.toString(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG);
+            String flagStr = pw + nec;
+            newFlag = Integer.parseInt(flagStr);
         }
         // 5 digit flags
-        else if (type == ENEMY_INFO){
-            if(flag == ENEMY_POLITICIAN_FLAG){
-                String EF = Integer.toString(ENEMY_POLITICIAN_FLAG + conv);
-                String flagStr = pw + EF;
-                newFlag = Integer.parseInt(flagStr);
-            }
-            else if(flag == ENEMY_SLANDERER_NEARBY_FLAG){
-                String EF = Integer.toString(ENEMY_SLANDERER_NEARBY_FLAG + conv);
-                String flagStr = pw + EF;
-                newFlag = Integer.parseInt(flagStr);
-            }
-            else if (flag == ENEMY_ENLIGHTENMENT_CENTER_FLAG){
-                String EF = Integer.toString(ENEMY_ENLIGHTENMENT_CENTER_FLAG + conv);
-                String flagStr = pw + EF;
-                newFlag = Integer.parseInt(flagStr);
-            }
+        else if(flag == ENEMY_POLITICIAN_FLAG){
+            String EF = Integer.toString(ENEMY_POLITICIAN_FLAG + conv);
+            String flagStr = pw + EF;
+            newFlag = Integer.parseInt(flagStr);
+        }
+        else if(flag == ENEMY_SLANDERER_NEARBY_FLAG){
+            String EF = Integer.toString(ENEMY_SLANDERER_NEARBY_FLAG + conv);
+            String flagStr = pw + EF;
+            newFlag = Integer.parseInt(flagStr);
+        }
+        else if (flag == ENEMY_ENLIGHTENMENT_CENTER_FLAG){
+            String EF = Integer.toString(ENEMY_ENLIGHTENMENT_CENTER_FLAG + conv);
+            String flagStr = pw + EF;
+            newFlag = Integer.parseInt(flagStr);
         }
         // Uh oh!!
         if(newFlag == 0){
@@ -193,7 +189,7 @@ abstract public class GenericRobot {
          *
          * remove trailing digits by using n /= 10^(n-k), where n is total number of digits,
          * and k is the number of digits to remove. since n is unknown until we actually get a
-         * flag, we have to count the total digits since our flags are either 3 or 5 digits long
+         * flag, we'll have to count the total digits since our flags are either 3 or 5 digits long
          *
          * ideally body will either equal 10 or 1000
          *

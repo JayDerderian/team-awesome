@@ -11,13 +11,11 @@ public interface FlagConstants {
     static final int PASSWORD = 11;
 
     // Alerts
-    static final int ALERT = 0; // used to determine which type of flag to make
     static final int NEUTRAL_ENLIGHTENMENT_CENTER_FLAG = 1;
     static final int NEED_HELP = 2;
     static final int GO_HERE = 3;
 
     // Detected Enemy Robot Flags
-    static final int ENEMY_INFO = 1;  // used to determine which type of flag to make
     static final int ENEMY_POLITICIAN_FLAG = 100;
     static final int ENEMY_SLANDERER_NEARBY_FLAG = 200;
     static final int ENEMY_MUCKRAKER_NEARBY_FLAG = 300;
