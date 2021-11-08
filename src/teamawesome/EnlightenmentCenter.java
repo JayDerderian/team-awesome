@@ -8,7 +8,6 @@ public class EnlightenmentCenter extends GenericRobot{
      * Enlightenment Center Variables
      */
     public String robotStatement = "I'm an " + rc.getType() + "! Location " + rc.getLocation();
-    protected static final int RUSH = 300;
 
     public EnlightenmentCenter(RobotController newRc) {
         super(newRc);
@@ -53,15 +52,8 @@ public class EnlightenmentCenter extends GenericRobot{
 
         //Check the bidding conditions.
         double toBid = Math.pow((round - 0.7), 5) + Math.pow((round - 0.2), 3) + 0.2;
-        if(rc.canBid((int)toBid)){
+        if(rc.canBid((int)toBid))
             rc.bid((int)toBid);
-            System.out.println("And I did!");
-        } else if((int)toBid > myInfluence) {
-            System.out.println("But I only have " + myInfluence);
-            if(round % 10 == 0) {
-                rc.bid(myInfluence / 9);
-            }
-        }
     }
     /**
      * Returns a random spawnable RobotType
