@@ -52,9 +52,8 @@ public class EnlightenmentCenter extends GenericRobot{
 
         //Check the bidding conditions.
         double toBid = Math.pow((round - 0.7), 5) + Math.pow((round - 0.2), 3) + 0.2;
-        if(rc.canBid((int)toBid)){
+        if(rc.canBid((int)toBid))
             rc.bid((int)toBid);
-        }
     }
     /**
      * Returns a random spawnable RobotType
