@@ -10,7 +10,11 @@ public strictfp class Muckraker extends GenericRobot {
     public String robotStatement = "I'm a " + rc.getType() + "! Location " + rc.getLocation();
     public boolean exposedSuccess = false;
     public MapLocation neutralLocation;
-    public int flagSensed = 00000;
+    public int flagSensed = 00000; // initial value = flag not set
+    public MapLocation enemyECLocation;
+    public MapLocation[] surroundingLocationArray;
+    public Direction nextMoveDir;
+    boolean nextMoveDirSet = false;
 
     /**
      * constructor
@@ -34,6 +38,7 @@ public strictfp class Muckraker extends GenericRobot {
         // 1. Sense Every Robot (max actionRadiusSquared)
         for (RobotInfo robot : rc.senseNearbyRobots()) {
             exposedSuccess = false;
+            nextMoveDirSet = false;
             // ENEMY
             if(robot.getTeam() == enemy){
                 if (robot.type.canBeExposed()) {
@@ -44,6 +49,11 @@ public strictfp class Muckraker extends GenericRobot {
                         rc.expose(robot.location);
                         return;
                     }
+                } else if (robot.getType() == RobotType.ENLIGHTENMENT_CENTER) { // Enemy enlightenment center
+                    enemyECLocation = robot.getLocation();
+                    determineNextMoveDir(enemyECLocation);
+                } else {
+                    determineNextMoveDir(robot.getLocation());
                 }
             }
             // NEUTRAL EC
@@ -75,10 +85,62 @@ public strictfp class Muckraker extends GenericRobot {
         }
 
         // 2. Muckraker move --> toward Enemy slanderer (or) random direction
-        if(DetectEnemySlanderer){
+        if(nextMoveDirSet){
+          tryMove(nextMoveDir);
+        } else if(DetectEnemySlanderer){
              tryMove(detectedDirection);
         } else if (tryMove(randomDirection())){
             System.out.println("I moved!");
         }
+    }
+
+    private void determineNextMoveDir(MapLocation enemyLocation) throws GameActionException {
+//        // North
+//        MapLocation N = new MapLocation(enemyLocation.x, enemyLocation.y-1);
+//        // East
+//        MapLocation E = new MapLocation(enemyLocation.x+1, enemyLocation.y);
+//        // South
+//        MapLocation S = new MapLocation(enemyLocation.x, enemyLocation.y+1);
+//        // West
+//        MapLocation W = new MapLocation(enemyLocation.x-1, enemyLocation.y);
+//        // NorthEast
+//        MapLocation NE = new MapLocation(enemyLocation.x+1, enemyLocation.y-1);
+//        // SouthEast
+//        MapLocation SE = new MapLocation(enemyLocation.x+1, enemyLocation.y+1);
+//        // SouthWest
+//        MapLocation SW = new MapLocation(enemyLocation.x-1, enemyLocation.y+1);
+//        // NorthWest
+//        MapLocation NW = new MapLocation(enemyLocation.x-1, enemyLocation.y-1);
+//
+//        surroundingLocationArray = new MapLocation[]{N, E, S, W, NE, SE, SW, NW};
+//        if (rc.canDetectLocation(N) && !rc.isLocationOccupied(N)) {
+//
+//        }
+
+        MapLocation myLocation = rc.getLocation();
+        int x = myLocation.x - enemyLocation.x;
+        int y = myLocation.y - enemyLocation.y;
+        if(x == 0) {
+            if(y > 0)
+                nextMoveDir = Direction.SOUTH;
+            if(y < 0)
+                nextMoveDir = Direction.NORTH;
+        } else if(y == 0) {
+            if(x > 0)
+                nextMoveDir = Direction.WEST;
+            if(x < 0)
+                nextMoveDir = Direction.EAST;
+        } else if(x > 0 && y > 0) {
+            nextMoveDir = Direction.SOUTHWEST;
+        } else if(x > 0 && y < 0) {
+            nextMoveDir = Direction.NORTHWEST;
+        } else if(x < 0 && y < 0) {
+            nextMoveDir = Direction.NORTHEAST;
+        } else if(x < 0 && y > 0) {
+            nextMoveDir = Direction.SOUTHEAST;
+        } else {
+            nextMoveDir = randomDirection();
+        }
+
     }
 }
