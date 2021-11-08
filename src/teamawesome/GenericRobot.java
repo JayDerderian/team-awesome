@@ -165,10 +165,10 @@ abstract public class GenericRobot {
                 res.put(ENEMY_POLITICIAN_FLAG, info.getLocation());
             // enemy slanderer!
             else if(flag/100 == 2)
-                res.put(ENEMY_POLITICIAN_FLAG, info.getLocation());
+                res.put(ENEMY_SLANDERER_NEARBY_FLAG, info.getLocation());
             // enemy muckraker!
             else if (flag/100 == 3)
-                res.put(ENEMY_POLITICIAN_FLAG, info.getLocation());
+                res.put(ENEMY_MUCKRAKER_NEARBY_FLAG, info.getLocation());
             else
                 res.put(ERROR, rc.getLocation());
         }
@@ -199,9 +199,8 @@ abstract public class GenericRobot {
          *
          */
         int firstTwo = flag / (int) Math.pow(10,(len-2));
-        if (firstTwo != PASSWORD){
+        if (firstTwo != PASSWORD)
             return false;
-        }
         return true;
     }
 
