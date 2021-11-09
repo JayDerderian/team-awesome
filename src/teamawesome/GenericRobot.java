@@ -50,9 +50,9 @@ abstract public class GenericRobot {
      *
      * @return Integer
      */
-    protected Integer makeFlag(int flag, int conv) {
-        int newFlag = 0;
+    public int makeFlag(int flag, int conv) {
         String pw = Integer.toString(PASSWORD);
+        int newFlag = 0;
         // 3 digit flags
         if (flag == NEED_HELP){
             String nh = Integer.toString(NEED_HELP);
@@ -80,14 +80,10 @@ abstract public class GenericRobot {
             String flagStr = pw + EF;
             newFlag = Integer.parseInt(flagStr);
         }
-        else if (flag == ENEMY_ENLIGHTENMENT_CENTER_FLAG){
+        else if (flag == ENEMY_ENLIGHTENMENT_CENTER_FLAG) {
             String EF = Integer.toString(ENEMY_ENLIGHTENMENT_CENTER_FLAG + conv);
             String flagStr = pw + EF;
             newFlag = Integer.parseInt(flagStr);
-        }
-        // Uh oh!!
-        if(newFlag == 0){
-            return ERROR;
         }
         return newFlag;
     }
@@ -106,7 +102,7 @@ abstract public class GenericRobot {
      * @param id
      * @return HashTable
      **/
-    protected Hashtable<Integer, MapLocation> retrieveFlag (int id) throws GameActionException {
+    public Hashtable<Integer, MapLocation> retrieveFlag (int id) throws GameActionException {
         // hash table containing all flag info.
         // see FlagConstants.java for a breakdown on entries.
         Hashtable<Integer, MapLocation> res = new Hashtable<>();
@@ -116,7 +112,7 @@ abstract public class GenericRobot {
             int flag = rc.getFlag(info.getID());
             // make sure this is one of ours!
             if(isOurs(flag))
-                return parseFlag(info, flag);
+                res = parseFlag(info, flag);
             else{
                 // add our own location since the table requires a MapLocation
                 System.out.println("Could not retrieve flag!");
@@ -130,15 +126,15 @@ abstract public class GenericRobot {
         return res;
     }
 
-    protected Hashtable <Integer, MapLocation> parseFlag(RobotInfo info, int flagOrig){
+    public Hashtable <Integer, MapLocation> parseFlag(RobotInfo info, int flagOrig){
         Hashtable<Integer, MapLocation> res = new Hashtable<>();
-        int len = countDigis(flagOrig);
         // NOTE: this is redundant if parseFlag is called from retrieveFlag
         // this is here in case parseFlag is called separately.
         if (!isOurs(flagOrig)) {
-            res.put(ERROR, rc.getLocation());
+            res.put(ERROR, info.getLocation());
             return res;
         }
+        int len = countDigis(flagOrig);
         // this is an alert!
         if (len == 3){
             // remove first two digits, then test against constants
@@ -148,7 +144,7 @@ abstract public class GenericRobot {
             else if (flag == NEED_HELP)
                 res.put(NEED_HELP, info.getLocation());
             else
-                res.put(ERROR, rc.getLocation());
+                res.put(ERROR, info.getLocation());
         }
         // this is enemy info!
         else if (len == 5){
@@ -166,19 +162,19 @@ abstract public class GenericRobot {
             else if (flag/100 == 3)
                 res.put(ENEMY_MUCKRAKER_NEARBY_FLAG, info.getLocation());
             else
-                res.put(ERROR, rc.getLocation());
+                res.put(ERROR, info.getLocation());
         }
         return res;
     }
 
     // Lil' helpers
-    private Integer countDigis(int number){
+    protected Integer countDigis(int number){
         int count = 0;
         for(; number !=0; number/=10, ++count){}
         return count;
     }
 
-    private Boolean isOurs(int flag){
+    protected Boolean isOurs(int flag){
         int len = countDigis(flag);
         if (len > 5 || len == 4 || len < 3) {
             System.out.print("Not one of our flags!");
