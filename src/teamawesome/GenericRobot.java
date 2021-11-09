@@ -168,13 +168,13 @@ abstract public class GenericRobot {
     }
 
     // Lil' helpers
-    protected Integer countDigis(int number){
+    public Integer countDigis(int number){
         int count = 0;
         for(; number !=0; number/=10, ++count){}
         return count;
     }
 
-    protected Boolean isOurs(int flag){
+    public Boolean isOurs(int flag){
         int len = countDigis(flag);
         if (len > 5 || len == 4 || len < 3) {
             System.out.print("Not one of our flags!");

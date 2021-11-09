@@ -37,6 +37,26 @@ public class GenericBotTest {
     RobotInfo[] teamRobotInfoArray = { teamBot1, teamBot2, teamBot3, teamBot4 };
 
 
+    //--------------------------------------TEST HELPERS-----------------------------------------//
+    // NOTE: These should not be called directly! They're used by the
+
+    @Test
+    public void testDigitCounter(){
+        RobotController rc = mock(RobotController.class);
+        Politician testBot = new Politician(rc);
+        int test = 11111;
+        int total = testBot.countDigis(test);
+        assertEquals(total, 5);
+    }
+
+    @Test
+    public void testIsOurs(){
+        RobotController rc = mock(RobotController.class);
+        Politician testBot = new Politician(rc);
+        assertTrue(testBot.isOurs(11400));
+    }
+
+
     //-------------------------------------FLAG GENERATION---------------------------------------//
 
     /*
@@ -45,7 +65,7 @@ public class GenericBotTest {
      */
 
     @Test
-    public void canMakeFlagOnOwn(){
+    public void canMakeFlag(){
         RobotController rc = mock(RobotController.class);
         Politician testBot = new Politician(rc);
         int test = 11400;
@@ -66,16 +86,6 @@ public class GenericBotTest {
 //        assertEquals(testFlag, newFlag);
 //    }
 
-    @Test
-    public void canMakeFlagAfterFindingNeutralEC() throws GameActionException{
-        RobotController rc = mock(RobotController.class);
-        Politician testBot = new Politician(rc);
-        // Sense neutral EC
-        RobotInfo neutralEc = rc.senseRobot(enemy4.getID());
-        int test = 111;
-        int testFlag = testBot.makeFlag(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG, 0);
-        assertEquals(test, testFlag);
-    }
 
 
     //--------------------------------------FLAG PARSING-----------------------------------------//
@@ -96,36 +106,35 @@ public class GenericBotTest {
         Politician testBot1 = new Politician(rc1);
         Politician testBot2 = new Politician(rc2);
 
-        int baseFlag = 111;                    // "Neutral EC found!"
-        int bot2ID = rc2.getID();
+        int baseFlag = 111;  // "Neutral EC found!"
         rc2.setFlag(testBot2.makeFlag(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG, 0));
 
         Hashtable<Integer, MapLocation> res;
 
         RobotInfo friendlyBot = rc1.senseRobot(rc2.getID());
         int friendlyFlag = rc1.getFlag(rc2.getID());
-        res = testBot1.parseFlag(friendlyBot, friendlyFlag);
+        res = testBot1.parseFlag(friendlyBot, friendlyFlag);    //Getting a null pointer exception here!!
 
         assertTrue(res.containsKey(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG));
     }
 
 
     @Test
-    public void canDetectFriendlyFlagUsingRetrieveFlagMethod() throws GameActionException{
+    public void canRetrieveFlag() throws GameActionException{
         RobotController rc1 = mock(RobotController.class);
         RobotController rc2 = mock(RobotController.class);
 
         Politician testBot1 = new Politician(rc1);
         EnlightenmentCenter testBot2 = new EnlightenmentCenter(rc2);
 
-        Hashtable<Integer, MapLocation> res = new Hashtable<>();
+        Hashtable<Integer, MapLocation> res;
 
         // set friendly's flag to something recognizable
-        int baseFlag = 11400; // "Neutral EC found!"
+        int baseFlag = 11400; // "Enemy EC found!"
         rc2.setFlag(testBot2.makeFlag(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG, 0));
 
         // attempt to retrieve friendly flag
-        res = testBot1.retrieveFlag(rc2.getID());
+        res = testBot1.retrieveFlag(rc2.getID());              //Getting a null pointer exception here!!
 
         // if we got the friendly's location, then maybe this worked...
         MapLocation neutralECLoc = res.get(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG);
