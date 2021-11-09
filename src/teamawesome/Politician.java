@@ -1,7 +1,6 @@
 package teamawesome;
 import battlecode.common.*;
 
-import javax.xml.stream.Location;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package examplefuncsplayer;
+package muck_rush;
 import battlecode.common.*;
 
 public strictfp class RobotPlayer {
@@ -65,7 +65,7 @@ public strictfp class RobotPlayer {
         RobotType toBuild;
         // build only slanderers for the first SLAN_RUSH rounds
         if(rc.getRoundNum() < SLAN_RUSH) {
-            toBuild = RobotType.SLANDERER;
+            toBuild = RobotType.MUCKRAKER;
         } else {
             toBuild = randomSpawnableRobotType();
         }
