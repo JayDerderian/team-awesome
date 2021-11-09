@@ -17,10 +17,11 @@ public class EnlightenmentCenter extends GenericRobot{
     public void turn() throws GameActionException {
         RobotType toBuild = randomSpawnableRobotType();
         int round = rc.getRoundNum();
+        double inf = Math.pow((round *.01), 2) + 1;
         for (Direction dir : teamawesome.RobotPlayer.directions) {
-            if (rc.canBuildRobot(toBuild, dir, round)) {
-                System.out.println("Building a " + toBuild + " in the " + dir + " direction!");
-                rc.buildRobot(toBuild, dir, (round/2 + 2));
+            if (rc.canBuildRobot(toBuild, dir, (int)inf)) {
+                System.out.println("Building a " + toBuild + " in the " + dir + " direction with " + inf + " influence!");
+                rc.buildRobot(toBuild, dir, (int)inf);
             }
         }
 
@@ -51,9 +52,13 @@ public class EnlightenmentCenter extends GenericRobot{
         }
 
         //Check the bidding conditions.
-        double toBid = Math.pow((round - 0.7), 5) + Math.pow((round - 0.2), 3) + 0.2;
-        if(rc.canBid((int)toBid))
-            rc.bid((int)toBid);
+        double toBid = Math.pow((round *.03), 2)/20;
+        if(round % 20 == 0){
+            if(rc.canBid((int)toBid)){
+                System.out.println("Round " + round + " bidding " + toBid);
+                rc.bid((int)toBid);
+            }
+        }
     }
     /**
      * Returns a random spawnable RobotType
