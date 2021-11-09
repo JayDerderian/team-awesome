@@ -122,7 +122,8 @@ public class Politician extends GenericRobot {
                     dirWeight += 1;
                 }
             } else {
-                dirWeight -= 0.5;
+                if(robot.getType() != RobotType.POLITICIAN)
+                    dirWeight -= 0.5;
                 if(robot.getType() == RobotType.ENLIGHTENMENT_CENTER) mothership = robot.getID();
             }
             locations.put(robotDirection, dirWeight);
