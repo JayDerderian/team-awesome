@@ -21,6 +21,7 @@ public strictfp class Muckraker extends GenericRobot {
     public Direction nextMoveDir;
     boolean nextMoveDirSet = false;
     HashMap<Direction, Integer> mapDirectionNum = new HashMap<>();
+    MapLocation homeECLocation;
 
     /**
      * constructor
@@ -44,6 +45,7 @@ public strictfp class Muckraker extends GenericRobot {
      * @throws GameActionException
      */
     public void turn() throws GameActionException {
+        homeECLocation = rc.getLocation();
         System.out.println(robotStatement);
 
         Team enemy = rc.getTeam().opponent();
