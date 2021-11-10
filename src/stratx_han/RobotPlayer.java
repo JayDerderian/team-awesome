@@ -23,6 +23,7 @@ import teamawesome.Slanderer;
  */
 
 public strictfp class RobotPlayer {
+    public static final int BID_START = 600;
     static RobotController rc;
 
     static final RobotType[] spawnableRobot = {
@@ -109,7 +110,7 @@ public strictfp class RobotPlayer {
         }
         int toBid = (int)(0.05 * rc.getInfluence());
         // don't bid before the mid game
-        if(rc.canBid(toBid) && rc.getRoundNum() > 750) rc.bid(toBid);
+        if(rc.canBid(toBid) && rc.getRoundNum() > BID_START) rc.bid(toBid);
     }
 
     static void runPolitician() throws GameActionException {
