@@ -19,9 +19,21 @@ public class Politician extends GenericRobot {
     public String robotStatement = "I'm a " + rc.getType() + "! Location " + rc.getLocation();
     public boolean empowered;
     LinkedList<Integer> rolodex;
+    boolean juggernaut; // juggernaut Politicians will ignore all enemies and focus on neutral ECs
 
     public Politician(RobotController newRc) {
         super(newRc);
+        setup();
+        juggernaut = false;
+    }
+
+    public Politician(RobotController newRc, boolean juggernautStatus) {
+        super(newRc);
+        setup();
+        juggernaut = juggernautStatus;
+    }
+
+    private void setup() {
         empowered = false;
         history = new LinkedList<>();
         // initialize momentum to 0 in all directions
@@ -47,7 +59,7 @@ public class Politician extends GenericRobot {
         Team enemy = rc.getTeam().opponent();
         int actionRadius = rc.getType().actionRadiusSquared;
         RobotInfo[] attackable = rc.senseNearbyRobots(actionRadius, enemy);
-        if (attackable.length != 0 && rc.canEmpower(actionRadius)) {
+        if (attackable.length != 0 && rc.canEmpower(actionRadius) && !juggernaut) {
             System.out.println("empowering...");
             rc.empower(actionRadius);
             System.out.println("empowered");
