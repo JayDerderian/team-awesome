@@ -1,0 +1,1 @@
+{"team-awesome.main":{"name":"team-awesome.main","packages":{"teamawesome":{"packageName":"teamawesome","isAll":false,"classes":["Lteamawesome.FlagConstants","Lteamawesome.Politician","Lteamawesome.EnlightenmentCenter","Lteamawesome.Slanderer","Lteamawesome.RobotPlayer","Lteamawesome.GenericRobot","Lteamawesome.Muckraker"]}}}}
