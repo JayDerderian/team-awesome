@@ -4,6 +4,7 @@ import static teamawesome.FlagConstants.*;
 import battlecode.common.*;
 import scala.Int;
 
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.lang.Math;
 
@@ -80,6 +81,11 @@ abstract public class GenericRobot {
             String flagStr = pw + EF;
             newFlag = Integer.parseInt(flagStr);
         }
+        else if(flag == ENEMY_MUCKRAKER_NEARBY_FLAG){
+            String EF = Integer.toString(ENEMY_MUCKRAKER_NEARBY_FLAG + conv);
+            String flagStr = pw + EF;
+            newFlag = Integer.parseInt(flagStr);
+        }
         else if (flag == ENEMY_ENLIGHTENMENT_CENTER_FLAG) {
             String EF = Integer.toString(ENEMY_ENLIGHTENMENT_CENTER_FLAG + conv);
             String flagStr = pw + EF;
@@ -102,10 +108,10 @@ abstract public class GenericRobot {
      * @param id
      * @return HashTable
      **/
-    public Hashtable<Integer, MapLocation> retrieveFlag (int id) throws GameActionException {
+    public HashMap<Integer, MapLocation> retrieveFlag (RobotController rc, int id) throws GameActionException {
         // hash table containing all flag info.
         // see FlagConstants.java for a breakdown on entries.
-        Hashtable<Integer, MapLocation> res = new Hashtable<>();
+        HashMap<Integer, MapLocation> res = new HashMap<>();
         // try to get flag from a given bot
         if (rc.canSenseRobot(id)) {
             RobotInfo info = rc.senseRobot(id);
@@ -120,19 +126,20 @@ abstract public class GenericRobot {
             }
         }
         else{
-            System.out.println("Could not retrieve flag!");
+            System.out.println("Could not sense bot from given ID!");
             res.put(ERROR, rc.getLocation());
         }
         return res;
     }
 
-    public Hashtable <Integer, MapLocation> parseFlag(RobotInfo info, int flagOrig){
-        Hashtable<Integer, MapLocation> res = new Hashtable<>();
+    public HashMap<Integer, MapLocation> parseFlag(RobotInfo info, int flagOrig){
+        HashMap<Integer, MapLocation> res = new HashMap<>();
         // NOTE: this is redundant if parseFlag is called from retrieveFlag
         // this is here in case parseFlag is called separately.
         if (!isOurs(flagOrig)) {
-            res.put(ERROR, info.getLocation());
-            return res;
+            System.out.println("Was not our flag!");
+            res.put(ERROR, info.getLocation());      // Getting null pointer exception here?? is the RobotInfo info
+            return res;                              // object null??
         }
         int len = countDigis(flagOrig);
         // this is an alert!
