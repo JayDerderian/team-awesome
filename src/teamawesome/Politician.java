@@ -53,7 +53,15 @@ public class Politician extends GenericRobot {
     public void turn() throws GameActionException {
         // check mothership for flag value
         rc.setFlag(0);
-        if(mothership != -1) homeFlag = rc.getFlag(mothership);
+        // read mothership flag
+        if(mothership != -1) {
+            try{
+                homeFlag = rc.getFlag(mothership);
+            } catch(GameActionException e) {
+                // if cannot read mothership flag, the mothership EC is dead
+                homeFlag = -1;
+            }
+        }
         System.out.println("I'm a politician! My mothership is " + mothership + " and their flag is " + homeFlag);
         checkRolodex();
         Team enemy = rc.getTeam().opponent();
