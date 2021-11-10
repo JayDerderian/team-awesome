@@ -1,5 +1,10 @@
 package teamawesome;
 import battlecode.common.*;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import static teamawesome.FlagConstants.*;
 
 public strictfp class Muckraker extends GenericRobot {
@@ -15,6 +20,7 @@ public strictfp class Muckraker extends GenericRobot {
     public MapLocation[] surroundingLocationArray;
     public Direction nextMoveDir;
     boolean nextMoveDirSet = false;
+    HashMap<Direction, Integer> mapDirectionNum = new HashMap<>();
 
     /**
      * constructor
@@ -22,6 +28,15 @@ public strictfp class Muckraker extends GenericRobot {
      */
     public Muckraker(RobotController newRc) {
         super(newRc);
+        mapDirectionNum.put(Direction.NORTH, 0);
+        mapDirectionNum.put(Direction.EAST, 0);
+        mapDirectionNum.put(Direction.SOUTH, 0);
+        mapDirectionNum.put(Direction.WEST, 0);
+        mapDirectionNum.put(Direction.CENTER, 0); // map.get(key)
+        mapDirectionNum.put(Direction.NORTHEAST, 0);
+        mapDirectionNum.put(Direction.NORTHWEST, 0);
+        mapDirectionNum.put(Direction.SOUTHEAST, 0);
+        mapDirectionNum.put(Direction.SOUTHWEST, 0);
     }
 
     /**
@@ -34,15 +49,18 @@ public strictfp class Muckraker extends GenericRobot {
         Team enemy = rc.getTeam().opponent();
         boolean DetectEnemySlanderer = false;
         Direction detectedDirection = Direction.CENTER; // random value, change later
+        RobotInfo[] sensedNearByRobots =  rc.senseNearbyRobots();
 
         // 1. Sense Every Robot (max actionRadiusSquared)
-        for (RobotInfo robot : rc.senseNearbyRobots()) {
+        for (RobotInfo robot : sensedNearByRobots) {
             exposedSuccess = false;
-            nextMoveDirSet = false;
+//            nextMoveDirSet = false;
             // ENEMY
             if(robot.getTeam() == enemy){
                 if (robot.type.canBeExposed()) {
                     // It's a slanderer... go get them!
+                    Direction enemySlandererDir = robot.location.directionTo(robot.location);
+                    mapDirectionNum.computeIfPresent(enemySlandererDir, (k, v) -> v + 1);
                     if (rc.canExpose(robot.location)) {
                         exposedSuccess = true;
                         System.out.println("e x p o s e d");
@@ -50,8 +68,9 @@ public strictfp class Muckraker extends GenericRobot {
                         return;
                     }
                 } else if (robot.getType() == RobotType.ENLIGHTENMENT_CENTER) { // Enemy enlightenment center
-                    enemyECLocation = robot.getLocation();
-                    nextMoveDir = Direction.EAST;
+                    Direction enemyECDir = robot.location.directionTo(robot.getLocation());
+                    mapDirectionNum.computeIfPresent(enemyECDir, (k, v) -> v + 2);
+//                    nextMoveDir = Direction.EAST;
 //                    nextMoveDir = robot.location.directionTo(enemyECLocation);
 //                    determineNextMoveDir(enemyECLocation);
 //                    nextMove(enemyECLocation);
@@ -75,16 +94,16 @@ public strictfp class Muckraker extends GenericRobot {
                     // Get the Flag
                     flagSensed = rc.getFlag(robot.getID());
                     if(robot.getType() == RobotType.ENLIGHTENMENT_CENTER){
-                        nextMoveDir = Direction.EAST;
+                        // decode what our EC is saying.
                     }
                     // Decode the Flag
                     // yet to implement...
                     // Flag about Neutral EC
-                    else if(flagSensed == NEUTRAL_ENLIGHTENMENT_CENTER_FLAG){
-                        rc.setFlag(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG);
-                    }
+//                    if(flagSensed == NEUTRAL_ENLIGHTENMENT_CENTER_FLAG){
+//                        rc.setFlag(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG);
+//                    }
                     // Flag about Enemy Slanderer
-                    else if(flagSensed == ENEMY_SLANDERER_NEARBY_FLAG){
+                    if(flagSensed == ENEMY_SLANDERER_NEARBY_FLAG){
                         DetectEnemySlanderer = true;
                         // decode their location
                         // set own flag value
@@ -94,40 +113,43 @@ public strictfp class Muckraker extends GenericRobot {
         }
 
         // 2. Muckraker move --> toward Enemy slanderer (or) random direction
-        if(nextMoveDirSet){
-          tryMove(nextMoveDir);
-        } else if(DetectEnemySlanderer){
-             tryMove(detectedDirection);
+        Direction popularMapDir = getPopularMapDirection();
+        if (tryMove(popularMapDir)){
+            System.out.println("I moved!");
         } else if (tryMove(randomDirection())){
             System.out.println("I moved!");
         }
+        resetMapDirNum();
+
+//        if(nextMoveDirSet){
+////          tryMove(nextMoveDir);
+//            tryMove(Direction.EAST);
+//        } else if(DetectEnemySlanderer){
+////             tryMove(detectedDirection);
+//            tryMove(Direction.EAST);
+//        }
+//        else if (tryMove(Direction.EAST)){
+//            System.out.println("I moved!");
+//        }
+//        else if (tryMove(randomDirection())){
+//            System.out.println("I moved!");
+//        }
     }
 
-//    private void determineNextMoveDir(MapLocation enemyLocation) throws GameActionException {
-//        MapLocation myLocation = rc.getLocation();
-//        int x = myLocation.x - enemyLocation.x;
-//        int y = myLocation.y - enemyLocation.y;
-//        if(x == 0) {
-//            if(y > 0)
-//                nextMoveDir = Direction.SOUTH;
-//            if(y < 0)
-//                nextMoveDir = Direction.NORTH;
-//        } else if(y == 0) {
-//            if(x > 0)
-//                nextMoveDir = Direction.WEST;
-//            if(x < 0)
-//                nextMoveDir = Direction.EAST;
-//        } else if(x > 0 && y > 0) {
-//            nextMoveDir = Direction.SOUTHWEST;
-//        } else if(x > 0 && y < 0) {
-//            nextMoveDir = Direction.NORTHWEST;
-//        } else if(x < 0 && y < 0) {
-//            nextMoveDir = Direction.NORTHEAST;
-//        } else if(x < 0 && y > 0) {
-//            nextMoveDir = Direction.SOUTHEAST;
-//        } else {
-//            nextMoveDir = randomDirection();
-//        }
-//
-//    }
+    private void resetMapDirNum() {
+        mapDirectionNum.replaceAll((k,v) -> 0);
+    }
+
+    private Direction getPopularMapDirection() {
+        int max = Collections.max(mapDirectionNum.values());
+        if(max !=0){
+            for (Map.Entry<Direction, Integer> entry : mapDirectionNum.entrySet()) {
+                if (entry.getValue()==max) {
+                    return entry.getKey();
+                }
+            }
+        }
+        return randomDirection();
+    }
+
 }
