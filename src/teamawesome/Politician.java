@@ -166,7 +166,7 @@ public class Politician extends GenericRobot {
      */
     private void checkPolitic(RobotInfo robot) throws GameActionException {
         int friendID = robot.getID();
-        getFlag(rc, friendID);
+        //retrieveFlag(rc, friendID);
         System.out.println("Found another politician! ID #" + friendID);
         if(!rolodex.contains(friendID)) rolodex.add(friendID);
     }
@@ -199,16 +199,18 @@ public class Politician extends GenericRobot {
             if(robot.getType() == RobotType.ENLIGHTENMENT_CENTER) {
                 dirWeight += 1;
                 // raise a flag that an EC has been found
-                rc.setFlag(makeFlag(rc, FlagConstants.ALERT, robot.getID()));
+                rc.setFlag(makeFlag(FlagConstants.NEUTRAL_ENLIGHTENMENT_CENTER_FLAG, robot.getID()));
             }
         } else {
             if(robot.getType() != RobotType.POLITICIAN)
                 dirWeight -= 0.5;
             else {
                 checkPolitic(robot);
-                Hashtable<Integer, Integer> flag = getFlag(rc, robot.getID());
+                HashMap<Integer, MapLocation> flag = retrieveFlag(rc, robot.getID());
                 // strongly prefer to travel toward politicians that have sighted a neutral EC
                 if(flag.containsKey(FlagConstants.NEUTRAL_ENLIGHTENMENT_CENTER_FLAG)) {
+                    System.out.println("An ally found a neutral EC! Location: " +
+                            flag.get(FlagConstants.NEUTRAL_ENLIGHTENMENT_CENTER_FLAG));
                     dirWeight += 5;
                 }
 
