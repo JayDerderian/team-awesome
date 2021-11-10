@@ -1,10 +1,8 @@
 package teamawesome;
 import battlecode.common.*;
+import com.sun.tools.doclint.Checker;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Politician
@@ -42,6 +40,7 @@ public class Politician extends GenericRobot {
      */
     public void turn() throws GameActionException {
         // check mothership for flag value
+        rc.setFlag(0);
         if(mothership != -1) homeFlag = rc.getFlag(mothership);
         System.out.println("I'm a politician! My mothership is " + mothership + " and their flag is " + homeFlag);
         checkRolodex();
@@ -175,12 +174,20 @@ public class Politician extends GenericRobot {
             dirWeight += 1;
             if(robot.getType() == RobotType.ENLIGHTENMENT_CENTER) {
                 dirWeight += 1;
+                // raise a flag that an EC has been found
+                rc.setFlag(makeFlag(rc, FlagConstants.ALERT, robot.getID()));
             }
         } else {
             if(robot.getType() != RobotType.POLITICIAN)
                 dirWeight -= 0.5;
             else {
                 checkPolitic(robot);
+                Hashtable<Integer, Integer> flag = getFlag(rc, robot.getID());
+                // strongly prefer to travel toward politicians that have sighted a neutral EC
+                if(flag.containsKey(FlagConstants.NEUTRAL_ENLIGHTENMENT_CENTER_FLAG)) {
+                    dirWeight += 5;
+                }
+
             }
             if(robot.getType() == RobotType.ENLIGHTENMENT_CENTER) mothership = robot.getID();
         }
@@ -193,15 +200,25 @@ public class Politician extends GenericRobot {
      */
     private void checkRolodex() throws GameActionException{
         System.out.println("Here is my rolodex:");
+        LinkedList<Integer> toRemove = new LinkedList<>();
         for (Integer id:
              rolodex) {
-            if(rc.canSenseRobot(id)) {
-                RobotInfo friend = rc.senseRobot(id);
-                System.out.println("ID #" + id + " at location " + friend.getLocation());
-            } else {
-                System.out.println("ID #" + id + " cannot be sensed!");
+            try {
+                int flag = rc.getFlag(id);
+                if(rc.canSenseRobot(id)) {
+                    RobotInfo friend = rc.senseRobot(id);
+                    System.out.println("ID #" + id + " at location " + friend.getLocation() + " with flag " + flag);
+                } else {
+                    System.out.println("ID #" + id + " with flag " + flag + " cannot be sensed!");
+                }
+            } catch(GameActionException e) { // the ID could not be found, meaning it's time to delete that entry
+                System.out.println("ID #" + id + " is dead!");
+                toRemove.add(id);
             }
-
+        }
+        for (Integer del:
+             toRemove) {
+            rolodex.remove(del);
         }
     }
 }

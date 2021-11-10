@@ -173,13 +173,21 @@ public strictfp class RobotPlayer {
      */
     static RobotType randomSpawnableRobotType() {
         int diceRoll = (int) (Math.random() * 10);
-        if(diceRoll == 2 || diceRoll == 4 || diceRoll == 6) {
-            return RobotType.MUCKRAKER;
+        if(rc.getRoundNum() < 600) {
+            if(diceRoll == 2 || diceRoll == 4 || diceRoll == 6) {
+                return RobotType.MUCKRAKER;
+            }
+            if(diceRoll % 2 == 0) {
+                return RobotType.SLANDERER;
+            }
+            return RobotType.POLITICIAN;
+        } else {
+            if(diceRoll % 2 == 0) {
+                return RobotType.SLANDERER;
+            }
+            return RobotType.POLITICIAN;
+
         }
-        if(diceRoll % 2 == 0) {
-            return RobotType.SLANDERER;
-        }
-        return RobotType.POLITICIAN;
     }
 
     /**
