@@ -171,6 +171,10 @@ public class Politician extends GenericRobot {
             if(momentum.containsKey(d)) thisPass += momentum.get(d);
             locations.put(d, thisPass);
         }
+        // avoid map edges
+        if(!rc.onTheMap(thisLocation)) {
+            locations.put(d, -5.0);
+        }
     }
 
     /**
