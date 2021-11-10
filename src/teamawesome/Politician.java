@@ -32,6 +32,7 @@ public class Politician extends GenericRobot {
                 Direction.values()) {
             if(d != Direction.CENTER) momentum.put(d, 0.0);
         }
+        rolodex = new LinkedList<>();
     }
 
     /**
@@ -43,6 +44,7 @@ public class Politician extends GenericRobot {
         // check mothership for flag value
         if(mothership != -1) homeFlag = rc.getFlag(mothership);
         System.out.println("I'm a politician! My mothership is " + mothership + " and their flag is " + homeFlag);
+        checkRolodex();
         Team enemy = rc.getTeam().opponent();
         int actionRadius = rc.getType().actionRadiusSquared;
         RobotInfo[] attackable = rc.senseNearbyRobots(actionRadius, enemy);
@@ -85,7 +87,7 @@ public class Politician extends GenericRobot {
     public Direction whereToMove() throws GameActionException {
         // record this location in the history list
         history.add(rc.getLocation());
-        if(history.size() > 10) {
+        if(history.size() > 25) {
             history.removeLast();
         }
         // degrade momentum values
@@ -184,4 +186,24 @@ public class Politician extends GenericRobot {
         }
         locations.put(robotDirection, dirWeight);
     }
+
+    /**
+     * Function to go through rolodex and check each politician
+     * @throws GameActionException cause RobotController
+     */
+    private void checkRolodex() throws GameActionException{
+        System.out.println("Here is my rolodex:");
+        for (Integer id:
+             rolodex) {
+            if(rc.canSenseRobot(id)) {
+                RobotInfo friend = rc.senseRobot(id);
+                System.out.println("ID #" + id + " at location " + friend.getLocation());
+            } else {
+                System.out.println("ID #" + id + " cannot be sensed!");
+            }
+
+        }
+    }
 }
+
+

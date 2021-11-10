@@ -1,5 +1,26 @@
-package sland_rush;
+package stratx_han;
 import battlecode.common.*;
+import teamawesome.Muckraker;
+import teamawesome.Politician;
+import teamawesome.Slanderer;
+
+/**
+ * Strategy experiment - sprint 3
+ *
+ * Variant of the examplefuncsplayer intended to explore counter strategies to our robot
+ * Strategy:
+ *  - toBuild influence level is the max of 50 or 10% of the EC's current influence
+ *  - Build only slanderers for the first 300 rounds
+ *     - except every 10th round build a muckraker
+ *  - Build only politicians for the next 300 rounds
+ *  - use randomspawnablerobot after that
+ *  - randomspawnablerobot is weighted:
+ *      - 20% muckraker
+ *      - 30% slanderer
+ *      - 50% politician
+ *  - do not bid until the 750th round, then bid 5% of EC's influence each turn
+ *  - slanderers do not ever leave range of another friendly robot
+ */
 
 public strictfp class RobotPlayer {
     static RobotController rc;
@@ -23,6 +44,7 @@ public strictfp class RobotPlayer {
 
     static int turnCount;
     protected static final int SLAN_RUSH = 300;
+    protected static final int POLI_RUSH = 300;
 
     /**
      * run() is the method that is called when a robot is instantiated in the Battlecode world.
@@ -35,6 +57,8 @@ public strictfp class RobotPlayer {
         // and to get information on its current status.
         RobotPlayer.rc = rc;
         turnCount = 0;
+        Politician poli = new Politician(rc);
+        Muckraker muck = new Muckraker(rc);
 
         System.out.println("I'm a " + rc.getType() + " and I just got created!");
         while (true) {
@@ -46,9 +70,9 @@ public strictfp class RobotPlayer {
                 System.out.println("I'm a " + rc.getType() + "! Location " + rc.getLocation());
                 switch (rc.getType()) {
                     case ENLIGHTENMENT_CENTER: runEnlightenmentCenter(); break;
-                    case POLITICIAN:           runPolitician();         break;
+                    case POLITICIAN:           poli.turn();              break;
                     case SLANDERER:            runSlanderer();           break;
-                    case MUCKRAKER:            runMuckraker();           break;
+                    case MUCKRAKER:            muck.turn();           break;
                 }
 
                 // Clock.yield() makes the robot wait until the next turn, then it will perform this loop again
@@ -65,8 +89,14 @@ public strictfp class RobotPlayer {
         RobotType toBuild;
         // build only slanderers for the first SLAN_RUSH rounds
         if(rc.getRoundNum() < SLAN_RUSH) {
-            toBuild = RobotType.SLANDERER;
-        } else {
+            if(rc.getRoundNum() % 10 != 0 )
+                toBuild = RobotType.SLANDERER;
+            else
+                toBuild = RobotType.MUCKRAKER;
+        } else if(rc.getRoundNum() < SLAN_RUSH + POLI_RUSH) {
+            toBuild = RobotType.POLITICIAN;
+        }
+        else {
             toBuild = randomSpawnableRobotType();
         }
         int influence = (int)Math.max(50, 0.10 * rc.getInfluence());
@@ -77,6 +107,9 @@ public strictfp class RobotPlayer {
                 break;
             }
         }
+        int toBid = (int)(0.05 * rc.getInfluence());
+        // don't bid before the mid game
+        if(rc.canBid(toBid) && rc.getRoundNum() > 750) rc.bid(toBid);
     }
 
     static void runPolitician() throws GameActionException {
@@ -100,6 +133,8 @@ public strictfp class RobotPlayer {
     }
 
     static void runSlanderer() throws GameActionException {
+        if(rc.senseNearbyRobots(rc.getType().actionRadiusSquared, rc.getTeam()) == null)
+            return;
         if (tryMove(randomDirection()))
             System.out.println("I moved!");
     }
@@ -136,7 +171,14 @@ public strictfp class RobotPlayer {
      * @return a random RobotType
      */
     static RobotType randomSpawnableRobotType() {
-        return spawnableRobot[(int) (Math.random() * spawnableRobot.length)];
+        int diceRoll = (int) (Math.random() * 10);
+        if(diceRoll == 2 || diceRoll == 4 || diceRoll == 6) {
+            return RobotType.MUCKRAKER;
+        }
+        if(diceRoll % 2 == 0) {
+            return RobotType.SLANDERER;
+        }
+        return RobotType.POLITICIAN;
     }
 
     /**

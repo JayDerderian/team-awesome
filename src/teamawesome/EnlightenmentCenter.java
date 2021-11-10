@@ -17,7 +17,7 @@ public class EnlightenmentCenter extends GenericRobot{
     public void turn() throws GameActionException {
         RobotType toBuild = randomSpawnableRobotType();
         int round = rc.getRoundNum();
-        double inf = Math.pow((round *.01), 2) + 1;
+        double inf = Math.pow((round *.01), 2) + 50;
         for (Direction dir : teamawesome.RobotPlayer.directions) {
             if (rc.canBuildRobot(toBuild, dir, (int)inf)) {
                 System.out.println("Building a " + toBuild + " in the " + dir + " direction with " + inf + " influence!");
