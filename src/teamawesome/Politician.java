@@ -20,6 +20,7 @@ public class Politician extends GenericRobot {
     int homeFlag = -1;
     public String robotStatement = "I'm a " + rc.getType() + "! Location " + rc.getLocation();
     public boolean empowered;
+    LinkedList<Integer> rolodex;
 
     public Politician(RobotController newRc) {
         super(newRc);
@@ -100,33 +101,14 @@ public class Politician extends GenericRobot {
         // this forms the basis for direction weights
         for(Direction d:
                 Direction.values()) {
-            MapLocation thisLocation = rc.adjacentLocation(d);
-            if(rc.onTheMap(thisLocation) && d != Direction.CENTER) {
-                // if the direction is valid, set the weight to the passability of the square plus the momentum
-                double thisPass = rc.sensePassability(thisLocation);
-                if(momentum.containsKey(d)) thisPass += momentum.get(d);
-                locations.put(d, thisPass);
-            }
+            initWeights(locations, d);
         }
         // check nearby robots
         RobotInfo[] info = rc.senseNearbyRobots();
         // update weights of different directions depending on what robots are that way
         for (RobotInfo robot:
                 info) {
-            Direction robotDirection = rc.getLocation().directionTo(robot.getLocation());
-            double dirWeight = locations.get(robotDirection);
-            // prefer to go toward enemy robots
-            if(robot.getTeam() != rc.getTeam()) {
-                dirWeight += 1;
-                if(robot.getType() == RobotType.ENLIGHTENMENT_CENTER) {
-                    dirWeight += 1;
-                }
-            } else {
-                if(robot.getType() != RobotType.POLITICIAN)
-                    dirWeight -= 0.5;
-                if(robot.getType() == RobotType.ENLIGHTENMENT_CENTER) mothership = robot.getID();
-            }
-            locations.put(robotDirection, dirWeight);
+            updateWeights(locations, robot);
         }
         // prefer to go away from the way we came
         for(MapLocation l :
@@ -154,5 +136,52 @@ public class Politician extends GenericRobot {
         }
         System.out.println("So I want to move " + toMove + " to space " + rc.adjacentLocation(toMove));
         return toMove;
+    }
+
+    /**
+     * Function to process a nearby politician and save its ID for later reference
+     * @param robot the other politician
+     * @throws GameActionException because it uses the RobotController
+     */
+    private void checkPolitic(RobotInfo robot) throws GameActionException {
+        int friendID = robot.getID();
+        getFlag(rc, friendID);
+        System.out.println("Found another politician! ID #" + friendID);
+        if(!rolodex.contains(friendID)) rolodex.add(friendID);
+    }
+
+    private void initWeights(HashMap<Direction, Double> locations, Direction d) throws GameActionException {
+        MapLocation thisLocation = rc.adjacentLocation(d);
+        if(rc.onTheMap(thisLocation) && d != Direction.CENTER) {
+            // if the direction is valid, set the weight to the passability of the square plus the momentum
+            double thisPass = rc.sensePassability(thisLocation);
+            if(momentum.containsKey(d)) thisPass += momentum.get(d);
+            locations.put(d, thisPass);
+        }
+    }
+
+    /**
+     * Update the weights for the locations hashmap, given a robot object
+     * @param locations the locations hashmap
+     * @param robot a RobotInfo object
+     */
+    private void updateWeights(HashMap<Direction, Double> locations, RobotInfo robot) throws GameActionException {
+        Direction robotDirection = rc.getLocation().directionTo(robot.getLocation());
+        double dirWeight = locations.get(robotDirection);
+        // prefer to go toward enemy robots
+        if(robot.getTeam() != rc.getTeam()) {
+            dirWeight += 1;
+            if(robot.getType() == RobotType.ENLIGHTENMENT_CENTER) {
+                dirWeight += 1;
+            }
+        } else {
+            if(robot.getType() != RobotType.POLITICIAN)
+                dirWeight -= 0.5;
+            else {
+                checkPolitic(robot);
+            }
+            if(robot.getType() == RobotType.ENLIGHTENMENT_CENTER) mothership = robot.getID();
+        }
+        locations.put(robotDirection, dirWeight);
     }
 }
