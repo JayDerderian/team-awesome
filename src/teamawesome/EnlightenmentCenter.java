@@ -23,7 +23,7 @@ public class EnlightenmentCenter extends GenericRobot{
             inf = Math.pow((round *.01), 2) + 50;
         }
         else if(toBuild == RobotType.SLANDERER){
-            inf = Math.pow((round *.01), 2) + 20;
+            inf = Math.pow((round *.01), 2) + 80;
         }else{
             inf = 20;
         }
