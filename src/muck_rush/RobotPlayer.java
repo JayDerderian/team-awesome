@@ -105,9 +105,10 @@ public strictfp class RobotPlayer {
     }
 
     static void runMuckraker() throws GameActionException {
+        boolean moved = false;
         Team enemy = rc.getTeam().opponent();
         int actionRadius = rc.getType().actionRadiusSquared;
-        for (RobotInfo robot : rc.senseNearbyRobots(actionRadius, enemy)) {
+        for (RobotInfo robot : rc.senseNearbyRobots()) {
             if (robot.type.canBeExposed()) {
                 // It's a slanderer... go get them!
                 if (rc.canExpose(robot.location)) {
@@ -116,9 +117,16 @@ public strictfp class RobotPlayer {
                     return;
                 }
             }
+            if(robot.getTeam() != rc.getTeam() && robot.getType() == RobotType.SLANDERER && !moved) {
+                Direction dir = rc.getLocation().directionTo(robot.getLocation());
+                System.out.println("Slanderer spotted to the " + dir);
+                tryMove(dir);
+                moved = true;
+            }
         }
-        if (tryMove(randomDirection()))
-            System.out.println("I moved!");
+        if(!moved)
+            if (tryMove(randomDirection()))
+                System.out.println("I moved!");
     }
 
     /**

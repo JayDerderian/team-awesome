@@ -18,6 +18,12 @@ public class EnlightenmentCenter extends GenericRobot{
         int round = rc.getRoundNum();
         double inf;
         RobotType toBuild = strategicSpawnableRobotType(round);
+        // check for nearby muckrakers, build a politician to defend
+        for (RobotInfo robot:
+             rc.senseNearbyRobots()) {
+            if(robot.getType() == RobotType.MUCKRAKER && robot.getTeam() != rc.getTeam())
+                toBuild = RobotType.POLITICIAN;
+        }
 
         if(toBuild == RobotType.POLITICIAN){
             inf = Math.pow((round *.01), 2) + 50;
