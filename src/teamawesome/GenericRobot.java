@@ -66,7 +66,7 @@ abstract public class GenericRobot {
             newFlag = Integer.parseInt(flagStr);
         }
         else if (flag == NEUTRAL_ENLIGHTENMENT_CENTER_FLAG){
-            String nec = Integer.toString(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG);
+            String nec = Integer.toString(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG + conv);
             String flagStr = pw + nec;
             newFlag = Integer.parseInt(flagStr);
         }
@@ -91,6 +91,7 @@ abstract public class GenericRobot {
             String flagStr = pw + EF;
             newFlag = Integer.parseInt(flagStr);
         }
+        System.out.println("New flag: " + newFlag);
         return newFlag;
     }
 
@@ -117,16 +118,18 @@ abstract public class GenericRobot {
             RobotInfo info = rc.senseRobot(id);
             int flag = rc.getFlag(info.getID());
             // make sure this is one of ours!
-            if(isOurs(flag))
+            if(isOurs(flag)) {
+                System.out.println("retrieveFlag -> This was one of our flags!");
                 res = parseFlag(info, flag);
+            }
             else{
                 // add our own location since the table requires a MapLocation
-                System.out.println("Could not retrieve flag!");
+                System.out.println("retrieveFlag -> This wasn't one of our flags!");
                 res.put(ERROR, rc.getLocation());
             }
         }
         else{
-            System.out.println("Could not sense bot from given ID!");
+            System.out.println("retrieveFlag -> Could not sense bot from given ID!");
             res.put(ERROR, rc.getLocation());
         }
         return res;
@@ -136,27 +139,34 @@ abstract public class GenericRobot {
         HashMap<Integer, MapLocation> res = new HashMap<>();
         // NOTE: this is redundant if parseFlag is called from retrieveFlag
         // this is here in case parseFlag is called separately.
-        if (!isOurs(flagOrig)) {
-            System.out.println("Was not our flag!");
-            res.put(ERROR, info.getLocation());      // Getting null pointer exception here?? is the RobotInfo info
-            return res;                              // object null??
-        }
         int len = countDigis(flagOrig);
+        System.out.println("parseFlag -> len of given flag: " + len);
         // this is an alert!
         if (len == 3){
+            System.out.println("parseFlag -> Received an alert!");
             // remove first two digits, then test against constants
             int flag = flagOrig % 10;
-            if (flag == NEUTRAL_ENLIGHTENMENT_CENTER_FLAG)
+            if (flag == NEUTRAL_ENLIGHTENMENT_CENTER_FLAG) {
+                System.out.println("parseFlag -> Found a neutral EC!");
                 res.put(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG, info.getLocation());
-            else if (flag == NEED_HELP)
+            }
+            else if (flag == NEED_HELP) {
+                System.out.println("parseFlag -> someone needs help!");
                 res.put(NEED_HELP, info.getLocation());
-            else
+            }
+            else {
+                System.out.println("parseFlag -> Unable to parse 3-digit flag!");
                 res.put(ERROR, info.getLocation());
+            }
         }
         // this is enemy info!
         else if (len == 5){
+            System.out.println("parseFlag -> Received enemy info!");
             // remove first two digits, then test against constants
-            int flag = flagOrig % 1000;
+            int flagTemp = flagOrig % 1000;
+            // subtract last two digits to get base flag. i.e. 302 - 2 == 300
+            int conv = flagTemp % 100;
+            int flag = flagTemp - conv;
             if(flag == ENEMY_ENLIGHTENMENT_CENTER_FLAG)
                 res.put(ENEMY_ENLIGHTENMENT_CENTER_FLAG, info.getLocation());
             // enemy politician!
@@ -168,8 +178,14 @@ abstract public class GenericRobot {
             // enemy muckraker!
             else if (flag/100 == 3)
                 res.put(ENEMY_MUCKRAKER_NEARBY_FLAG, info.getLocation());
-            else
+            else {
+                System.out.println("parseFlag -> unable to parse 5-digit flag!");
                 res.put(ERROR, info.getLocation());
+            }
+        }
+        else{
+            System.out.println(("Not one of our flags!"));
+            res.put(ERROR, info.getLocation());
         }
         return res;
     }
