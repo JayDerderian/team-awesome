@@ -1,6 +1,5 @@
 package examplefuncsplayer;
 import battlecode.common.*;
-import teamawesome.Politician;
 
 public strictfp class RobotPlayer {
     static RobotController rc;
@@ -23,6 +22,7 @@ public strictfp class RobotPlayer {
     };
 
     static int turnCount;
+    protected static final int SLAN_RUSH = 300;
 
     /**
      * run() is the method that is called when a robot is instantiated in the Battlecode world.
@@ -34,7 +34,6 @@ public strictfp class RobotPlayer {
         // This is the RobotController object. You use it to perform actions from this robot,
         // and to get information on its current status.
         RobotPlayer.rc = rc;
-        Politician politic = new Politician(rc);
         turnCount = 0;
 
         System.out.println("I'm a " + rc.getType() + " and I just got created!");
@@ -63,7 +62,13 @@ public strictfp class RobotPlayer {
     }
 
     static void runEnlightenmentCenter() throws GameActionException {
-        RobotType toBuild = randomSpawnableRobotType();
+        RobotType toBuild;
+        // build only slanderers for the first SLAN_RUSH rounds
+        if(rc.getRoundNum() < SLAN_RUSH) {
+            toBuild = RobotType.SLANDERER;
+        } else {
+            toBuild = randomSpawnableRobotType();
+        }
         int influence = 50;
         for (Direction dir : directions) {
             if (rc.canBuildRobot(toBuild, dir, influence)) {
