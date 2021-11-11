@@ -9,6 +9,7 @@ import static org.mockito.Mockito.*;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import teamawesome.Muckraker;
 import teamawesome.Politician;
 import teamawesome.Slanderer;
 
@@ -31,12 +32,28 @@ public class SlanderderTest {
     RobotInfo[] teamRobotInfoArray = {teamBot1};
 
     @Test
-    public void ifSlandererRobotCreatedThenMuckrakerClassIsCalled() {
+    public void ifSlandererRobotCreatedThenSlandererClassIsCalled() {
         RobotController rc = mock(RobotController.class);
         when(rc.getType()).thenReturn(RobotType.SLANDERER);
 
         Slanderer robot = new Slanderer(rc);
 
         assertThat(robot.robotStatement, containsString("I'm a SLANDERER"));
+    }
+
+    @Test
+    public void ifSlandererRobotSensedRobotNearby() throws GameActionException {
+        RobotController rc = mock(RobotController.class);
+        when(rc.getType()).thenReturn(RobotType.SLANDERER);
+        when(rc.getTeam()).thenReturn(Team.A);
+        when(rc.senseNearbyRobots()).thenReturn(enemyRobotInfoArray);
+        when(rc.canExpose(new MapLocation(20000, 20000))).thenReturn(true);
+
+
+        Slanderer robot = new Slanderer(rc);
+        robot.turn();
+
+        assertEquals(enemyRobotInfoArray[0].getTeam(), Team.B);
+        assertTrue(rc.canExpose(new MapLocation(20000, 20000)));
     }
 }
