@@ -93,8 +93,9 @@ public class Politician extends GenericRobot {
             if(momentum.containsKey(d)) momentum.put(d, momentum.get(d) + 1);
             else momentum.put(d, 1.0);
         } else {
-            // if the robot can't move that direction, degrade momentum
-            System.out.println("I'm Stuck! | Momentum: " + momentum.get(d));
+            // if the attempted direction is blocked, degrade momentum
+            if(rc.isLocationOccupied(rc.adjacentLocation(d)))
+                System.out.println("I'm Stuck! | Momentum: " + momentum.get(d));
             if(momentum.containsKey(d)) momentum.put(d, momentum.get(d) - 1);
             else momentum.put(d, 1.0);
         }
