@@ -140,6 +140,11 @@ abstract public class GenericRobot {
         HashMap<Integer, MapLocation> res = new HashMap<>();
         // NOTE: this is redundant if parseFlag is called from retrieveFlag
         // this is here in case parseFlag is called separately.
+        if(!isOurs(flagOrig)){
+            System.out.println(("parseFlag -> Not one of our flags!"));
+            res.put(ERROR, info.getLocation());
+            return res;
+        }
         int len = countDigis(flagOrig);
         System.out.println("parseFlag -> len of given flag: " + len);
         // this is an alert!
@@ -183,10 +188,6 @@ abstract public class GenericRobot {
                 System.out.println("parseFlag -> unable to parse 5-digit flag!");
                 res.put(ERROR, info.getLocation());
             }
-        }
-        else{
-            System.out.println(("Not one of our flags!"));
-            res.put(ERROR, info.getLocation());
         }
         return res;
     }
