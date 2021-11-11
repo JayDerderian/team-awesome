@@ -199,7 +199,7 @@ public class Politician extends GenericRobot {
             if(robot.getType() == RobotType.ENLIGHTENMENT_CENTER) {
                 dirWeight += 1;
                 // raise a flag that an EC has been found
-                rc.setFlag(makeFlag(FlagConstants.NEUTRAL_ENLIGHTENMENT_CENTER_FLAG, robot.getID()));
+                rc.setFlag(makeFlag(FlagConstants.NEUTRAL_ENLIGHTENMENT_CENTER_FLAG, 0));
             }
         } else {
             if(robot.getType() != RobotType.POLITICIAN)
