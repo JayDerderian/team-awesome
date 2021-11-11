@@ -17,7 +17,7 @@ public class Politician extends GenericRobot {
     int homeFlag = -1;
     public String robotStatement = "I'm a " + rc.getType() + "! Location " + rc.getLocation();
     public boolean empowered;
-    LinkedList<Integer> rolodex;
+    HashMap<Integer, MapLocation> rolodex;
     // controls the type of politician
     // standard Politicians will seek any convertable robot
     // juggernaut Politicians will ignore all enemies and focus on neutral ECs
@@ -45,7 +45,7 @@ public class Politician extends GenericRobot {
                 Direction.values()) {
             if(d != Direction.CENTER) momentum.put(d, 0.0);
         }
-        rolodex = new LinkedList<>();
+        rolodex = new HashMap<>();
     }
 
     /**
@@ -66,7 +66,6 @@ public class Politician extends GenericRobot {
             }
         }
         System.out.println("I'm a politician! My mothership is " + mothership + " and their flag is " + homeFlag);
-        checkRolodex();
         Team enemy = rc.getTeam().opponent();
         int actionRadius = rc.getType().actionRadiusSquared;
         RobotInfo[] attackable = rc.senseNearbyRobots(actionRadius, enemy);
@@ -139,9 +138,11 @@ public class Politician extends GenericRobot {
                 history) {
             if(rc.getLocation().directionTo(l) != Direction.CENTER) {
                 Direction histDirection = rc.getLocation().directionTo(l);
-                locations.put(histDirection, locations.get(histDirection) - 0.25);
+                locations.put(histDirection, locations.get(histDirection) - 1);
             }
         }
+        // see if any politicians in the rolodex have seen a neutral EC, go towards their last known location
+        checkRolodex(locations);
         // select the direction with the highest weight
         Map.Entry<Direction, Double> best = null;
         StringBuilder s = new StringBuilder();
@@ -169,9 +170,8 @@ public class Politician extends GenericRobot {
      */
     private void checkPolitic(RobotInfo robot) throws GameActionException {
         int friendID = robot.getID();
-        //retrieveFlag(rc, friendID);
         System.out.println("Found another politician! ID #" + friendID);
-        if(!rolodex.contains(friendID)) rolodex.add(friendID);
+        if(!rolodex.containsKey(friendID)) rolodex.put(friendID, robot.getLocation());
     }
 
     private void initWeights(HashMap<Direction, Double> locations, Direction d) throws GameActionException {
@@ -227,18 +227,28 @@ public class Politician extends GenericRobot {
      * Function to go through rolodex and check each politician
      * @throws GameActionException cause RobotController
      */
-    private void checkRolodex() throws GameActionException{
+    private void checkRolodex(HashMap<Direction, Double> locations) throws GameActionException{
         System.out.println("Here is my rolodex:");
         LinkedList<Integer> toRemove = new LinkedList<>();
-        for (Integer id:
-             rolodex) {
+        for (Map.Entry<Integer, MapLocation> contact:
+             rolodex.entrySet()) {
+            int id = contact.getKey();
             try {
                 int flag = rc.getFlag(id);
                 if(rc.canSenseRobot(id)) {
                     RobotInfo friend = rc.senseRobot(id);
-                    System.out.println("ID #" + id + " at location " + friend.getLocation() + " with flag " + flag);
+                    MapLocation contactLoc = friend.getLocation();
+                    contact.setValue(contactLoc);
+                    System.out.println("ID #" + id + " at location " + contactLoc + " with flag " + flag);
                 } else {
-                    System.out.println("ID #" + id + " with flag " + flag + " cannot be sensed!");
+                    System.out.println("ID #" + id + " with flag " + flag +
+                            " cannot be sensed, last known location: " + contact.getValue());
+                    // increase the weight of their last known location if they've seen a neutral EC
+                    HashMap<Integer, MapLocation> flagParsed = retrieveFlag(rc, id);
+                    if(flagParsed.containsKey(FlagConstants.NEUTRAL_ENLIGHTENMENT_CENTER_FLAG)) {
+                        Direction dir = rc.getLocation().directionTo(contact.getValue());
+                        locations.put(dir, locations.get(dir) + 2);
+                    }
                 }
             } catch(GameActionException e) { // the ID could not be found, meaning it's time to delete that entry
                 System.out.println("ID #" + id + " is dead!");
