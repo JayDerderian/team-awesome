@@ -15,6 +15,7 @@ public strictfp class Muckraker extends GenericRobot {
     public MapLocation neutralLocation;
     public int flagSensed = 00000; // initial value = flag not set
     public MapLocation enemyECLocation;
+    public Direction enemyECDirection;
     public MapLocation[] surroundingLocationArray;
     public Direction nextMoveDir;
     boolean nextMoveDirSet = false;
@@ -22,6 +23,8 @@ public strictfp class Muckraker extends GenericRobot {
     MapLocation homeECLocation;
     ArrayList<Direction> zigZagUp = new ArrayList<Direction>(Arrays.asList(Direction.EAST, Direction.NORTH, Direction.WEST, Direction.NORTH));
     ArrayList<Direction> zigZagDown = new ArrayList<Direction>(Arrays.asList(Direction.SOUTH, Direction.WEST, Direction.NORTH));
+    int zigZagIndex = 0;
+    boolean enemyEcFound = false;
 
 
     /**
@@ -46,7 +49,79 @@ public strictfp class Muckraker extends GenericRobot {
      * @throws GameActionException
      */
     public void turn() throws GameActionException {
+        System.out.println(robotStatement);
+        homeECLocation = rc.getLocation();
 
+        Team enemy = rc.getTeam().opponent();
+        enemyEcFound = false;
+
+        RobotInfo[] sensedNearByRobots =  rc.senseNearbyRobots();
+
+        while(!enemyEcFound){
+            for (RobotInfo robot : sensedNearByRobots) {
+                // ENEMY
+                if(robot.getTeam() == enemy) {
+                    if (robot.type.canBeExposed()) {
+                        // It's a slanderer... go get them!
+                        if (rc.canExpose(robot.location)) {
+                            exposedSuccess = true;
+                            System.out.println("e x p o s e d");
+                            rc.expose(robot.location);
+                            return;
+                        }
+                    }
+                    if(robot.type == RobotType.ENLIGHTENMENT_CENTER){
+                        enemyEcFound = true;
+                        enemyECLocation = robot.location;
+                        enemyECDirection = robot.location.directionTo(enemyECLocation);
+                        break;
+                    }
+                }
+            }
+
+            if(enemyEcFound)
+                break;
+
+            int stepCount = 1;
+            while (tryMove(zigZagUp.get(zigZagIndex))){
+                System.out.println("I moved!");
+                stepCount += 1;
+                if(stepCount == 30)
+                    break;
+            }
+            sensedNearByRobots =  rc.senseNearbyRobots();
+            if(!rc.onTheMap(rc.adjacentLocation(zigZagUp.get(zigZagIndex + 1 % zigZagUp.size()))))
+                zigZagIndex = zigZagIndex+1 % zigZagUp.size();
+        }
+        if(enemyEcFound){
+            // move to its adjacent location
+            while (rc.adjacentLocation(enemyECDirection) != enemyECLocation) {
+                if (tryMove(enemyECDirection)) {
+                    System.out.println("I moved!");
+                } else if (tryMove(randomDirection())) {
+                    System.out.println("I moved!");
+                }
+            }
+
+            if(rc.adjacentLocation(enemyECDirection) == enemyECLocation){
+                sensedNearByRobots =  rc.senseNearbyRobots();
+                for (RobotInfo robot : sensedNearByRobots) {
+                    // ENEMY
+                    if(robot.getTeam() == enemy) {
+                        if (robot.type.canBeExposed()) {
+                            // It's a slanderer... go get them!
+                            if (rc.canExpose(robot.location)) {
+                                exposedSuccess = true;
+                                System.out.println("e x p o s e d");
+                                rc.expose(robot.location);
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
     }
 
 
