@@ -9,9 +9,11 @@ public class EnlightenmentCenter extends GenericRobot{
      */
     public String robotStatement = "I'm an " + rc.getType() + "! Location " + rc.getLocation();
     protected RobotType lastBuilt;
+    protected int age;
     public EnlightenmentCenter(RobotController newRc) {
         super(newRc);
         lastBuilt = null;
+        age = 0;
     }
 
     @Override
@@ -26,6 +28,7 @@ public class EnlightenmentCenter extends GenericRobot{
             if(robot.getType() == RobotType.MUCKRAKER && robot.getTeam() != rc.getTeam())
                 toBuild = RobotType.POLITICIAN;
         }
+        if(age <= 20) toBuild = RobotType.SLANDERER;
 
         if(toBuild == RobotType.POLITICIAN){
             inf = Math.pow((round *.01), 2) + 50;
@@ -76,10 +79,11 @@ public class EnlightenmentCenter extends GenericRobot{
 
         //Check the bidding conditions.
         double toBid = Math.pow((round *.01), 2);
-        if(rc.canBid((int)toBid)){
+        if(rc.canBid((int)toBid) && age >= 50){
             System.out.println("Round " + round + " bidding " + toBid);
             rc.bid((int)toBid);
         }
+        ++age;
     }
     /**
      * Returns a random spawnable RobotType
