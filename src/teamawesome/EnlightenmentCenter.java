@@ -40,22 +40,13 @@ public class EnlightenmentCenter extends GenericRobot{
             if(lastBuilt == RobotType.MUCKRAKER) toBuild = RobotType.SLANDERER;
         }
 
-        for (Direction dir : teamawesome.RobotPlayer.directions) {
-
-            if (rc.canBuildRobot(toBuild, dir, (int) inf)) {
-                    System.out.println("Building a " + toBuild + " in the " + dir + " direction with " + inf + " influence!");
-                    lastBuilt = toBuild;
-                    rc.buildRobot(toBuild, dir, (int) inf);
-                }
-        }
 
         //sense enemy robots
-        if(rc.canSenseRobot(rc.getID())){
-            RobotInfo sense = rc.senseRobot(rc.getID());
+        for (RobotInfo robot:
+                rc.senseNearbyRobots()) {
+            if(robot.getTeam() != rc.getTeam()){
 
-            //check team
-            if(sense.team != rc.getTeam()){
-                switch (sense.type) {
+                switch (robot.type) {
                     case POLITICIAN:
                         rc.setFlag(makeFlag(FlagConstants.ENEMY_POLITICIAN_FLAG, 0));   break;
                     case SLANDERER:
@@ -68,8 +59,18 @@ public class EnlightenmentCenter extends GenericRobot{
         }
 
         //if low influence, raise need help flag
-        if(rc.getInfluence() < 200 && rc.getConviction() < 200){
+        if(round > 100 && rc.getInfluence() < 200 && rc.getConviction() < 200){
             rc.setFlag(makeFlag(FlagConstants.NEED_HELP, 0));
+        }
+
+        //build
+        for (Direction dir : teamawesome.RobotPlayer.directions) {
+
+            if (rc.canBuildRobot(toBuild, dir, (int) inf)) {
+                System.out.println("Building a " + toBuild + " in the " + dir + " direction with " + inf + " influence!");
+                lastBuilt = toBuild;
+                rc.buildRobot(toBuild, dir, (int) inf);
+            }
         }
 
         //Check the bidding conditions.
