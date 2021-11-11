@@ -22,13 +22,14 @@ public class EnlightenmentCenter extends GenericRobot{
         double myInf = rc.getInfluence();
         double inf;
         RobotType toBuild = strategicSpawnableRobotType(round);
+        // for first 50 rounds after creation, build the slanderer
+        if(age <= 50) toBuild = RobotType.SLANDERER;
         // check for nearby muckrakers, build a politician to defend
         for (RobotInfo robot:
              rc.senseNearbyRobots()) {
             if(robot.getType() == RobotType.MUCKRAKER && robot.getTeam() != rc.getTeam())
                 toBuild = RobotType.POLITICIAN;
         }
-        if(age <= 20) toBuild = RobotType.SLANDERER;
 
         if(toBuild == RobotType.POLITICIAN){
             inf = Math.pow((round *.01), 2) + 50;
@@ -105,7 +106,7 @@ public class EnlightenmentCenter extends GenericRobot{
      */
     static RobotType strategicSpawnableRobotType(int round) {
         if (round < 300){
-            if(round % 10 == 0){
+            if((round % 10) + 1 == 0){
                 return(RobotType.MUCKRAKER);
             }
             else return(RobotType.SLANDERER);
