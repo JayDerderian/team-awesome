@@ -11,7 +11,6 @@ import java.util.*;
  * RobotPlayer should call turn() once per turn to exercise the robot
  */
 public class Politician extends GenericRobot {
-
     LinkedList<MapLocation> history;
     HashMap<Direction, Double> momentum;
     int mothership = -1;
@@ -19,18 +18,22 @@ public class Politician extends GenericRobot {
     public String robotStatement = "I'm a " + rc.getType() + "! Location " + rc.getLocation();
     public boolean empowered;
     LinkedList<Integer> rolodex;
-    boolean juggernaut; // juggernaut Politicians will ignore all enemies and focus on neutral ECs
+    // controls the type of politician
+    // standard Politicians will seek any convertable robot
+    // juggernaut Politicians will ignore all enemies and focus on neutral ECs
+    // rearguard Politicians will never leave the immediate area of their EC
+    PoliTypes type;
 
     public Politician(RobotController newRc) {
         super(newRc);
         setup();
-        juggernaut = false;
+        type = PoliTypes.STANDARD;
     }
 
-    public Politician(RobotController newRc, boolean juggernautStatus) {
+    public Politician(RobotController newRc, PoliTypes newType) {
         super(newRc);
         setup();
-        juggernaut = juggernautStatus;
+        type = newType;
     }
 
     private void setup() {
@@ -67,7 +70,7 @@ public class Politician extends GenericRobot {
         Team enemy = rc.getTeam().opponent();
         int actionRadius = rc.getType().actionRadiusSquared;
         RobotInfo[] attackable = rc.senseNearbyRobots(actionRadius, enemy);
-        if (attackable.length != 0 && rc.canEmpower(actionRadius) && !juggernaut) {
+        if (attackable.length != 0 && rc.canEmpower(actionRadius) && type != PoliTypes.JUGGERNAUT) {
             System.out.println("empowering...");
             rc.empower(actionRadius);
             System.out.println("empowered");
@@ -105,8 +108,8 @@ public class Politician extends GenericRobot {
      */
     public Direction whereToMove() throws GameActionException {
         // record this location in the history list
-        history.add(rc.getLocation());
-        if(history.size() > 25) {
+        history.addFirst(rc.getLocation());
+        if(history.size() > 10) {
             history.removeLast();
         }
         // degrade momentum values

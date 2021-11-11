@@ -73,7 +73,7 @@ public strictfp class RobotPlayer {
                     case ENLIGHTENMENT_CENTER: runEnlightenmentCenter(); break;
                     case POLITICIAN:           poli.turn();              break;
                     case SLANDERER:            runSlanderer();           break;
-                    case MUCKRAKER:            muck.turn();           break;
+                    case MUCKRAKER:            runMuckraker();           break;
                 }
 
                 // Clock.yield() makes the robot wait until the next turn, then it will perform this loop again
@@ -114,6 +114,7 @@ public strictfp class RobotPlayer {
     }
 
     static void runPolitician() throws GameActionException {
+        boolean moved = false;
         Team enemy = rc.getTeam().opponent();
         int actionRadius = rc.getType().actionRadiusSquared;
         RobotInfo[] attackable = rc.senseNearbyRobots(actionRadius, enemy);
@@ -129,9 +130,22 @@ public strictfp class RobotPlayer {
                 rc.empower(actionRadius);
             }
         }
-        if (tryMove(randomDirection()))
-            System.out.println("I moved!");
+        RobotInfo[] surroundings = rc.senseNearbyRobots();
+        for (RobotInfo robot:
+                  surroundings) {
+            if(robot.getTeam() == enemy ) {
+                Direction dir = rc.getLocation().directionTo(robot.getLocation());
+                System.out.println("Slanderer spotted to the " + dir);
+                tryMove(dir);
+                moved = true;
+                break;
+            }
+        }
+        if(!moved)
+            if (tryMove(randomDirection()))
+                System.out.println("I moved!");
     }
+
 
     static void runSlanderer() throws GameActionException {
         if(rc.senseNearbyRobots(rc.getType().actionRadiusSquared, rc.getTeam()) == null)
@@ -141,9 +155,10 @@ public strictfp class RobotPlayer {
     }
 
     static void runMuckraker() throws GameActionException {
+        boolean moved = false;
         Team enemy = rc.getTeam().opponent();
         int actionRadius = rc.getType().actionRadiusSquared;
-        for (RobotInfo robot : rc.senseNearbyRobots(actionRadius, enemy)) {
+        for (RobotInfo robot : rc.senseNearbyRobots()) {
             if (robot.type.canBeExposed()) {
                 // It's a slanderer... go get them!
                 if (rc.canExpose(robot.location)) {
@@ -152,9 +167,16 @@ public strictfp class RobotPlayer {
                     return;
                 }
             }
+            if(robot.getTeam() != rc.getTeam() && robot.getType() == RobotType.SLANDERER && !moved) {
+                Direction dir = rc.getLocation().directionTo(robot.getLocation());
+                System.out.println("Slanderer spotted to the " + dir);
+                tryMove(dir);
+                moved = true;
+            }
         }
-        if (tryMove(randomDirection()))
-            System.out.println("I moved!");
+        if(!moved)
+            if (tryMove(randomDirection()))
+                System.out.println("I moved!");
     }
 
     /**

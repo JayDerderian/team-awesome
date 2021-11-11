@@ -9,11 +9,13 @@ public class EnlightenmentCenter extends GenericRobot{
      */
     public String robotStatement = "I'm an " + rc.getType() + "! Location " + rc.getLocation();
     protected RobotType lastBuilt;
+    protected int robotsBuilt;
     protected int age;
     public EnlightenmentCenter(RobotController newRc) {
         super(newRc);
         lastBuilt = null;
         age = 0;
+        robotsBuilt = 0;
     }
 
     @Override
@@ -33,11 +35,11 @@ public class EnlightenmentCenter extends GenericRobot{
 
         if(toBuild == RobotType.POLITICIAN){
             inf = Math.pow((round *.01), 2) + 50;
-            if(myInf < inf) inf = 50;
+            if(myInf < inf) inf = (int)Math.max(50, 0.10 * rc.getInfluence());
         }
         else if(toBuild == RobotType.SLANDERER){
-            inf = Math.pow((round *.01), 2) + 80;
-            if(myInf < inf) inf = 50;
+            inf = Math.pow((round *.01), 2) + 150;
+            if(myInf < inf) inf = (int)Math.max(50, 0.10 * rc.getInfluence());
         }else{
             inf = 20;
             // prevent getting stuck just building muckrakers
@@ -49,10 +51,10 @@ public class EnlightenmentCenter extends GenericRobot{
             if (rc.canBuildRobot(toBuild, dir, (int) inf)) {
                     System.out.println("Building a " + toBuild + " in the " + dir + " direction with " + inf + " influence!");
                     lastBuilt = toBuild;
+                    ++robotsBuilt;
                     rc.buildRobot(toBuild, dir, (int) inf);
                 }
         }
-
 
         //sense enemy robots
         int conviction = 0;
@@ -91,9 +93,23 @@ public class EnlightenmentCenter extends GenericRobot{
      *
      * @return a random RobotType
      */
-    static RobotType randomSpawnableRobotType() {
-        return teamawesome.RobotPlayer.spawnableRobot[(int) (Math.random()
-                * teamawesome.RobotPlayer.spawnableRobot.length)];
+    static RobotType randomSpawnableRobotType(int round) {
+        int diceRoll = (int) (Math.random() * 10);
+        if(round < 600) {
+            if(diceRoll == 2 || diceRoll == 4 || diceRoll == 6) {
+                return RobotType.MUCKRAKER;
+            }
+            if(diceRoll % 2 == 0) {
+                return RobotType.SLANDERER;
+            }
+            return RobotType.POLITICIAN;
+        } else {
+            if(diceRoll % 2 == 0) {
+                return RobotType.SLANDERER;
+            }
+            return RobotType.POLITICIAN;
+
+        }
     }
 
     /**
@@ -104,9 +120,9 @@ public class EnlightenmentCenter extends GenericRobot{
      *             RobotType.MUCKRAKER,
      *     };
      */
-    static RobotType strategicSpawnableRobotType(int round) {
+    protected RobotType strategicSpawnableRobotType(int round) {
         if (round < 300){
-            if((round % 10) + 1 == 0){
+            if(robotsBuilt % 10 == 0){
                 return(RobotType.MUCKRAKER);
             }
             else return(RobotType.SLANDERER);
@@ -114,7 +130,6 @@ public class EnlightenmentCenter extends GenericRobot{
         else if(round > 700 && round < 900 ){
             return(RobotType.POLITICIAN);
         }
-        else return teamawesome.RobotPlayer.spawnableRobot[(int) (Math.random()
-                * teamawesome.RobotPlayer.spawnableRobot.length)];
+        else return randomSpawnableRobotType(round);
     }
 }

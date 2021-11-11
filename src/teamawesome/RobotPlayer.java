@@ -1,6 +1,10 @@
 package teamawesome;
 import battlecode.common.*;
 
+enum PoliTypes {
+    STANDARD, JUGGERNAUT, REARGUARD
+}
+
 /**
  * RobotPlayer
  * This is the class that is called by the client environment to invoke a new robot
