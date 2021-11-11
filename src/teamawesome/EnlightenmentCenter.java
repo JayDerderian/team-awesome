@@ -49,29 +49,27 @@ public class EnlightenmentCenter extends GenericRobot{
                 }
         }
 
-
         //sense enemy robots
-        int conviction = 0;
-        int typeFlag = 25;
         if(rc.canSenseRobot(rc.getID())){
             RobotInfo sense = rc.senseRobot(rc.getID());
 
             //check team
             if(sense.team != rc.getTeam()){
-                conviction = sense.conviction + 30;
                 switch (sense.type) {
-                    case ENLIGHTENMENT_CENTER: typeFlag = 50;   break;
-                    case POLITICIAN:           typeFlag = 0;    break;
-                    case SLANDERER:            typeFlag = 10;   break;
-                    case MUCKRAKER:            typeFlag = 20;   break;
+                    case POLITICIAN:
+                        rc.setFlag(makeFlag(FlagConstants.ENEMY_POLITICIAN_FLAG, 0));   break;
+                    case SLANDERER:
+                        rc.setFlag(makeFlag(FlagConstants.ENEMY_SLANDERER_NEARBY_FLAG, 0));   break;
+                    case MUCKRAKER:
+                        rc.setFlag(makeFlag(FlagConstants.ENEMY_MUCKRAKER_NEARBY_FLAG, 0));   break;
                 }
             }
 
         }
-        //set flag
-        int flag = typeFlag + conviction;
-        if(rc.canSetFlag(flag)){
-            rc.setFlag(flag);
+
+        //if low influence, raise need help flag
+        if(rc.getInfluence() < 200 && rc.getConviction() < 200){
+            rc.setFlag(makeFlag(FlagConstants.NEED_HELP, 0));
         }
 
         //Check the bidding conditions.
