@@ -27,8 +27,10 @@ import java.lang.Math;
 
 abstract public class GenericRobot {
     RobotController rc;
+    boolean help;
     public GenericRobot(RobotController newRc) {
         rc = newRc;
+        help = false;
     }
 
     /**

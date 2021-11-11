@@ -34,7 +34,7 @@ public class EnlightenmentCenter extends GenericRobot{
         }
 
         if(toBuild == RobotType.POLITICIAN){
-            inf = Math.pow((round *.01), 2) + 50;
+            inf = Math.pow((round *.01), 2) + 100;
             if(myInf < inf) inf = (int)Math.max(50, 0.10 * rc.getInfluence());
         }
         else if(toBuild == RobotType.SLANDERER){
@@ -67,31 +67,29 @@ public class EnlightenmentCenter extends GenericRobot{
         //if low influence, raise need help flag
         if(round > 100 && rc.getInfluence() < 200 && rc.getConviction() < 200){
             rc.setFlag(makeFlag(FlagConstants.NEED_HELP, 0));
+            help = true;
         }
 
         //build
         for (Direction dir : teamawesome.RobotPlayer.directions) {
-
             if (rc.canBuildRobot(toBuild, dir, (int) inf)) {
-                    System.out.println("Building a " + toBuild + " in the " + dir + " direction with " + inf + " influence!");
-                    lastBuilt = toBuild;
-                    ++robotsBuilt;
-                    rc.buildRobot(toBuild, dir, (int) inf);
-                }
                 System.out.println("Building a " + toBuild + " in the " + dir + " direction with " + inf + " influence!");
                 lastBuilt = toBuild;
+                ++robotsBuilt;
                 rc.buildRobot(toBuild, dir, (int) inf);
             }
+        }
 
 
 
         //Check the bidding conditions.
         double toBid = Math.pow((round *.01), 2);
-        if(rc.canBid((int)toBid)){
+        if(rc.canBid((int)toBid) && !help){
             System.out.println("Round " + round + " bidding " + toBid);
             rc.bid((int)toBid);
         }
         ++age;
+        help = false;
     }
     /**
      * Returns a random spawnable RobotType
@@ -126,13 +124,15 @@ public class EnlightenmentCenter extends GenericRobot{
      *     };
      */
     protected RobotType strategicSpawnableRobotType(int round) {
-        if (round < 300){
-            if(robotsBuilt % 10 == 0){
-                return(RobotType.MUCKRAKER);
-            }
-            else return(RobotType.SLANDERER);
+        if (round < 300) {
+            if (robotsBuilt % 3 == 0) {
+                return (RobotType.MUCKRAKER);
+            } else if(robotsBuilt % 10 - 1 == 0) return RobotType.SLANDERER;
+            else return (RobotType.POLITICIAN);
         }
-        else if(round > 700 && round < 900 ){
+        else if(round > 700 && round < 900 ) {
+            if (robotsBuilt % 5 == 0)
+                return (RobotType.SLANDERER);
             return(RobotType.POLITICIAN);
         }
         else return randomSpawnableRobotType(round);

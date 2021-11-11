@@ -204,6 +204,9 @@ public class Politician extends GenericRobot {
                 dirWeight += 15;
                 // raise a flag that an EC has been found
                 rc.setFlag(makeFlag(FlagConstants.NEUTRAL_ENLIGHTENMENT_CENTER_FLAG, 0));
+            } else if(robot.getType() == RobotType.MUCKRAKER) {
+                dirWeight += 10;
+                rc.setFlag(makeFlag(FlagConstants.ENEMY_MUCKRAKER_NEARBY_FLAG, 0));
             }
         } else {
             if(robot.getType() != RobotType.POLITICIAN)

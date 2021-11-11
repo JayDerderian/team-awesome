@@ -23,6 +23,7 @@ public strictfp class RobotPlayer {
 
     static int turnCount;
     protected static final int SLAN_RUSH = 300;
+    static Direction lastMove = null;
 
     /**
      * run() is the method that is called when a robot is instantiated in the Battlecode world.
@@ -105,28 +106,40 @@ public strictfp class RobotPlayer {
     }
 
     static void runMuckraker() throws GameActionException {
-        boolean moved = false;
         Team enemy = rc.getTeam().opponent();
         int actionRadius = rc.getType().actionRadiusSquared;
         for (RobotInfo robot : rc.senseNearbyRobots()) {
             if (robot.type.canBeExposed()) {
                 // It's a slanderer... go get them!
-                if (rc.canExpose(robot.location)) {
+                if (rc.canExpose(robot.location) && rc.getLocation().distanceSquaredTo(robot.getLocation()) < actionRadius) {
                     System.out.println("e x p o s e d");
                     rc.expose(robot.location);
                     return;
                 }
             }
-            if(robot.getTeam() != rc.getTeam() && robot.getType() == RobotType.SLANDERER && !moved) {
+            if(robot.getTeam() == enemy && robot.getType() == RobotType.SLANDERER) {
                 Direction dir = rc.getLocation().directionTo(robot.getLocation());
                 System.out.println("Slanderer spotted to the " + dir);
                 tryMove(dir);
-                moved = true;
+                return;
             }
         }
-        if(!moved)
+        for (RobotInfo robot : rc.senseNearbyRobots()) {
+            if(robot.getTeam() == rc.getTeam()) {
+                Direction dir = rc.getLocation().directionTo(robot.getLocation());
+                System.out.println("Avoiding allies to the " + dir);
+                if(rc.canMove(dir.opposite())) {
+                    tryMove(dir.opposite());
+                    return;
+                }
+            }
+        }
+        if((int)(Math.random()*10) == 0 || !rc.canMove(lastMove)) {
             if (tryMove(randomDirection()))
                 System.out.println("I moved!");
+        } else {
+            tryMove(lastMove);
+        }
     }
 
     /**
@@ -158,6 +171,7 @@ public strictfp class RobotPlayer {
         System.out.println("I am trying to move " + dir + "; " + rc.isReady() + " " + rc.getCooldownTurns() + " " + rc.canMove(dir));
         if (rc.canMove(dir)) {
             rc.move(dir);
+            lastMove = dir;
             return true;
         } else return false;
     }

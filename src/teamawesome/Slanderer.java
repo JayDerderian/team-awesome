@@ -55,9 +55,12 @@ public class Slanderer extends GenericRobot {
         int x = rc.getLocation().x;
         int y = rc.getLocation().y;
         for (RobotInfo robot : nearby) {
-            if (robot.getTeam() == rc.getTeam().opponent()) {
+            if (robot.getTeam() == rc.getTeam().opponent() || (robot.getTeam() == rc.getTeam() && robot.getType() == RobotType.ENLIGHTENMENT_CENTER)) {
                 xLean += robot.getLocation().x - x;
                 yLean += robot.getLocation().y - y;
+            } else if(robot.getTeam() == rc.getTeam() && robot.getLocation().distanceSquaredTo(rc.getLocation()) > 25) {
+                xLean -= robot.getLocation().x - x;
+                yLean -= robot.getLocation().y - y;
             }
         }
     }

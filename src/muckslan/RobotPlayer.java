@@ -1,29 +1,8 @@
-package stratx_han;
+package muckslan;
 import battlecode.common.*;
-import teamawesome.Muckraker;
 import teamawesome.Politician;
-import teamawesome.Slanderer;
-
-/**
- * Strategy experiment - sprint 3
- *
- * Variant of the examplefuncsplayer intended to explore counter strategies to our robot
- * Strategy:
- *  - toBuild influence level is the max of 50 or 10% of the EC's current influence
- *  - Build only slanderers for the first 300 rounds
- *     - except every 10th round build a muckraker
- *  - Build only politicians for the next 300 rounds
- *  - use randomspawnablerobot after that
- *  - randomspawnablerobot is weighted:
- *      - 20% muckraker
- *      - 30% slanderer
- *      - 50% politician
- *  - do not bid until the 750th round, then bid 5% of EC's influence each turn
- *  - slanderers do not ever leave range of another friendly robot
- */
 
 public strictfp class RobotPlayer {
-    public static final int BID_START = 600;
     static RobotController rc;
 
     static final RobotType[] spawnableRobot = {
@@ -44,8 +23,9 @@ public strictfp class RobotPlayer {
     };
 
     static int turnCount;
-    protected static final int SLAN_RUSH = 300;
-    protected static final int POLI_RUSH = 300;
+    protected static final int RUSH = 400;
+    protected static final int BID_START = 600;
+    static Direction lastMove = null;
 
     /**
      * run() is the method that is called when a robot is instantiated in the Battlecode world.
@@ -59,7 +39,6 @@ public strictfp class RobotPlayer {
         RobotPlayer.rc = rc;
         turnCount = 0;
         Politician poli = new Politician(rc);
-        Muckraker muck = new Muckraker(rc);
 
         System.out.println("I'm a " + rc.getType() + " and I just got created!");
         while (true) {
@@ -89,15 +68,9 @@ public strictfp class RobotPlayer {
     static void runEnlightenmentCenter() throws GameActionException {
         RobotType toBuild;
         // build only slanderers for the first SLAN_RUSH rounds
-        if(rc.getRoundNum() < SLAN_RUSH) {
-            if(rc.getRoundNum() % 10 != 0 )
-                toBuild = RobotType.SLANDERER;
-            else
-                toBuild = RobotType.MUCKRAKER;
-        } else if(rc.getRoundNum() < SLAN_RUSH + POLI_RUSH) {
-            toBuild = RobotType.POLITICIAN;
-        }
-        else {
+        if(rc.getRoundNum() < RUSH) {
+            toBuild = rushSpawn();
+        } else {
             toBuild = randomSpawnableRobotType();
         }
         int influence = (int)Math.max(50, 0.10 * rc.getInfluence());
@@ -114,7 +87,6 @@ public strictfp class RobotPlayer {
     }
 
     static void runPolitician() throws GameActionException {
-        boolean moved = false;
         Team enemy = rc.getTeam().opponent();
         int actionRadius = rc.getType().actionRadiusSquared;
         RobotInfo[] attackable = rc.senseNearbyRobots(actionRadius, enemy);
@@ -130,26 +102,11 @@ public strictfp class RobotPlayer {
                 rc.empower(actionRadius);
             }
         }
-        RobotInfo[] surroundings = rc.senseNearbyRobots();
-        for (RobotInfo robot:
-                  surroundings) {
-            if(robot.getTeam() == enemy ) {
-                Direction dir = rc.getLocation().directionTo(robot.getLocation());
-                System.out.println("Slanderer spotted to the " + dir);
-                tryMove(dir);
-                moved = true;
-                break;
-            }
-        }
-        if(!moved)
-            if (tryMove(randomDirection()))
-                System.out.println("I moved!");
+        if (tryMove(randomDirection()))
+            System.out.println("I moved!");
     }
 
-
     static void runSlanderer() throws GameActionException {
-        if(rc.senseNearbyRobots(rc.getType().actionRadiusSquared, rc.getTeam()) == null)
-            return;
         if (tryMove(randomDirection()))
             System.out.println("I moved!");
     }
@@ -177,12 +134,18 @@ public strictfp class RobotPlayer {
             if(robot.getTeam() == rc.getTeam()) {
                 Direction dir = rc.getLocation().directionTo(robot.getLocation());
                 System.out.println("Avoiding allies to the " + dir);
-                tryMove(dir.opposite());
-                return;
+                if(rc.canMove(dir.opposite())) {
+                    tryMove(dir.opposite());
+                    return;
+                }
             }
         }
-        if (tryMove(randomDirection()))
-            System.out.println("I moved!");
+        if((int)(Math.random()*10) == 0 || !rc.canMove(lastMove)) {
+            if (tryMove(randomDirection()))
+                System.out.println("I moved!");
+        } else {
+            tryMove(lastMove);
+        }
     }
 
     /**
@@ -200,22 +163,12 @@ public strictfp class RobotPlayer {
      * @return a random RobotType
      */
     static RobotType randomSpawnableRobotType() {
-        int diceRoll = (int) (Math.random() * 10);
-        if(rc.getRoundNum() < 600) {
-            if(diceRoll == 2 || diceRoll == 4 || diceRoll == 6) {
-                return RobotType.MUCKRAKER;
-            }
-            if(diceRoll % 2 == 0) {
-                return RobotType.SLANDERER;
-            }
-            return RobotType.POLITICIAN;
-        } else {
-            if(diceRoll % 2 == 0) {
-                return RobotType.SLANDERER;
-            }
-            return RobotType.POLITICIAN;
+        return spawnableRobot[(int) (Math.random() * spawnableRobot.length)];
+    }
 
-        }
+    static RobotType rushSpawn() {
+        if(((int) (Math.random() * 2)) % 2 == 0) return RobotType.SLANDERER;
+        return RobotType.MUCKRAKER;
     }
 
     /**
@@ -229,6 +182,7 @@ public strictfp class RobotPlayer {
         System.out.println("I am trying to move " + dir + "; " + rc.isReady() + " " + rc.getCooldownTurns() + " " + rc.canMove(dir));
         if (rc.canMove(dir)) {
             rc.move(dir);
+            lastMove = dir;
             return true;
         } else return false;
     }
