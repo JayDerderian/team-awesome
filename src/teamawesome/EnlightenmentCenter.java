@@ -40,38 +40,37 @@ public class EnlightenmentCenter extends GenericRobot{
             if(lastBuilt == RobotType.MUCKRAKER) toBuild = RobotType.SLANDERER;
         }
 
-        for (Direction dir : teamawesome.RobotPlayer.directions) {
-
-            if (rc.canBuildRobot(toBuild, dir, (int) inf)) {
-                    System.out.println("Building a " + toBuild + " in the " + dir + " direction with " + inf + " influence!");
-                    lastBuilt = toBuild;
-                    rc.buildRobot(toBuild, dir, (int) inf);
-                }
-        }
-
 
         //sense enemy robots
-        int conviction = 0;
-        int typeFlag = 25;
-        if(rc.canSenseRobot(rc.getID())){
-            RobotInfo sense = rc.senseRobot(rc.getID());
+        for (RobotInfo robot:
+                rc.senseNearbyRobots()) {
+            if(robot.getTeam() != rc.getTeam()){
 
-            //check team
-            if(sense.team != rc.getTeam()){
-                conviction = sense.conviction + 30;
-                switch (sense.type) {
-                    case ENLIGHTENMENT_CENTER: typeFlag = 50;   break;
-                    case POLITICIAN:           typeFlag = 0;    break;
-                    case SLANDERER:            typeFlag = 10;   break;
-                    case MUCKRAKER:            typeFlag = 20;   break;
+                switch (robot.type) {
+                    case POLITICIAN:
+                        rc.setFlag(makeFlag(FlagConstants.ENEMY_POLITICIAN_FLAG, 0));   break;
+                    case SLANDERER:
+                        rc.setFlag(makeFlag(FlagConstants.ENEMY_SLANDERER_NEARBY_FLAG, 0));   break;
+                    case MUCKRAKER:
+                        rc.setFlag(makeFlag(FlagConstants.ENEMY_MUCKRAKER_NEARBY_FLAG, 0));   break;
                 }
             }
 
         }
-        //set flag
-        int flag = typeFlag + conviction;
-        if(rc.canSetFlag(flag)){
-            rc.setFlag(flag);
+
+        //if low influence, raise need help flag
+        if(round > 100 && rc.getInfluence() < 200 && rc.getConviction() < 200){
+            rc.setFlag(makeFlag(FlagConstants.NEED_HELP, 0));
+        }
+
+        //build
+        for (Direction dir : teamawesome.RobotPlayer.directions) {
+
+            if (rc.canBuildRobot(toBuild, dir, (int) inf)) {
+                System.out.println("Building a " + toBuild + " in the " + dir + " direction with " + inf + " influence!");
+                lastBuilt = toBuild;
+                rc.buildRobot(toBuild, dir, (int) inf);
+            }
         }
 
         //Check the bidding conditions.
@@ -101,7 +100,7 @@ public class EnlightenmentCenter extends GenericRobot{
      */
     static RobotType strategicSpawnableRobotType(int round) {
         if (round < 300){
-            if(round % 10 == 0){
+            if(round % 5 == 0){
                 return(RobotType.MUCKRAKER);
             }
             else return(RobotType.SLANDERER);
@@ -111,5 +110,9 @@ public class EnlightenmentCenter extends GenericRobot{
         }
         else return teamawesome.RobotPlayer.spawnableRobot[(int) (Math.random()
                 * teamawesome.RobotPlayer.spawnableRobot.length)];
+    }
+
+    public RobotType getLastBuilt(){
+        return lastBuilt;
     }
 }

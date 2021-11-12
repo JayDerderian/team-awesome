@@ -10,7 +10,7 @@ import static teamawesome.FlagConstants.*;
 import static org.mockito.Mockito.*;
 
 import java.util.HashMap;
-
+import java.util.Map;
 
 
 public class GenericBotTest {
@@ -86,6 +86,36 @@ public class GenericBotTest {
         assertEquals(test, testFlag);
     }
 
+
+    //-----------------------------------LOCATION ENCODING/DECODING------------------------------//
+
+    /*
+    @Test - make sure a flag is encoded correctly
+    @Test - make sure a flag is decoded correctly
+     */
+
+    @Test
+    public void encodeMapCoordinates(){
+        RobotController rc = mock(RobotController.class);
+        Politician testBot = new Politician(rc);
+        int x = 12300;
+        int y = 32100;
+        MapLocation loc = new MapLocation(x,y);
+        int flag = testBot.encodeLocationInFlag(loc);
+        assertEquals(11123321, flag);
+    }
+
+    @Test
+    public void decodeMapCoordinates(){
+        RobotController rc = mock(RobotController.class);
+        Politician testBot = new Politician(rc);
+        int flag = 11123321;
+        int x = 12300;
+        int y = 32100;
+        MapLocation loc = testBot.decodeLocationFromFlag(flag);
+        assertEquals(x, loc.x);
+        assertEquals(y, loc.y);
+    }
 
 
     //--------------------------------------FLAG PARSING-----------------------------------------//
