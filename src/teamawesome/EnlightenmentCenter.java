@@ -7,6 +7,7 @@ public class EnlightenmentCenter extends GenericRobot{
     /**
      * Enlightenment Center Variables
      */
+    protected static final int BID_START = 800;
     public String robotStatement = "I'm an " + rc.getType() + "! Location " + rc.getLocation();
     protected RobotType lastBuilt;
     public EnlightenmentCenter(RobotController newRc) {
@@ -40,7 +41,11 @@ public class EnlightenmentCenter extends GenericRobot{
         }
 
         if(toBuild == RobotType.POLITICIAN){
-            inf = Math.pow((round *.01), 2) + 50;
+            if(round < 400){
+                inf = 150;
+            }else{
+                inf = Math.pow((round *.01), 2) + 50;
+            }
             if(myInf < inf) inf = 50;
         }
         else if(toBuild == RobotType.SLANDERER){
@@ -85,12 +90,20 @@ public class EnlightenmentCenter extends GenericRobot{
             }
         }
 
-        //Check the bidding conditions.
-        double toBid = Math.pow((round *.01), 2);
-        if(rc.canBid((int)toBid)){
-            System.out.println("Round " + round + " bidding " + toBid);
-            rc.bid((int)toBid);
-        }
+        //Bid
+        int toBid;
+        //if(round < BID_START){
+            toBid = (int)Math.pow((round *.01), 2);
+            if(rc.canBid((int)toBid)){
+                System.out.println("Round " + round + " bidding " + toBid);
+                rc.bid((int)toBid);
+            }
+       /* }else {
+            toBid = (int)0.1 * rc.getInfluence();
+            if(rc.canBid(toBid)) {
+                rc.bid(toBid);
+            }
+        }*/
     }
     /**
      * Returns a random spawnable RobotType
@@ -111,17 +124,20 @@ public class EnlightenmentCenter extends GenericRobot{
      *     };
      */
     static RobotType strategicSpawnableRobotType(int round) {
-        if (round < 300){
+        //if (round < 400){
             if(round % 5 == 0){
                 return(RobotType.MUCKRAKER);
             }
+            if(round %30 == 0){
+                return(RobotType.POLITICIAN);
+            }
             else return(RobotType.SLANDERER);
-        }
+      /*  }
         else if(round > 600 && round < 800 ){
             return(RobotType.POLITICIAN);
         }
         else return teamawesome.RobotPlayer.spawnableRobot[(int) (Math.random()
-                * teamawesome.RobotPlayer.spawnableRobot.length)];
+                * teamawesome.RobotPlayer.spawnableRobot.length)];*/
     }
 
     public RobotType getLastBuilt(){
