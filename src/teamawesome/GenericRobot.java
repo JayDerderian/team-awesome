@@ -6,8 +6,8 @@ import battlecode.common.*;
 import scala.Int;
 
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.lang.Math;
+import java.util.List;
 
 /**
  * GenericRobot
@@ -72,17 +72,17 @@ abstract public class GenericRobot {
             newFlag = Integer.parseInt(flagStr);
         }
         // 5 digit flags
-        else if(flag == ENEMY_POLITICIAN_FLAG){
+        else if (flag == ENEMY_POLITICIAN_FLAG){
             String EF = Integer.toString(ENEMY_POLITICIAN_FLAG + conv);
             String flagStr = pw + EF;
             newFlag = Integer.parseInt(flagStr);
         }
-        else if(flag == ENEMY_SLANDERER_NEARBY_FLAG){
+        else if (flag == ENEMY_SLANDERER_NEARBY_FLAG){
             String EF = Integer.toString(ENEMY_SLANDERER_NEARBY_FLAG + conv);
             String flagStr = pw + EF;
             newFlag = Integer.parseInt(flagStr);
         }
-        else if(flag == ENEMY_MUCKRAKER_NEARBY_FLAG){
+        else if (flag == ENEMY_MUCKRAKER_NEARBY_FLAG){
             String EF = Integer.toString(ENEMY_MUCKRAKER_NEARBY_FLAG + conv);
             String flagStr = pw + EF;
             newFlag = Integer.parseInt(flagStr);
@@ -100,11 +100,11 @@ abstract public class GenericRobot {
      * Supply a given robot's id, and this method will attempt to retrieve
      * the flag of the given bot and pass it to the helper parser method.
      *
-     * A small hashtable will be returned who's values can be searched for
+     * A small hash map will be returned who's values can be searched for
      * using the FlagConstants as keys. Each flag/key will have an associated
      * MapLocation value.
      *
-     * If there's an error at any point, then a table containing the key ERROR
+     * If there's an error at any point, then a map containing the key ERROR
      * will be returned.
      *
      * @param id
@@ -119,7 +119,7 @@ abstract public class GenericRobot {
             RobotInfo info = rc.senseRobot(id);
             int flag = rc.getFlag(info.getID());
             // make sure this is one of ours!
-            if(isOurs(flag)) {
+            if (isOurs(flag)) {
                 System.out.println("retrieveFlag -> This was one of our flags!");
                 res = parseFlag(info, flag);
             }
@@ -140,7 +140,7 @@ abstract public class GenericRobot {
         HashMap<Integer, MapLocation> res = new HashMap<>();
         // NOTE: this is redundant if parseFlag is called from retrieveFlag
         // this is here in case parseFlag is called separately.
-        if(!isOurs(flagOrig)){
+        if (!isOurs(flagOrig)){
             System.out.println(("parseFlag -> Not one of our flags!"));
             res.put(ERROR, info.getLocation());
             return res;
@@ -160,6 +160,10 @@ abstract public class GenericRobot {
                 System.out.println("parseFlag -> someone needs help!");
                 res.put(NEED_HELP, info.getLocation());
             }
+            else if (flag == GO_HERE) {
+                System.out.println("parseFlag -> need to go this way!");
+                res.put(GO_HERE, info.getLocation());
+            }
             else {
                 System.out.println("parseFlag -> Unable to parse 3-digit flag!");
                 res.put(ERROR, info.getLocation());
@@ -173,17 +177,25 @@ abstract public class GenericRobot {
             // subtract last two digits to get base flag. i.e. 302 - 2 == 300
             int conv = flagTemp % 100;
             int flag = flagTemp - conv;
-            if(flag == ENEMY_ENLIGHTENMENT_CENTER_FLAG)
+            if (flag == ENEMY_ENLIGHTENMENT_CENTER_FLAG) {
+                System.out.println("parseFlag -> there's an enemy Enlightenment Center this way!");
                 res.put(ENEMY_ENLIGHTENMENT_CENTER_FLAG, info.getLocation());
+            }
             // enemy politician!
-            if(flag/100 == 1)
+            if (flag/100 == 1) {
+                System.out.println("parseFlag -> there's an enemy Politician this way!");
                 res.put(ENEMY_POLITICIAN_FLAG, info.getLocation());
+            }
             // enemy slanderer!
-            else if(flag/100 == 2)
+            else if (flag/100 == 2) {
+                System.out.println("parseFlag -> there's an enemy Slanderer this way!");
                 res.put(ENEMY_SLANDERER_NEARBY_FLAG, info.getLocation());
+            }
             // enemy muckraker!
-            else if (flag/100 == 3)
+            else if (flag/100 == 3) {
+                System.out.println("parseFlag -> there's an enemy Muckraker this way!");
                 res.put(ENEMY_MUCKRAKER_NEARBY_FLAG, info.getLocation());
+            }
             else {
                 System.out.println("parseFlag -> unable to parse 5-digit flag!");
                 res.put(ERROR, info.getLocation());
@@ -201,8 +213,9 @@ abstract public class GenericRobot {
 
     public Boolean isOurs(int flag){
         int len = countDigis(flag);
+        if(flag > 11300300) return false;
         if (len > 5 || len == 4 || len < 3) {
-            System.out.print("Not one of our flags!");
+            System.out.print("isOurs -> Not one of our flags!");
             return false;
         }
         /*
@@ -212,13 +225,87 @@ abstract public class GenericRobot {
          * and k is the number of digits to remove. since n is unknown until we actually get a
          * flag, we'll have to count the total digits since our flags are either 3 or 5 digits long
          *
-         * ideally body will either equal 10 or 1000
-         *
          */
         int firstTwo = flag / (int) Math.pow(10,(len-2));
         if (firstTwo != PASSWORD)
             return false;
         return true;
+    }
+
+
+    /**
+     * Flag encoding methods:
+     *
+     * ENCODE:
+     * 1. get x and y from MapLocation
+     * 2. apply hash function (to be defined) to each coordinate
+     * 3. change new x and y to strings
+     * 4. concatinate
+     * 5. change back to int and return.
+     *
+     * DECODE:
+     * 1. Change 6-digit int to a string
+     * 2. Split in two
+     * 3. Change each half back into an int
+     * 4. Put through reverse hash
+     * 5. Create new MapLocation Object and assign
+     *    to contained x and y fields.
+     *
+     */
+
+
+    /**
+     * Takes a MapLocation as an argument and returns encoded x/y coordinates
+     * in the form of a setable flag. Returns an ERROR flag value if something
+     * goes wrong.
+     *
+     * @param loc
+     * @return
+     */
+    public int encodeLocationInFlag(MapLocation loc){
+        String pw = Integer.toString(PASSWORD);
+        String xS = Integer.toString(loc.x / 100);
+        String yS = Integer.toString(loc.y / 100);
+        String flagStr = pw + xS + yS;
+        return Integer.parseInt(flagStr);
+    }
+
+    /**
+     * Takes a given coordinates flag and returns a MapLocation object
+     * containing the approximate x, y coordinates.
+     *
+     * @param flagOrig
+     * @return MapLocation
+     */
+    public MapLocation decodeLocationFromFlag(int flagOrig){
+        System.out.println("decodeFlag -> flag inputted = " + flagOrig);
+        // remove first two (since it's the password)
+        int flagTemp = flagOrig % 1000000;
+        System.out.println("decodeFlag -> flag w/o pw = " + flagTemp);
+        // split into two separate integers
+        String flagStr = Integer.toString(flagTemp);
+        int mid = flagStr.length()/2;
+        String xStr = flagStr.substring(0, mid);
+        String yStr = flagStr.substring(mid);
+        int x = Integer.parseInt(xStr);
+        int y = Integer.parseInt(yStr);
+        return new MapLocation(x *= 100, y *= 100);
+    }
+
+    /**
+     * Find and return a list of all enemy bots within your surroundings
+     * @return List
+     * @throws NullPointerException
+     */
+    public HashMap<Integer, RobotInfo> findThreats(RobotController rc) throws NullPointerException{
+        Team enemy = rc.getTeam().opponent();
+        HashMap<Integer, RobotInfo> threats = null;
+        for (RobotInfo robot : rc.senseNearbyRobots()) {
+            if(robot.getTeam() == enemy){
+                threats.put(ENEMY_INFO, robot);
+            }
+        }
+        return threats;
     }
 
 
