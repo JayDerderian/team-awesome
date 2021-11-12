@@ -27,7 +27,7 @@ public class EnlightenmentCenter extends GenericRobot{
                 toBuild = RobotType.POLITICIAN;
         }
 
-        if(round < 600 || round > 800){
+        if(round < 300){
             for (RobotInfo robot:
                     rc.senseNearbyRobots()) {
                 if (robot.getTeam() == rc.getTeam()) {
@@ -117,7 +117,7 @@ public class EnlightenmentCenter extends GenericRobot{
             }
             else return(RobotType.SLANDERER);
         }
-        else if(round > 700 && round < 900 ){
+        else if(round > 600 && round < 800 ){
             return(RobotType.POLITICIAN);
         }
         else return teamawesome.RobotPlayer.spawnableRobot[(int) (Math.random()
