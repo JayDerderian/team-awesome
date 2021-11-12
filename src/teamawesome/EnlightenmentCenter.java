@@ -27,6 +27,18 @@ public class EnlightenmentCenter extends GenericRobot{
                 toBuild = RobotType.POLITICIAN;
         }
 
+        if(round < 600 || round > 800){
+            for (RobotInfo robot:
+                    rc.senseNearbyRobots()) {
+                if (robot.getTeam() == rc.getTeam()) {
+                    switch (robot.type) {
+                        case POLITICIAN:
+                            toBuild = strategicSpawnableRobotType(round);
+                    }
+                }
+            }
+        }
+
         if(toBuild == RobotType.POLITICIAN){
             inf = Math.pow((round *.01), 2) + 50;
             if(myInf < inf) inf = 50;
