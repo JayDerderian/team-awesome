@@ -27,6 +27,18 @@ public class EnlightenmentCenter extends GenericRobot{
                 toBuild = RobotType.POLITICIAN;
         }
 
+        if(round < 600 || round > 800){
+            for (RobotInfo robot:
+                    rc.senseNearbyRobots()) {
+                if (robot.getTeam() == rc.getTeam()) {
+                    switch (robot.type) {
+                        case POLITICIAN:
+                            toBuild = strategicSpawnableRobotType(round);
+                    }
+                }
+            }
+        }
+
         if(toBuild == RobotType.POLITICIAN){
             inf = Math.pow((round *.01), 2) + 50;
             if(myInf < inf) inf = 50;
@@ -100,7 +112,7 @@ public class EnlightenmentCenter extends GenericRobot{
      */
     static RobotType strategicSpawnableRobotType(int round) {
         if (round < 300){
-            if(round % 10 == 0){
+            if(round % 5 == 0){
                 return(RobotType.MUCKRAKER);
             }
             else return(RobotType.SLANDERER);
@@ -110,5 +122,9 @@ public class EnlightenmentCenter extends GenericRobot{
         }
         else return teamawesome.RobotPlayer.spawnableRobot[(int) (Math.random()
                 * teamawesome.RobotPlayer.spawnableRobot.length)];
+    }
+
+    public RobotType getLastBuilt(){
+        return lastBuilt;
     }
 }
