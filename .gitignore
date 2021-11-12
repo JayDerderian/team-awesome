@@ -21,6 +21,7 @@ src/lectureplayer
 *.ipr
 *.iws
 /.idea/
+*.hprof
 
 
 # User-specific stuff:

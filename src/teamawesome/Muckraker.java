@@ -11,14 +11,12 @@ public strictfp class Muckraker extends GenericRobot {
 
     public MapLocation enemyECLocation;
     public Direction enemyECDirection;
-//    boolean enemyECLocationSet = false;
-    boolean enemyEcFound = false;
-//    boolean botDirectionToMoveSet = false;
-    Direction botDirectionToMove;
+    public Direction botDirectionToMove;
     public int xLean;
     public int yLean;
     public int dirIdx;
-    public RobotInfo[] nearby;
+    boolean enemyECLocationSet = false;
+    boolean enemyEcFound = false;
 
     /**
      * constructor
@@ -36,7 +34,6 @@ public strictfp class Muckraker extends GenericRobot {
         xLean = 0; yLean = 0; // Reset guiding
         System.out.println(robotStatement);
         Team enemy = rc.getTeam().opponent();
-//        RobotInfo[] sensedNearByRobots = rc.senseNearbyRobots();
 
         for (RobotInfo robot : rc.senseNearbyRobots()) {
             // ENEMY
@@ -50,9 +47,10 @@ public strictfp class Muckraker extends GenericRobot {
                         return;
                     }
                 }
-                if (robot.type == RobotType.ENLIGHTENMENT_CENTER) {
+                if (robot.type == RobotType.ENLIGHTENMENT_CENTER) { // enemy EC
                     enemyEcFound = true;
                     enemyECLocation = robot.getLocation();
+                    enemyECLocationSet = true;
                     enemyECDirection = rc.getLocation().directionTo(enemyECLocation);
 
                     // set Flag to let other muck's know
@@ -62,12 +60,11 @@ public strictfp class Muckraker extends GenericRobot {
 
                     break;
                 }
-            } else if (robot.getTeam() != enemy){
+            } else if (robot.getTeam() != enemy) {
                 if(rc.canGetFlag(robot.ID)) {
                     int flagValue = rc.getFlag(robot.ID);
-                    if(flagValue == 11400){
+                    if(flagValue == 11400) {
                         botDirectionToMove = rc.getLocation().directionTo(robot.getLocation());
-//                        botDirectionToMoveSet = true;
                         while(!enemyEcFound) {
                             if (tryMove(botDirectionToMove))
                                 System.out.println("MUCK moved!");
@@ -81,36 +78,17 @@ public strictfp class Muckraker extends GenericRobot {
                                             System.out.println("e x p o s e d");
                                             rc.expose(robot1.location);
                                             return;
-                                        }
-                                    }
-                                }
+                                        } } }
                                 if (robot1.getTeam() == enemy && robot1.getType() == RobotType.ENLIGHTENMENT_CENTER) {
                                     enemyEcFound = true;
                                     flagValue = makeFlag(ENEMY_ENLIGHTENMENT_CENTER_FLAG, 0);
                                     if (rc.canSetFlag(flagValue))
                                         rc.setFlag(flagValue);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
+                                } } } } } }
         }
 
-        // Move
-        if(!enemyEcFound) {
-//            nearby = rc.senseNearbyRobots();
-//            if (nearby.length == 0)
-//                return;
-//            int x = rc.getLocation().x;
-//            int y = rc.getLocation().y;
-//            for (RobotInfo robot : nearby) {
-//                if (robot.getTeam() == rc.getTeam().opponent()) {
-//                    xLean += robot.getLocation().x - x;
-//                    yLean += robot.getLocation().y - y;
-//                }
-//            }
+        // Move Muckraker
+        if(!enemyEcFound) { // Initially explore map quickly (along with Slanders)
             if (xLean == 0 && yLean == 0) {
                 int[] x1 = {0, 1, -1, 3, -3, 2, -2, 4, -4};
                 for (int i: x1) {
@@ -122,8 +100,7 @@ public strictfp class Muckraker extends GenericRobot {
                     if(enemyEcFound)
                         break;
                 }
-            }
-            else {
+            } else {
                 // Clean the leans somewhat
                 if (Math.abs(xLean) > 2 * Math.abs(yLean)) {yLean = 0;}
                 else if (Math.abs(yLean) > 2 * Math.abs(xLean)) {xLean = 0;}
@@ -131,44 +108,33 @@ public strictfp class Muckraker extends GenericRobot {
                 yLean = Math.min(1, Math.max(-1, yLean)) * -1;
                 for (Direction dir : RobotPlayer.directions) {
                     if (dir.getDeltaY() == yLean && dir.getDeltaX() == xLean) {
-//                        System.out.println("I'm moving to " + dir);
                         if (rc.canMove(dir)) { rc.move(dir); }
                         return;
                     }
                     if(enemyEcFound)
                         break;
-                }
-//                System.out.println("Cannot Move!!!");
-            }
-        } else {
-            if(tryMove(rc.getLocation().directionTo(enemyECLocation))){
+                } }
+        } else { // If enemy EC found, then move in close proximity to the enemy EC
+            if(enemyECLocationSet && tryMove(rc.getLocation().directionTo(enemyECLocation)))
                 System.out.println("Muck Moved!");
-                return;
-            } else {
-                Direction leastPassabilityDirection = getLeastPassableDirection();
-                if(tryMove(leastPassabilityDirection)) {
+            else
+                if(tryMove(getLeastPassableDirection()))
                     System.out.println("Muck Moved!");
-                } else {
-                    if (tryMove(randomDirection())) {
+                else
+                    if (tryMove(randomDirection()))
                         System.out.println("Muck moved!");
-                    }
-                }
-            }
-        }
-    }
+    } }
 
     private Direction getLeastPassableDirection() throws GameActionException {
         double minPass = 1.0;
         Direction minPassDir = randomDirection();
         for(Direction d: Direction.values()){
-//            if(hasPrevMovedDir && prevMovedDir.opposite() != d){
+            if(rc.canSenseLocation(rc.adjacentLocation(d))){
                 double currPass = rc.sensePassability(rc.adjacentLocation(d));
                 if(currPass < minPass){
                     minPass = currPass;
                     minPassDir = d;
-                }
-//            }
-        }
+                } } }
         return minPassDir;
     }
 
