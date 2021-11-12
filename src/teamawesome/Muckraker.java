@@ -63,7 +63,7 @@ public strictfp class Muckraker extends GenericRobot {
 //        homeECLocation = rc.getLocation();
 
         Team enemy = rc.getTeam().opponent();
-        enemyEcFound = false;
+//        enemyEcFound = false;
 
         RobotInfo[] sensedNearByRobots = rc.senseNearbyRobots();
 
@@ -103,6 +103,8 @@ public strictfp class Muckraker extends GenericRobot {
                                     botDirectionToMoveSet = true;
                                 }
                             }
+                            if (rc.canSetFlag(flagValue))
+                                rc.setFlag(flagValue);
                         }
                     } else {
                         if(flagValue == 1140 && !botDirectionToMoveSet) {
@@ -143,32 +145,63 @@ public strictfp class Muckraker extends GenericRobot {
 //                }
 //            }
 //        }
+        if(!enemyEcFound) {
+            if (xLean == 0 && yLean == 0) {
+                int[] x = {0, 1, -1, 3, -3, 2, -2, 4, -4};
+                for (int i: x) {
+                    if (rc.canMove(directions[myMod((dirIdx + i), directions.length)])) {
+                        rc.move(directions[myMod((dirIdx + i), directions.length)]);
+                        dirIdx += i;
+                        break;
+                    }
+                }
+            }
+            else {
+                // Clean the leans somewhat
+                if (Math.abs(xLean) > 2 * Math.abs(yLean)) {yLean = 0;}
+                else if (Math.abs(yLean) > 2 * Math.abs(xLean)) {xLean = 0;}
+                xLean = Math.min(1, Math.max(-1, xLean)) * -1;
+                yLean = Math.min(1, Math.max(-1, yLean)) * -1;
+                for (Direction dir : directions) {
+                    if (dir.getDeltaY() == yLean && dir.getDeltaX() == xLean) {
+                        System.out.println("I'm moving to " + dir);
+                        if (rc.canMove(dir)) { rc.move(dir); }
+                        return;
+                    }
+                }
+                System.out.println("Cannot Move!!!");
+            }
+        } else {
+            if(botDirectionToMoveSet){
+                if(tryMove(botDirectionToMove)) {
+                    System.out.println("Muck Moved!");
+                    hasPrevMovedDir = true;
+                    prevMovedDir = botDirectionToMove;
+                } else {
+                    Direction nextRandom = randomDirection();
+                    if (tryMove(nextRandom)) {
+                        System.out.println("Muck moved!");
+                        hasPrevMovedDir = true;
+                        prevMovedDir = nextRandom;
+                    }
+                }
+        } else {
+            Direction leastPassabilityDirection = getLeastPassableDirection();
+            if(tryMove(leastPassabilityDirection)) {
+                hasPrevMovedDir = true;
+                prevMovedDir = leastPassabilityDirection;
+                System.out.println("Muck Moved!");
+            } else {
+                Direction nextRandom = randomDirection();
+                if (tryMove(nextRandom)) {
+                    System.out.println("Muck moved!");
+                    hasPrevMovedDir = true;
+                    prevMovedDir = nextRandom;
+                }
+            }
+        }
+        }
 
-        if (xLean == 0 && yLean == 0) {
-            int[] x = {0, 1, -1, 3, -3, 2, -2, 4, -4};
-            for (int i: x) {
-                if (rc.canMove(directions[myMod((dirIdx + i), directions.length)])) {
-                    rc.move(directions[myMod((dirIdx + i), directions.length)]);
-                    dirIdx += i;
-                    break;
-                }
-            }
-        }
-        else {
-            // Clean the leans somewhat
-            if (Math.abs(xLean) > 2 * Math.abs(yLean)) {yLean = 0;}
-            else if (Math.abs(yLean) > 2 * Math.abs(xLean)) {xLean = 0;}
-            xLean = Math.min(1, Math.max(-1, xLean)) * -1;
-            yLean = Math.min(1, Math.max(-1, yLean)) * -1;
-            for (Direction dir : directions) {
-                if (dir.getDeltaY() == yLean && dir.getDeltaX() == xLean) {
-                    System.out.println("I'm moving to " + dir);
-                    if (rc.canMove(dir)) { rc.move(dir); }
-                    return;
-                }
-            }
-            System.out.println("Cannot Move!!!");
-        }
 
         botDirectionToMoveSet = false;
 //        if (rc.canSetFlag(1000))
