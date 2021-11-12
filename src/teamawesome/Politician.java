@@ -20,6 +20,7 @@ public class Politician extends GenericRobot {
     public boolean empowered;
     LinkedList<Integer> rolodex;
     boolean juggernaut; // juggernaut Politicians will ignore all enemies and focus on neutral ECs
+    boolean ECsighted;
 
     public Politician(RobotController newRc) {
         super(newRc);
@@ -62,6 +63,7 @@ public class Politician extends GenericRobot {
                 homeFlag = -1;
             }
         }
+        ECsighted = false;
         System.out.println("I'm a politician! My mothership is " + mothership + " and their flag is " + homeFlag);
         checkRolodex();
         Team enemy = rc.getTeam().opponent();
@@ -197,14 +199,15 @@ public class Politician extends GenericRobot {
         if(robot.getTeam() != rc.getTeam()) {
             dirWeight += 1;
             if(robot.getType() == RobotType.ENLIGHTENMENT_CENTER) {
-                dirWeight += 1;
+                dirWeight += 15;
                 // raise a flag that an EC has been found
+                ECsighted = true;
                 rc.setFlag(makeFlag(FlagConstants.NEUTRAL_ENLIGHTENMENT_CENTER_FLAG, 0));
             }
         } else {
             if(robot.getType() != RobotType.POLITICIAN)
                 dirWeight -= 0.5;
-            else {
+            else if(!ECsighted){
                 checkPolitic(robot);
                 HashMap<Integer, MapLocation> flag = retrieveFlag(rc, robot.getID());
                 // strongly prefer to travel toward politicians that have sighted a neutral EC
