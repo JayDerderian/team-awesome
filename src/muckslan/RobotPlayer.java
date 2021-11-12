@@ -25,7 +25,7 @@ public strictfp class RobotPlayer {
     static int turnCount;
     protected static final int RUSH = 400;
     protected static final int BID_START = 600;
-    static Direction lastMove = null;
+    static Direction lastMove = Direction.CENTER;
 
     /**
      * run() is the method that is called when a robot is instantiated in the Battlecode world.
