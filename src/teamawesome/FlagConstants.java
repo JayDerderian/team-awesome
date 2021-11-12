@@ -18,6 +18,8 @@ public interface FlagConstants {
     static final int ENEMY_INFO = 4;
     static final int OUT_OF_RANGE = 5;
     static final int NEUTRAL = 6;
+    static final int SEND_LOCATION = 7;
+    static final int LOCATION_INFO = 8;
 
 
     // Detected Enemy Robot Flags

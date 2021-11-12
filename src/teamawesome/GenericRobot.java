@@ -201,6 +201,12 @@ abstract public class GenericRobot {
                 res.put(ERROR, info.getLocation());
             }
         }
+        // this is location info!
+        else if (len == 8){
+            System.out.println("parseFlag -> Received location info!");
+            MapLocation loc = decodeLocationFromFlag(flagOrig);
+            res.put(LOCATION_INFO, loc);
+        }
         return res;
     }
 
