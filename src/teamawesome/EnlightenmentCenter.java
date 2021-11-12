@@ -25,7 +25,7 @@ public class EnlightenmentCenter extends GenericRobot{
         double inf;
         RobotType toBuild = strategicSpawnableRobotType(round);
         // for first 50 rounds after creation, build the slanderer
-        if(age <= 50) toBuild = RobotType.SLANDERER;
+        if(age <= 10) toBuild = RobotType.SLANDERER;
         // check for nearby muckrakers, build a politician to defend
         for (RobotInfo robot:
              rc.senseNearbyRobots()) {
@@ -34,14 +34,14 @@ public class EnlightenmentCenter extends GenericRobot{
         }
 
         if(toBuild == RobotType.POLITICIAN){
-            inf = Math.pow((round *.01), 2) + 100;
+            inf = Math.pow((round *.01), 2) + 50;
             if(myInf < inf) inf = (int)Math.max(50, 0.10 * rc.getInfluence());
         }
         else if(toBuild == RobotType.SLANDERER){
             inf = Math.pow((round *.01), 2) + 150;
             if(myInf < inf) inf = (int)Math.max(50, 0.10 * rc.getInfluence());
         }else{
-            inf = 20;
+            inf = 50;
             // prevent getting stuck just building muckrakers
             if(lastBuilt == RobotType.MUCKRAKER) toBuild = RobotType.SLANDERER;
         }
@@ -98,21 +98,9 @@ public class EnlightenmentCenter extends GenericRobot{
      */
     static RobotType randomSpawnableRobotType(int round) {
         int diceRoll = (int) (Math.random() * 10);
-        if(round < 600) {
-            if(diceRoll == 2 || diceRoll == 4 || diceRoll == 6) {
-                return RobotType.MUCKRAKER;
-            }
-            if(diceRoll % 2 == 0) {
-                return RobotType.SLANDERER;
-            }
-            return RobotType.POLITICIAN;
-        } else {
-            if(diceRoll % 2 == 0) {
-                return RobotType.SLANDERER;
-            }
-            return RobotType.POLITICIAN;
-
-        }
+        if(diceRoll % 3 == 0) return RobotType.SLANDERER;
+        if(diceRoll == 1) return RobotType.MUCKRAKER;
+        return RobotType.POLITICIAN;
     }
 
     /**
@@ -127,14 +115,17 @@ public class EnlightenmentCenter extends GenericRobot{
         if (round < 300) {
             if (robotsBuilt % 3 == 0) {
                 return (RobotType.MUCKRAKER);
-            } else if(robotsBuilt % 10 - 1 == 0) return RobotType.SLANDERER;
-            else return (RobotType.POLITICIAN);
+            } else if(robotsBuilt % 10 - 1 == 0) return RobotType.POLITICIAN;
+            else return (RobotType.SLANDERER);
         }
+        /*
         else if(round > 700 && round < 900 ) {
             if (robotsBuilt % 5 == 0)
                 return (RobotType.SLANDERER);
             return(RobotType.POLITICIAN);
         }
-        else return randomSpawnableRobotType(round);
+
+         */
+        return randomSpawnableRobotType(round);
     }
 }

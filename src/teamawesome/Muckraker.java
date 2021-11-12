@@ -11,6 +11,7 @@ public strictfp class Muckraker extends GenericRobot {
     public boolean exposedSuccess = false;
     public MapLocation neutralLocation;
     public int flagSensed = 00000;
+    protected Direction lastMove;
 
     /**
      * constructor
@@ -18,6 +19,7 @@ public strictfp class Muckraker extends GenericRobot {
      */
     public Muckraker(RobotController newRc) {
         super(newRc);
+        lastMove = null;
     }
 
     /**
@@ -76,9 +78,16 @@ public strictfp class Muckraker extends GenericRobot {
 
         // 2. Muckraker move --> toward Enemy slanderer (or) random direction
         if(DetectEnemySlanderer){
-             tryMove(detectedDirection);
-        } else if (tryMove(randomDirection())){
-            System.out.println("I moved!");
+             if(tryMove(detectedDirection))
+                 lastMove = detectedDirection;
+        } else if((int)(Math.random()*10) == 0 || !rc.canMove(lastMove)) {
+            Direction dir = randomDirection();
+            if (tryMove(dir)){
+                System.out.println("I moved!");
+                lastMove = dir;
+            }
+        } else {
+            tryMove(lastMove);
         }
     }
 }
