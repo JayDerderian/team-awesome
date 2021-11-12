@@ -52,8 +52,11 @@ public class Slanderer extends GenericRobot {
             System.out.println("No one nearby.");
             return;
         }
-        int x = rc.getLocation().x;
-        int y = rc.getLocation().y;
+        int x = 0, y = 0;
+        if (rc.getLocation() != null) {
+            x = rc.getLocation().x;
+            y = rc.getLocation().y;
+        }
         for (RobotInfo robot : nearby) {
             if (robot.getTeam() == rc.getTeam().opponent()) {
                 xLean += robot.getLocation().x - x;
@@ -70,6 +73,7 @@ public class Slanderer extends GenericRobot {
                 if (rc.canMove(directions[myMod((dirIdx + i), directions.length)])) {
                     rc.move(directions[myMod((dirIdx + i), directions.length)]);
                     dirIdx += i;
+                    System.out.println("I'm moving randomly");
                     break;
                 }
             }

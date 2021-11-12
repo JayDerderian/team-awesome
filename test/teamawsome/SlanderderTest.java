@@ -21,7 +21,7 @@ public class SlanderderTest {
     RobotInfo[] enemyRobotInfoArray = { enemy1, enemy2, enemy3 };
     RobotInfo[] noNearbyArray = {};
 
-    RobotInfo neutralEC1 = new RobotInfo(4, Team.NEUTRAL, RobotType.ENLIGHTENMENT_CENTER, 0, 0, new MapLocation(20100, 20100));
+    RobotInfo neutralEC1 = new RobotInfo(4, Team.NEUTRAL, RobotType.ENLIGHTENMENT_CENTER, 0, 0, new MapLocation(20000, 20000));
     RobotInfo neutralEC2 = new RobotInfo(5, Team.NEUTRAL, RobotType.ENLIGHTENMENT_CENTER, 0, 0, new MapLocation(20100, 20100));
     RobotInfo[] neutralECRobotInfoArray = { neutralEC1 };
 
@@ -52,8 +52,37 @@ public class SlanderderTest {
 
         Slanderer robot = new Slanderer(rc);
         robot.turn();
-
         assertEquals(enemyRobotInfoArray[0].getTeam(), Team.B);
         assertTrue(rc.canExpose(new MapLocation(20000, 20000)));
+    }
+
+    @Test
+    public void ifSlanderersDetectedEC() throws GameActionException {
+        RobotController rc = mock(RobotController.class);
+        when(rc.getType()).thenReturn(RobotType.SLANDERER);
+        when(rc.getTeam()).thenReturn(Team.A);
+        when(rc.getLocation()).thenReturn(new MapLocation(20001, 20001));
+        when(rc.senseNearbyRobots()).thenReturn(neutralECRobotInfoArray);
+        when(rc.canExpose(new MapLocation(20000, 20000))).thenReturn(true);
+
+        Slanderer robot = new Slanderer(rc);
+        robot.turn();
+
+        assertEquals(robot.nearby[0].getLocation(), neutralEC1.getLocation());
+    }
+
+    @Test
+    public void ifSlandererMoveAwayFromEnemies() throws GameActionException {
+        RobotController rc = mock(RobotController.class);
+        when(rc.getType()).thenReturn(RobotType.SLANDERER);
+        when(rc.getTeam()).thenReturn(Team.A);
+        when(rc.senseNearbyRobots()).thenReturn(enemyRobotInfoArray);
+        when(rc.canExpose(new MapLocation(20000, 20000))).thenReturn(true);
+
+
+        Slanderer robot = new Slanderer(rc);
+        robot.turn();
+        assertEquals(robot.xLean, -1);
+        assertEquals(robot.yLean, -1);
     }
 }
