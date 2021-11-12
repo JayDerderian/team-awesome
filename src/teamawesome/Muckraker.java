@@ -46,6 +46,7 @@ public strictfp class Muckraker extends GenericRobot {
                     if (rc.canExpose(robot.location)) {
                         System.out.println("e x p o s e d");
                         rc.expose(robot.location);
+                        tryMove(rc.getLocation().directionTo(robot.getLocation()));
                         return;
                     }
                 }
@@ -99,17 +100,17 @@ public strictfp class Muckraker extends GenericRobot {
 
         // Move
         if(!enemyEcFound) {
-            nearby = rc.senseNearbyRobots();
-            if (nearby.length == 0)
-                return;
-            int x = rc.getLocation().x;
-            int y = rc.getLocation().y;
-            for (RobotInfo robot : nearby) {
-                if (robot.getTeam() == rc.getTeam().opponent()) {
-                    xLean += robot.getLocation().x - x;
-                    yLean += robot.getLocation().y - y;
-                }
-            }
+//            nearby = rc.senseNearbyRobots();
+//            if (nearby.length == 0)
+//                return;
+//            int x = rc.getLocation().x;
+//            int y = rc.getLocation().y;
+//            for (RobotInfo robot : nearby) {
+//                if (robot.getTeam() == rc.getTeam().opponent()) {
+//                    xLean += robot.getLocation().x - x;
+//                    yLean += robot.getLocation().y - y;
+//                }
+//            }
             if (xLean == 0 && yLean == 0) {
                 int[] x1 = {0, 1, -1, 3, -3, 2, -2, 4, -4};
                 for (int i: x1) {
