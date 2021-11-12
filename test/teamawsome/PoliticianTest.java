@@ -79,7 +79,6 @@ public class PoliticianTest {
 
         Politician robot = new Politician(rc);
         robot.turn();
-
         assertTrue(robot.empowered);
     }
 
