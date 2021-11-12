@@ -100,7 +100,7 @@ public class EnlightenmentCenter extends GenericRobot{
      */
     static RobotType strategicSpawnableRobotType(int round) {
         if (round < 300){
-            if(round % 10 == 0){
+            if(round % 5 == 0){
                 return(RobotType.MUCKRAKER);
             }
             else return(RobotType.SLANDERER);
@@ -110,5 +110,9 @@ public class EnlightenmentCenter extends GenericRobot{
         }
         else return teamawesome.RobotPlayer.spawnableRobot[(int) (Math.random()
                 * teamawesome.RobotPlayer.spawnableRobot.length)];
+    }
+
+    public RobotType getLastBuilt(){
+        return lastBuilt;
     }
 }
