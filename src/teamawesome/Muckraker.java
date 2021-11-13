@@ -66,7 +66,7 @@ public strictfp class Muckraker extends GenericRobot {
             } else if (robot.getTeam() != enemy) {
                 if(rc.canGetFlag(robot.ID)) {
                     int flagValue = rc.getFlag(robot.ID);
-                    if(flagValue == 11400) {
+                    if(flagValue == 11400) { // other muck near enemy EC, then move in that dir till u find enemy EC
                         botDirectionToMove = rc.getLocation().directionTo(robot.getLocation());
                         while(!enemyEcFound) {
                             if (tryMove(botDirectionToMove)) {
@@ -83,13 +83,22 @@ public strictfp class Muckraker extends GenericRobot {
                                             System.out.println("e x p o s e d");
                                             rc.expose(robot1.location);
                                             return;
-                                        } } }
-                                if (robot1.getTeam() == enemy && robot1.getType() == RobotType.ENLIGHTENMENT_CENTER) {
-                                    enemyEcFound = true;
-                                    flagValue = makeFlag(ENEMY_ENLIGHTENMENT_CENTER_FLAG, 0);
+                                        } }
+                                    if (robot1.getType() == RobotType.ENLIGHTENMENT_CENTER) {
+                                        enemyEcFound = true;
+                                        flagValue = makeFlag(ENEMY_ENLIGHTENMENT_CENTER_FLAG, 0);
+                                        if (rc.canSetFlag(flagValue))
+                                            rc.setFlag(flagValue);
+                                    }
+                                } else if (robot1.getTeam() != enemy && robot1.getType() == RobotType.ENLIGHTENMENT_CENTER) {
+                                    enemyEcFound = false;
+                                    flagValue = 00000;
                                     if (rc.canSetFlag(flagValue))
                                         rc.setFlag(flagValue);
-                                } } } } } }
+                                }
+                            } }
+                    } }
+            }
         }
 
         // Move Muckraker
