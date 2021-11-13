@@ -17,8 +17,8 @@ public strictfp class Muckraker extends GenericRobot {
     public int xLean;
     public int yLean;
     public int dirIdx;
-    boolean enemyECLocationSet = false;
-    boolean enemyEcFound = false;
+    public boolean enemyECLocationSet = false;
+    public boolean enemyEcFound = false;
 
     /**
      * constructor
@@ -65,21 +65,7 @@ public strictfp class Muckraker extends GenericRobot {
 
                     break;
                 }
-            } else if (robot.getTeam() != enemy) {
-
-                // Found Neutral EC Go inform homeEC, and clear flag
-//                if(robot.getTeam() == Team.NEUTRAL) {
-//                    int flagValue = makeFlag(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG, 0);
-//                    if (rc.canSetFlag(flagValue))
-//                        rc.setFlag(flagValue);
-//                    for (RobotInfo robot1 : rc.senseNearbyRobots()) {
-//                        if (robot1.getTeam() != enemy && robot1.getType() == RobotType.ENLIGHTENMENT_CENTER) { // HomeEC
-//                            flagValue = 00000;
-//                            if (rc.canSetFlag(flagValue))
-//                                rc.setFlag(flagValue);
-//                        }
-//                    }
-//                }
+            } else if (robot.getTeam() != enemy) { // OUR TEAM
 
                 if(rc.canGetFlag(robot.ID)) {
                     int flagValue = rc.getFlag(robot.ID);
@@ -108,14 +94,12 @@ public strictfp class Muckraker extends GenericRobot {
                                             rc.setFlag(flagValue);
                                     }
                                 } else if (robot1.getTeam() != enemy && robot1.getType() == RobotType.ENLIGHTENMENT_CENTER) {
+                                    // reset Flag
                                     enemyEcFound = false;
                                     flagValue = 00000;
                                     if (rc.canSetFlag(flagValue))
                                         rc.setFlag(flagValue);
-                                }
-                            } }
-                    } }
-            }
+                                } } } } } }
         }
 
         // Move Muckraker
