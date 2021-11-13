@@ -92,13 +92,13 @@ abstract public class GenericRobot {
             String flagStr = pw + EF;
             newFlag = Integer.parseInt(flagStr);
         }
-        System.out.println("New flag: " + newFlag);
         return newFlag;
     }
 
     /**
-     * Supply a given robot's id, and this method will attempt to retrieve
-     * the flag of the given bot and pass it to the helper parser method.
+     * Supply a RobotController instance (rc), and a robot's id, and this method
+     * will attempt to retrieve the flag of the given bot and pass it to the helper
+     * parser method.
      *
      * A small hash map will be returned who's values can be searched for
      * using the FlagConstants as keys. Each flag/key will have an associated
@@ -119,20 +119,14 @@ abstract public class GenericRobot {
             RobotInfo info = rc.senseRobot(id);
             int flag = rc.getFlag(info.getID());
             // make sure this is one of ours!
-            if (isOurs(flag)) {
-                System.out.println("retrieveFlag -> This was one of our flags!");
+            if (isOurs(flag))
                 res = parseFlag(info, flag);
-            }
-            else{
+            else
                 // add our own location since the table requires a MapLocation
-                System.out.println("retrieveFlag -> This wasn't one of our flags!");
                 res.put(ERROR, rc.getLocation());
-            }
         }
-        else{
-            System.out.println("retrieveFlag -> Could not sense bot from given ID!");
+        else
             res.put(ERROR, rc.getLocation());
-        }
         return res;
     }
 
@@ -141,29 +135,20 @@ abstract public class GenericRobot {
         // NOTE: this is redundant if parseFlag is called from retrieveFlag
         // this is here in case parseFlag is called separately.
         if (!isOurs(flagOrig)){
-            System.out.println(("parseFlag -> Not one of our flags!"));
             res.put(ERROR, info.getLocation());
             return res;
         }
         int len = countDigis(flagOrig);
-        System.out.println("parseFlag -> len of given flag: " + len);
         // this is an alert!
         if (len == 3){
-            System.out.println("parseFlag -> Received an alert!");
             // remove first two digits, then test against constants
             int flag = flagOrig % 10;
-            if (flag == NEUTRAL_ENLIGHTENMENT_CENTER_FLAG) {
-                System.out.println("parseFlag -> Found a neutral EC!");
+            if (flag == NEUTRAL_ENLIGHTENMENT_CENTER_FLAG)
                 res.put(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG, info.getLocation());
-            }
-            else if (flag == NEED_HELP) {
-                System.out.println("parseFlag -> someone needs help!");
+            else if (flag == NEED_HELP)
                 res.put(NEED_HELP, info.getLocation());
-            }
-            else if (flag == GO_HERE) {
-                System.out.println("parseFlag -> need to go this way!");
+            else if (flag == GO_HERE)
                 res.put(GO_HERE, info.getLocation());
-            }
             else {
                 System.out.println("parseFlag -> Unable to parse 3-digit flag!");
                 res.put(ERROR, info.getLocation());
@@ -171,39 +156,27 @@ abstract public class GenericRobot {
         }
         // this is enemy info!
         else if (len == 5){
-            System.out.println("parseFlag -> Received enemy info!");
             // remove first two digits, then test against constants
             int flagTemp = flagOrig % 1000;
             // subtract last two digits to get base flag. i.e. 302 - 2 == 300
             int conv = flagTemp % 100;
             int flag = flagTemp - conv;
-            if (flag == ENEMY_ENLIGHTENMENT_CENTER_FLAG) {
-                System.out.println("parseFlag -> there's an enemy Enlightenment Center this way!");
+            if (flag == ENEMY_ENLIGHTENMENT_CENTER_FLAG)
                 res.put(ENEMY_ENLIGHTENMENT_CENTER_FLAG, info.getLocation());
-            }
             // enemy politician!
-            if (flag/100 == 1) {
-                System.out.println("parseFlag -> there's an enemy Politician this way!");
+            if (flag/100 == 1)
                 res.put(ENEMY_POLITICIAN_FLAG, info.getLocation());
-            }
             // enemy slanderer!
-            else if (flag/100 == 2) {
-                System.out.println("parseFlag -> there's an enemy Slanderer this way!");
+            else if (flag/100 == 2)
                 res.put(ENEMY_SLANDERER_NEARBY_FLAG, info.getLocation());
-            }
             // enemy muckraker!
-            else if (flag/100 == 3) {
-                System.out.println("parseFlag -> there's an enemy Muckraker this way!");
+            else if (flag/100 == 3)
                 res.put(ENEMY_MUCKRAKER_NEARBY_FLAG, info.getLocation());
-            }
-            else {
-                System.out.println("parseFlag -> unable to parse 5-digit flag!");
+            else
                 res.put(ERROR, info.getLocation());
-            }
         }
         // this is location info!
         else if (len == 8){
-            System.out.println("parseFlag -> Received location info!");
             MapLocation loc = decodeLocationFromFlag(flagOrig);
             res.put(LOCATION_INFO, loc);
         }
@@ -282,9 +255,6 @@ abstract public class GenericRobot {
      * @return MapLocation
      */
     public MapLocation decodeLocationFromFlag(int flagOrig){
-        // is this flag less than 8 digits?s
-        if(countDigis(flagOrig) < 8)
-            return new MapLocation(0,0);
         // remove first two (since it's the password)
         int flagTemp = flagOrig % 1000000;
         // split into two separate integers
