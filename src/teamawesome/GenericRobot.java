@@ -201,6 +201,12 @@ abstract public class GenericRobot {
                 res.put(ERROR, info.getLocation());
             }
         }
+        // this is location info!
+        else if (len == 8){
+            System.out.println("parseFlag -> Received location info!");
+            MapLocation loc = decodeLocationFromFlag(flagOrig);
+            res.put(LOCATION_INFO, loc);
+        }
         return res;
     }
 
@@ -212,12 +218,10 @@ abstract public class GenericRobot {
     }
 
     public Boolean isOurs(int flag){
+        if (flag > 11300300) return false;
         int len = countDigis(flag);
-        if(flag > 11300300) return false;
-        if (len > 5 || len == 4 || len < 3) {
-            System.out.print("isOurs -> Not one of our flags!");
-            return false;
-        }
+        if (len == 7 || len == 6) return false;
+        if (len == 4 || len < 3) return false;
         /*
          * PASSWORD CHECK!
          *
@@ -278,10 +282,11 @@ abstract public class GenericRobot {
      * @return MapLocation
      */
     public MapLocation decodeLocationFromFlag(int flagOrig){
-        System.out.println("decodeFlag -> flag inputted = " + flagOrig);
+        // is this flag less than 8 digits?s
+        if(countDigis(flagOrig) < 8)
+            return new MapLocation(0,0);
         // remove first two (since it's the password)
         int flagTemp = flagOrig % 1000000;
-        System.out.println("decodeFlag -> flag w/o pw = " + flagTemp);
         // split into two separate integers
         String flagStr = Integer.toString(flagTemp);
         int mid = flagStr.length()/2;
