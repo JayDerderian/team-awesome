@@ -10,6 +10,7 @@ public strictfp class Muckraker extends GenericRobot {
     public String robotStatement = "I'm a " + rc.getType() + "! Location " + rc.getLocation();
 
     public MapLocation enemyECLocation;
+    public MapLocation homeECLocation;
     public Direction enemyECDirection;
     public Direction botDirectionToMove;
     public Direction prevMovedDir;
@@ -35,6 +36,7 @@ public strictfp class Muckraker extends GenericRobot {
         xLean = 0; yLean = 0; // Reset guiding
         System.out.println(robotStatement);
         Team enemy = rc.getTeam().opponent();
+        homeECLocation = rc.getLocation();
 
         for (RobotInfo robot : rc.senseNearbyRobots()) {
             // ENEMY
@@ -64,6 +66,21 @@ public strictfp class Muckraker extends GenericRobot {
                     break;
                 }
             } else if (robot.getTeam() != enemy) {
+
+                // Found Neutral EC Go inform homeEC, and clear flag
+//                if(robot.getTeam() == Team.NEUTRAL) {
+//                    int flagValue = makeFlag(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG, 0);
+//                    if (rc.canSetFlag(flagValue))
+//                        rc.setFlag(flagValue);
+//                    for (RobotInfo robot1 : rc.senseNearbyRobots()) {
+//                        if (robot1.getTeam() != enemy && robot1.getType() == RobotType.ENLIGHTENMENT_CENTER) { // HomeEC
+//                            flagValue = 00000;
+//                            if (rc.canSetFlag(flagValue))
+//                                rc.setFlag(flagValue);
+//                        }
+//                    }
+//                }
+
                 if(rc.canGetFlag(robot.ID)) {
                     int flagValue = rc.getFlag(robot.ID);
                     if(flagValue == 11400) { // other muck near enemy EC, then move in that dir till u find enemy EC
