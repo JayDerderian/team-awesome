@@ -47,8 +47,10 @@ abstract public class GenericRobot {
 
 
     /**
-     * Takes a flag type (ERROR or ALERT), the base flag (see FlagConstants.java),
-     * and optional conviction level. Enter 0 for conv if you want to set an alert.
+     * Takes a the base flag (see FlagConstants.java), and optional conviction level.
+     * Returns a new flag.
+     *
+     * Enter 0 for conv if none is detected, or if you're setting an ALERT.
      *
      * @return Integer
      */
@@ -272,15 +274,39 @@ abstract public class GenericRobot {
      * @return List
      * @throws NullPointerException
      */
-    public HashMap<Integer, RobotInfo> findThreats(RobotController rc) throws NullPointerException{
+    public HashMap<Integer, MapLocation> findThreats(RobotController rc){
         Team enemy = rc.getTeam().opponent();
-        HashMap<Integer, RobotInfo> threats = null;
+        HashMap<Integer, MapLocation> threats = new HashMap<>();
         for (RobotInfo robot : rc.senseNearbyRobots()) {
             if(robot.getTeam() == enemy){
-                threats.put(ENEMY_INFO, robot);
+                threats.put(ENEMY_INFO, robot.getLocation());
             }
         }
         return threats;
+    }
+
+
+    /**
+     * Attempts to detect and store location info of a neutral EC
+     * within the vicinity of this bot
+     *
+     * @param rc
+     * @return HashMap
+     */
+    public HashMap<Integer, MapLocation> findNeutralECs (RobotController rc) {
+        HashMap<Integer, MapLocation> ecLoc = new HashMap<>();
+        for (RobotInfo robot : rc.senseNearbyRobots()) {
+            if(rc.getTeam() == Team.NEUTRAL ){
+                ecLoc.put(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG, robot.getLocation());
+            }
+        }
+        if(!ecLoc.isEmpty()) {
+            return ecLoc;
+        }
+        else {
+            ecLoc.put(ERROR, rc.getLocation());
+            return ecLoc;
+        }
     }
 
 
