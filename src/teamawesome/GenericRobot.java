@@ -8,6 +8,7 @@ import scala.Int;
 import java.util.HashMap;
 import java.lang.Math;
 import java.util.List;
+import java.util.Map;
 
 /**
  * GenericRobot
@@ -282,6 +283,8 @@ abstract public class GenericRobot {
                 threats.put(ENEMY_INFO, robot.getLocation());
             }
         }
+        if(threats.isEmpty())
+            threats.put(ERROR, new MapLocation(0, 0));
         return threats;
     }
 
@@ -300,13 +303,9 @@ abstract public class GenericRobot {
                 ecLoc.put(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG, robot.getLocation());
             }
         }
-        if(!ecLoc.isEmpty()) {
-            return ecLoc;
-        }
-        else {
-            ecLoc.put(ERROR, rc.getLocation());
-            return ecLoc;
-        }
+        if(ecLoc.isEmpty())
+            ecLoc.put(ERROR, new MapLocation(0,0));
+        return ecLoc;
     }
 
 
