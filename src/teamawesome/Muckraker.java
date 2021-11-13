@@ -10,13 +10,15 @@ public strictfp class Muckraker extends GenericRobot {
     public String robotStatement = "I'm a " + rc.getType() + "! Location " + rc.getLocation();
 
     public MapLocation enemyECLocation;
+    public MapLocation homeECLocation;
     public Direction enemyECDirection;
     public Direction botDirectionToMove;
+    public Direction prevMovedDir;
     public int xLean;
     public int yLean;
     public int dirIdx;
-    boolean enemyECLocationSet = false;
-    boolean enemyEcFound = false;
+    public boolean enemyECLocationSet = false;
+    public boolean enemyEcFound = false;
 
     /**
      * constructor
@@ -34,6 +36,7 @@ public strictfp class Muckraker extends GenericRobot {
         xLean = 0; yLean = 0; // Reset guiding
         System.out.println(robotStatement);
         Team enemy = rc.getTeam().opponent();
+        homeECLocation = rc.getLocation();
 
         for (RobotInfo robot : rc.senseNearbyRobots()) {
             // ENEMY
@@ -43,7 +46,9 @@ public strictfp class Muckraker extends GenericRobot {
                     if (rc.canExpose(robot.location)) {
                         System.out.println("e x p o s e d");
                         rc.expose(robot.location);
-                        tryMove(rc.getLocation().directionTo(robot.getLocation()));
+                        Direction possibleDir = rc.getLocation().directionTo(robot.getLocation());
+                        if(tryMove(possibleDir))
+                            prevMovedDir = possibleDir;
                         return;
                     }
                 }
@@ -60,14 +65,17 @@ public strictfp class Muckraker extends GenericRobot {
 
                     break;
                 }
-            } else if (robot.getTeam() != enemy) {
+            } else if (robot.getTeam() != enemy) { // OUR TEAM
+
                 if(rc.canGetFlag(robot.ID)) {
                     int flagValue = rc.getFlag(robot.ID);
-                    if(flagValue == 11400) {
+                    if(flagValue == 11400) { // other muck near enemy EC, then move in that dir till u find enemy EC
                         botDirectionToMove = rc.getLocation().directionTo(robot.getLocation());
                         while(!enemyEcFound) {
-                            if (tryMove(botDirectionToMove))
+                            if (tryMove(botDirectionToMove)) {
+                                prevMovedDir = botDirectionToMove;
                                 System.out.println("MUCK moved!");
+                            }
                             else
                                 break;
                             for (RobotInfo robot1 : rc.senseNearbyRobots()) {
@@ -78,10 +86,17 @@ public strictfp class Muckraker extends GenericRobot {
                                             System.out.println("e x p o s e d");
                                             rc.expose(robot1.location);
                                             return;
-                                        } } }
-                                if (robot1.getTeam() == enemy && robot1.getType() == RobotType.ENLIGHTENMENT_CENTER) {
-                                    enemyEcFound = true;
-                                    flagValue = makeFlag(ENEMY_ENLIGHTENMENT_CENTER_FLAG, 0);
+                                        } }
+                                    if (robot1.getType() == RobotType.ENLIGHTENMENT_CENTER) {
+                                        enemyEcFound = true;
+                                        flagValue = makeFlag(ENEMY_ENLIGHTENMENT_CENTER_FLAG, 0);
+                                        if (rc.canSetFlag(flagValue))
+                                            rc.setFlag(flagValue);
+                                    }
+                                } else if (robot1.getTeam() != enemy && robot1.getType() == RobotType.ENLIGHTENMENT_CENTER) {
+                                    // reset Flag
+                                    enemyEcFound = false;
+                                    flagValue = 00000;
                                     if (rc.canSetFlag(flagValue))
                                         rc.setFlag(flagValue);
                                 } } } } } }
@@ -115,27 +130,32 @@ public strictfp class Muckraker extends GenericRobot {
                         break;
                 } }
         } else { // If enemy EC found, then move in close proximity to the enemy EC
-            if(enemyECLocationSet && tryMove(rc.getLocation().directionTo(enemyECLocation)))
+            Direction possibleDir = rc.getLocation().directionTo(enemyECLocation);
+            if(enemyECLocationSet && tryMove(possibleDir)) {
+                prevMovedDir = possibleDir;
                 System.out.println("Muck Moved!");
-            else
-                if(tryMove(getLeastPassableDirection()))
+            }
+            else {
+                Direction possibleDir1 = getHighPassableDirection();
+                if (tryMove(possibleDir1)) {
+                    prevMovedDir = possibleDir1;
                     System.out.println("Muck Moved!");
-                else
-                    if (tryMove(randomDirection()))
-                        System.out.println("Muck moved!");
-    } }
+                } else if (tryMove(randomDirection())) {
+                    System.out.println("Muck moved!");
+                }
+            } } }
 
-    private Direction getLeastPassableDirection() throws GameActionException {
-        double minPass = 1.0;
-        Direction minPassDir = randomDirection();
+    private Direction getHighPassableDirection() throws GameActionException {
+        double maxPass = 0.0;
+        Direction maxPassDir = randomDirection();
         for(Direction d: Direction.values()){
-            if(rc.canSenseLocation(rc.adjacentLocation(d))){
+            if(d != prevMovedDir && rc.canSenseLocation(rc.adjacentLocation(d))){
                 double currPass = rc.sensePassability(rc.adjacentLocation(d));
-                if(currPass < minPass){
-                    minPass = currPass;
-                    minPassDir = d;
+                if(currPass > maxPass){
+                    maxPass = currPass;
+                    maxPassDir = d;
                 } } }
-        return minPassDir;
+        return maxPassDir;
     }
 
     public int myMod(int i, int j) {
