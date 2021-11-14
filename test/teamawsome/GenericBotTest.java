@@ -9,6 +9,7 @@ import static teamawesome.FlagConstants.*;
 
 import static org.mockito.Mockito.*;
 
+import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -117,6 +118,27 @@ public class GenericBotTest {
         assertEquals(y, loc.y);
     }
 
+    //-------------------------------ENEMY / NEUTRAL EC DETECTION--------------------------------//
+
+//    @Test
+//    public void detectEnemies(){
+//        RobotController rc = mock(RobotController.class);
+//        Politician testBot = new Politician(rc);
+//        when(rc.senseNearbyRobots()).thenReturn(enemyRobotInfoArray);
+//        HashMap<Integer, MapLocation> res = testBot.findThreats(rc);
+//        assertFalse(res.containsKey(ERROR));
+//        assertTrue(res.containsKey(ENEMY_INFO));
+//    }
+//
+//    @Test
+//    public void detectNeutralEC(){
+//        RobotController rc = mock(RobotController.class);
+//        Politician testBot = new Politician(rc);
+//        when(rc.senseNearbyRobots()).thenReturn(neutralECRobotInfoArray);
+//        HashMap<Integer, MapLocation> res = testBot.findNeutralECs(rc);
+//        assertFalse(res.containsKey(ERROR));
+//        assertTrue(res.containsKey(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG));
+//    }
 
     //--------------------------------------FLAG PARSING-----------------------------------------//
 
