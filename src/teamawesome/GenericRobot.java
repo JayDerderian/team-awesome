@@ -56,8 +56,8 @@ abstract public class GenericRobot {
      * @return Integer
      */
     public int makeFlag(int flag, int conv) {
-        String pw = Integer.toString(PASSWORD);
         int newFlag = 0;
+        String pw = Integer.toString(PASSWORD);
         // 3 digit flags
         if (flag == NEED_HELP){
             String nh = Integer.toString(NEED_HELP);
@@ -72,6 +72,16 @@ abstract public class GenericRobot {
         else if (flag == NEUTRAL_ENLIGHTENMENT_CENTER_FLAG){
             String nec = Integer.toString(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG + conv);
             String flagStr = pw + nec;
+            newFlag = Integer.parseInt(flagStr);
+        }
+        else if (flag == SEND_LOCATION){
+            String EF = Integer.toString(SEND_LOCATION + conv);
+            String flagStr = pw + EF;
+            newFlag = Integer.parseInt(flagStr);
+        }
+        else if (flag == NEUTRAL){
+            String EF = Integer.toString(NEUTRAL + conv);
+            String flagStr = pw + EF;
             newFlag = Integer.parseInt(flagStr);
         }
         // 5 digit flags
@@ -272,8 +282,9 @@ abstract public class GenericRobot {
 
     /**
      * Find and return a list of all enemy bots within your surroundings
-     * @return List
-     * @throws NullPointerException
+     *
+     * @param rc
+     * @return HashMap
      */
     public HashMap<Integer, MapLocation> findThreats(RobotController rc){
         Team enemy = rc.getTeam().opponent();
