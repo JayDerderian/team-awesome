@@ -10,7 +10,6 @@ public strictfp class Muckraker extends GenericRobot {
     public String robotStatement = "I'm a " + rc.getType() + "! Location " + rc.getLocation();
 
     public MapLocation enemyECLocation;
-    public MapLocation homeECLocation;
     public Direction enemyECDirection;
     public Direction botDirectionToMove;
     public Direction prevMovedDir;
@@ -36,7 +35,6 @@ public strictfp class Muckraker extends GenericRobot {
         xLean = 0; yLean = 0; // Reset guiding
         System.out.println(robotStatement);
         Team enemy = rc.getTeam().opponent();
-        homeECLocation = rc.getLocation();
 
         for (RobotInfo robot : rc.senseNearbyRobots()) {
             // ENEMY
