@@ -299,7 +299,7 @@ abstract public class GenericRobot {
     public HashMap<Integer, MapLocation> findNeutralECs (RobotController rc) {
         HashMap<Integer, MapLocation> ecLoc = new HashMap<>();
         for (RobotInfo robot : rc.senseNearbyRobots()) {
-            if(rc.getTeam() == Team.NEUTRAL ){
+            if(robot.getTeam() == Team.NEUTRAL ){
                 ecLoc.put(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG, robot.getLocation());
             }
         }
