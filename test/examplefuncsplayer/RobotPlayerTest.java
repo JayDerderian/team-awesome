@@ -27,4 +27,6 @@ public class RobotPlayerTest {
 		when(rc.getType()).thenReturn(RobotType.SLANDERER);
 	}
 
+
+
 }

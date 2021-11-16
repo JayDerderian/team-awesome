@@ -125,19 +125,19 @@ public class MuckrakerTest {
 //        assertEquals(rc.getFlag(rc.getID()), 1231);
 //    }
 
-//    @Test
-//    public void ifTeamRobotDetectedThenGetItsFlag() throws GameActionException {
-//        RobotController rc = mock(RobotController.class);
-//        when(rc.getType()).thenReturn(RobotType.MUCKRAKER);
-//        when(rc.getTeam()).thenReturn(Team.A);
-//        when(rc.senseNearbyRobots()).thenReturn(teamRobotInfoArray);
-//        when(rc.canGetFlag(6)).thenReturn(true);
-//        when(rc.getFlag(6)).thenReturn(20200);
-//
-//        Muckraker robot = new Muckraker(rc);
-//        robot.turn();
-//
-//        assertEquals(robot.flagSensed, 20200);
-//    }
+    @Test
+    public void ifTeamRobotDetectedThenGetItsFlag() throws GameActionException {
+        RobotController rc = mock(RobotController.class);
+        when(rc.getType()).thenReturn(RobotType.MUCKRAKER);
+        when(rc.getTeam()).thenReturn(Team.A);
+        when(rc.senseNearbyRobots()).thenReturn(teamRobotInfoArray);
+        when(rc.canGetFlag(6)).thenReturn(true);
+        when(rc.getFlag(6)).thenReturn(20200);
+
+        Muckraker robot = new Muckraker(rc);
+        robot.turn();
+
+        //assertEquals(robot.getFlag, 20200);
+    }
 
 }
