@@ -7,7 +7,7 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-import teamawesome.GenericRobot;
+//import teamawesome.GenericRobot;
 import teamawesome.Muckraker;
 
 /**
@@ -66,7 +66,7 @@ public class MuckrakerTest {
     @Test
     public void ifCanMoveInPossibleDirThenStoreItAsPrevMove() throws GameActionException {
         RobotController rc = mock(RobotController.class);
-        GenericRobot gr = mock(GenericRobot.class);
+//        GenericRobot gr = mock(GenericRobot.class);
         when(rc.getType()).thenReturn(RobotType.MUCKRAKER);
         when(rc.getLocation()).thenReturn(new MapLocation(20100, 20100));
         when(rc.getTeam()).thenReturn(Team.A);

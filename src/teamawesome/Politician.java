@@ -10,7 +10,7 @@ import java.util.*;
  * the politician robot. constructor requires a RobotController object
  * RobotPlayer should call turn() once per turn to exercise the robot
  */
-public class Politician extends GenericRobot {
+public class Politician extends RobotPlayer {
 
     LinkedList<MapLocation> history;
     HashMap<Direction, Double> momentum;

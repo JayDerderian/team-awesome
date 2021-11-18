@@ -2,7 +2,7 @@ package teamawesome;
 import battlecode.common.*;
 import static teamawesome.FlagConstants.*;
 
-public strictfp class Muckraker extends GenericRobot {
+public strictfp class Muckraker extends RobotPlayer {
 
     /**
      * Variables of Muckraker

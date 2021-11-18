@@ -2,7 +2,7 @@ package teamawesome;
 
 import battlecode.common.*;
 
-public class EnlightenmentCenter extends GenericRobot{
+public class EnlightenmentCenter extends RobotPlayer{
 
     /**
      * Enlightenment Center Variables
