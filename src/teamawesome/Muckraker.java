@@ -8,7 +8,6 @@ public strictfp class Muckraker extends RobotPlayer {
      * Variables of Muckraker
      */
     public String robotStatement = "I'm a " + rc.getType() + "! Location " + rc.getLocation();
-
     public MapLocation enemyECLocation;
     public Direction enemyECDirection;
     public Direction botDirectionToMove;
@@ -40,27 +39,11 @@ public strictfp class Muckraker extends RobotPlayer {
             // ENEMY
             if (robot.getTeam() == enemy) { // Slanderer
                 if (robot.type.canBeExposed()) {
-                    // It's a slanderer... go get them!
-                    if (rc.canExpose(robot.location)) {
-                        System.out.println("e x p o s e d");
-                        rc.expose(robot.location);
-                        Direction possibleDir = rc.getLocation().directionTo(robot.getLocation());
-                        if(tryMove(possibleDir))
-                            prevMovedDir = possibleDir;
-                        return;
-                    }
+                   if(tryExposingEnemySladerer(robot))
+                       return;
                 }
                 if (robot.type == RobotType.ENLIGHTENMENT_CENTER) { // enemy EC
-                    enemyEcFound = true;
-                    enemyECLocation = robot.getLocation();
-                    enemyECLocationSet = true;
-                    enemyECDirection = rc.getLocation().directionTo(enemyECLocation);
-
-                    // set Flag to let other muck's know
-                    int flagValue = makeFlag(ENEMY_ENLIGHTENMENT_CENTER_FLAG, 0);
-                    if (rc.canSetFlag(flagValue))
-                        rc.setFlag(flagValue);
-
+                   setEnemyECFlag(robot);
                     break;
                 }
             } else if (robot.getTeam() != enemy) { // OUR TEAM
@@ -79,17 +62,11 @@ public strictfp class Muckraker extends RobotPlayer {
                             for (RobotInfo robot1 : rc.senseNearbyRobots()) {
                                 if (robot1.getTeam() == enemy) {
                                     if (robot1.type.canBeExposed()) {
-                                        // It's a slanderer... go get them!
-                                        if (rc.canExpose(robot1.location)) {
-                                            System.out.println("e x p o s e d");
-                                            rc.expose(robot1.location);
+                                        if(tryExposingEnemySladerer(robot))
                                             return;
-                                        } }
+                                    }
                                     if (robot1.getType() == RobotType.ENLIGHTENMENT_CENTER) {
-                                        enemyEcFound = true;
-                                        flagValue = makeFlag(ENEMY_ENLIGHTENMENT_CENTER_FLAG, 0);
-                                        if (rc.canSetFlag(flagValue))
-                                            rc.setFlag(flagValue);
+                                        setEnemyECFlag(robot1);
                                     }
                                 } else if (robot1.getTeam() != enemy && robot1.getType() == RobotType.ENLIGHTENMENT_CENTER) {
                                     // reset Flag
@@ -113,20 +90,7 @@ public strictfp class Muckraker extends RobotPlayer {
                     if(enemyEcFound)
                         break;
                 }
-            } else {
-                // Clean the leans somewhat
-                if (Math.abs(xLean) > 2 * Math.abs(yLean)) {yLean = 0;}
-                else if (Math.abs(yLean) > 2 * Math.abs(xLean)) {xLean = 0;}
-                xLean = Math.min(1, Math.max(-1, xLean)) * -1;
-                yLean = Math.min(1, Math.max(-1, yLean)) * -1;
-                for (Direction dir : RobotPlayer.directions) {
-                    if (dir.getDeltaY() == yLean && dir.getDeltaX() == xLean) {
-                        if (rc.canMove(dir)) { rc.move(dir); }
-                        return;
-                    }
-                    if(enemyEcFound)
-                        break;
-                } }
+            }
         } else { // If enemy EC found, then move in close proximity to the enemy EC
             Direction possibleDir = rc.getLocation().directionTo(enemyECLocation);
             if(enemyECLocationSet && tryMove(possibleDir)) {
@@ -143,6 +107,47 @@ public strictfp class Muckraker extends RobotPlayer {
                 }
             } } }
 
+    /**
+     * If enemy EC found then set the flag to 11400.
+     * @param robot
+     * @throws GameActionException
+     */
+    private void setEnemyECFlag(RobotInfo robot) throws GameActionException {
+        enemyEcFound = true;
+        enemyECLocation = robot.getLocation();
+        enemyECLocationSet = true;
+        enemyECDirection = rc.getLocation().directionTo(enemyECLocation);
+
+        // set Flag to let other muck's know
+        int flagValue = makeFlag(ENEMY_ENLIGHTENMENT_CENTER_FLAG, 0);
+        if (rc.canSetFlag(flagValue))
+            rc.setFlag(flagValue);
+    }
+
+    /**
+     * If enemy sland found then try exposing them.
+     * @param robot
+     * @return
+     * @throws GameActionException
+     */
+    private boolean tryExposingEnemySladerer(RobotInfo robot) throws GameActionException {
+        // It's a slanderer... go get them!
+        if (rc.canExpose(robot.location)) {
+            System.out.println("e x p o s e d");
+            rc.expose(robot.location);
+            Direction possibleDir = rc.getLocation().directionTo(robot.getLocation());
+            if(tryMove(possibleDir))
+                prevMovedDir = possibleDir;
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Get passability value of nearby squares.
+     * @return
+     * @throws GameActionException
+     */
     private Direction getHighPassableDirection() throws GameActionException {
         double maxPass = 0.0;
         Direction maxPassDir = randomDirection();
