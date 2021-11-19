@@ -156,11 +156,11 @@ abstract public strictfp class RobotPlayer {
      * @return the location of the robot
      * @throws GameActionException
      */
-    protected HashMap<Integer, MapLocation> rxLocation(int ID) throws GameActionException{
+    protected Map<Integer, MapLocation> rxLocation(int ID) throws GameActionException{
         System.out.println("Reception initiated");
         if(rxsender == -1) rxsender = ID;
         if(rxsender != ID) return null; // only talk to current rxsender
-        HashMap<Integer, MapLocation> flag = retrieveFlag(rc, ID);
+        Map<Integer, MapLocation> flag = retrieveFlag(rc, ID);
         Map.Entry<Integer, MapLocation> flagval = flag.entrySet().iterator().next();
         int code = flagval.getKey();
         MapLocation loc = flagval.getValue();
@@ -274,20 +274,24 @@ abstract public strictfp class RobotPlayer {
      * @param id
      * @return HashTable
      **/
-    public HashMap<Integer, MapLocation> retrieveFlag (RobotController rc, int id) throws GameActionException {
+    public Map<Integer, MapLocation> retrieveFlag (RobotController rc, int id) throws GameActionException {
+
         // hash table containing all flag info.
         // see FlagConstants.java for a breakdown on entries.
-        HashMap<Integer, MapLocation> res = new HashMap<>();
+        Map<Integer, MapLocation> res = new HashMap<>();
         // try to get flag from a given bot
-        if (rc.canSenseRobot(id)) {
-            RobotInfo info = rc.senseRobot(id);
-            int flag = rc.getFlag(info.getID());
+        if (rc.canSenseRobot(id)) {                 // 5 bytecodes
+            RobotInfo info = rc.senseRobot(id);     // 25 bytecodes
+            int flag = rc.getFlag(id);              // 5 bytecodes
             // make sure this is one of ours!
-            if (isOurs(flag))
-                res = parseFlag(info, flag);
-            else
+            if (isOurs(flag))                       // 1 bytecode
+                res = parseFlag(info, flag);        // 1 bytecode
+            else {
                 // add our own location since the table requires a MapLocation
-                res.put(ERROR, rc.getLocation());
+                int startcode = Clock.getBytecodeNum();
+                res.put(ERROR, rc.getLocation());   // 1 bytecode
+                System.out.println("retrieveFlag: putting location used " + (Clock.getBytecodeNum() - startcode) + " bytecodes");
+            }
         }
         else
             res.put(ERROR, rc.getLocation());
@@ -502,18 +506,13 @@ abstract public strictfp class RobotPlayer {
      * @throws GameActionException cause RobotController
      */
     protected void checkRolodex() throws GameActionException{
-        System.out.println("Here is my rolodex:");
+        System.out.println("I have " + rolodex.size() + " contacts. Here is my rolodex:");
         LinkedList<Integer> toRemove = new LinkedList<>();
         for (Integer id:
                 rolodex) {
+            if(Clock.getBytecodesLeft() < 500) return;
             try {
-                HashMap<Integer, MapLocation> flag = retrieveFlag(rc, id);
-                if(rc.canSenseRobot(id)) {
-                    RobotInfo friend = rc.senseRobot(id);
-                    System.out.println("ID #" + id + " at location " + friend.getLocation() + " with flag " + flag);
-                } else {
-                    System.out.println("ID #" + id + " with flag " + flag + " out of range!");
-                }
+                Map<Integer, MapLocation> flag = retrieveFlag(rc, id);
                 if(!flag.containsKey(ERROR)) {
                     // if no rx source, use this one
                     if(rxsender == -1) rxsender = id;
@@ -527,7 +526,10 @@ abstract public strictfp class RobotPlayer {
         }
         for (Integer del:
                 toRemove) {
+            int startcode = Clock.getBytecodeNum();
             rolodex.remove(del);
+            System.out.println("checkRolodex: removing entry used " + (Clock.getBytecodeNum() - startcode) + " bytecodes");
+
         }
     }
 }

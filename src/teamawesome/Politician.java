@@ -62,7 +62,7 @@ public class Politician extends RobotPlayer {
         // read mothership flag
         if(mothership != -1) {
             try{
-                HashMap<Integer, MapLocation> flag = rxLocation(mothership);
+                Map<Integer, MapLocation> flag = rxLocation(mothership);
                 if(flag != null)
                     if(flag.containsKey(FlagConstants.NEUTRAL_ENLIGHTENMENT_CENTER_FLAG)) {
                         MapLocation newDest = flag.get(FlagConstants.NEUTRAL_ENLIGHTENMENT_CENTER_FLAG);

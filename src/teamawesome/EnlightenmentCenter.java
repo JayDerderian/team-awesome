@@ -2,6 +2,8 @@ package teamawesome;
 
 import battlecode.common.*;
 import java.util.HashMap;
+import java.util.Map;
+
 import static teamawesome.FlagConstants.*;
 public class EnlightenmentCenter extends RobotPlayer{
 
@@ -24,17 +26,18 @@ public class EnlightenmentCenter extends RobotPlayer{
         double inf;
         RobotType toBuild = strategicSpawnableRobotType(round);
         // check for nearby muckrakers, build a politician to defend
+        RobotInfo[] robots = rc.senseNearbyRobots();
         for (RobotInfo robot:
-             rc.senseNearbyRobots()) {
-            if(robot.getType() == RobotType.MUCKRAKER && robot.getTeam() != rc.getTeam())
+             robots) {
+            if(robot.getType() == RobotType.MUCKRAKER && robot.getTeam() != myTeam)
                 toBuild = RobotType.POLITICIAN;
         }
         if(scoutedAge > 0 && scoutedAge < 6) toBuild = RobotType.POLITICIAN;
 
         if(round < 300){
             for (RobotInfo robot:
-                    rc.senseNearbyRobots()) {
-                if (robot.getTeam() == rc.getTeam()) {
+                    robots) {
+                if (robot.getTeam() == myTeam) {
                     switch (robot.type) {
                         case POLITICIAN:
                             toBuild = strategicSpawnableRobotType(round);
@@ -63,7 +66,7 @@ public class EnlightenmentCenter extends RobotPlayer{
 
         //sense enemy robots
         for (RobotInfo robot:
-                rc.senseNearbyRobots()) {
+                robots) {
             if(robot.getTeam() != myTeam){
 
                 switch (robot.type) {
@@ -86,11 +89,11 @@ public class EnlightenmentCenter extends RobotPlayer{
             rxsender = -1;
             scoutedAge = 0;
         }
-        if(rxsender == -1 && scouted == null) {
+        if(rxsender == -1) {
             checkRolodex();
         }
         if(rxsender != -1) {
-            HashMap<Integer, MapLocation> location = rxLocation(rxsender);
+            Map<Integer, MapLocation> location = rxLocation(rxsender);
             if(location.containsKey(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG)) {
                 System.out.println("Neutral EC Scouted by " + rxsender);
                 scouted = location.get(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG);
