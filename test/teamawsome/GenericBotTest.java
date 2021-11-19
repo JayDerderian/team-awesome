@@ -87,6 +87,19 @@ public class GenericBotTest {
         assertEquals(test, testFlag);
     }
 
+    @Test
+    public void encodeDecodeCoordinatesTest() {
+        RobotController rc = mock(RobotController.class);
+        Politician testBot = new Politician(rc);
+        int x = 12300;
+        int y = 32100;
+        MapLocation loc = new MapLocation(x,y);
+        int flag = testBot.encodeLocationInFlag(loc);
+        MapLocation loc2 = testBot.decodeLocationFromFlag(flag);
+        assertEquals(x, loc2.x);
+        assertEquals(y, loc2.y);
+    }
+
 
     //-----------------------------------LOCATION ENCODING/DECODING------------------------------//
 

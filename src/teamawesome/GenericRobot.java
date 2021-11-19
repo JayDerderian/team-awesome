@@ -3,10 +3,11 @@ package teamawesome;
 import static teamawesome.FlagConstants.*;
 
 import battlecode.common.*;
-import scala.Int;
 
 import java.util.HashMap;
 import java.lang.Math;
+import java.util.LinkedList;
+import java.util.Map;
 import java.util.List;
 import java.util.Map;
 
@@ -26,8 +27,25 @@ import java.util.Map;
 
 abstract public class GenericRobot {
     RobotController rc;
+    protected int rxsender;
+    protected int rxsync;
+    protected int rxcode;
+    protected int rxtype;
+    protected int txsync;
+    LinkedList<Integer> rolodex;
+    MapLocation scouted;
+    int scoutedAge;
+    int mothership = -1;
+    protected static final int swizzle = 0;
     public GenericRobot(RobotController newRc) {
         rc = newRc;
+        txsync = -1;
+        rxsync = -1;
+        rxtype = ERROR;
+        rxsender = -1;
+        rolodex = new LinkedList<>();
+        scouted = null;
+        scoutedAge = 0;
     }
 
     /**
@@ -44,6 +62,99 @@ abstract public class GenericRobot {
      */
     protected Direction randomDirection() {
         return RobotPlayer.directions[(int) (Math.random() * RobotPlayer.directions.length)];
+    }
+
+    /**
+     * Function to sync the transmission of location data via the flag system
+     * @param type the message to be sent
+     * @param loc the location to be encoded
+     * @param conv conviction level
+     * @return success of the operation
+     * @throws GameActionException because rc
+     */
+    protected boolean txLocation(int type, MapLocation loc, int conv) throws GameActionException{
+        if(loc == null) return false;
+        System.out.println("Transmission Initiated, sending code " + type + " for location " + loc);
+        if(txsync == 1) {
+            // we broadcast the type last time, now broadcast location
+            txsync = -1;
+            MapLocation cipherLoc = loc.translate(-swizzle, -swizzle);
+            int newFlag = encodeLocationInFlag(cipherLoc);
+            if(rc.canSetFlag(newFlag)) {
+                rc.setFlag(newFlag);
+                return true;
+            }
+        } else {
+            // we need to broadcast the type
+            txsync = 1;
+            int newFlag = makeFlag(type, conv);
+            if(rc.canSetFlag(newFlag)) {
+                rc.setFlag(newFlag);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * given a location, validates that it is a possible location given BattleCode rules
+     * @param loc location to be validated
+     * @return validity of loc
+     */
+    protected boolean validateLocation(MapLocation loc) {
+        if(loc == null) return false;
+        int x = loc.x;
+        int y = loc.y;
+        if(x < 10000 || x > 30000) return false;
+        return y >= 10000 && y <= 30000;
+    }
+
+    /**
+     * Function to sync reception of location data
+     * @param ID robot to receive location data from
+     * @return the location of the robot
+     * @throws GameActionException
+     */
+    protected HashMap<Integer, MapLocation> rxLocation(int ID) throws GameActionException{
+        System.out.println("Reception initiated");
+        if(rxsender == -1) rxsender = ID;
+        if(rxsender != ID) return null; // only talk to current rxsender
+        HashMap<Integer, MapLocation> flag = retrieveFlag(rc, ID);
+        Map.Entry<Integer, MapLocation> flagval = flag.entrySet().iterator().next();
+        int code = flagval.getKey();
+        MapLocation loc = flagval.getValue();
+        if(rxsync == -1) {
+            // if rxsync is unset and the flag is valid, read the flag and set rxsync
+            if(code != ERROR && code != LOCATION_INFO)
+                rxsync = 1;
+            rxcode = code;
+            flag.clear();
+            flag.put(NONE, null);
+        } else if(rxsync == 1 && code == LOCATION_INFO) {
+            // if rxsync is a valid value, clear flag and put the stored code
+            flag.clear();
+            try {
+                MapLocation decipherLoc = loc.translate(swizzle, swizzle);
+                rc.setIndicatorDot(decipherLoc, 255, 0, 255);
+                System.out.println("rx: " + ID + " reports code " +
+                        rxcode + " at " + decipherLoc);
+                if(validateLocation(decipherLoc)) {
+                    flag.put(rxcode, decipherLoc);
+                    System.out.println("Receive success!");
+                } else {
+                    System.out.println("Invalid location received, terminating communication");
+                    rxsender = -1;
+                }
+            } catch(NullPointerException n) {
+                System.out.println("No Location data found!");
+            }
+            rxsync = -1;
+        } else {
+            System.out.println("Commmunication error, terminating communication");
+            rxsender = -1;
+            rxsync = -1;
+        }
+        return flag;
     }
 
 
@@ -105,6 +216,7 @@ abstract public class GenericRobot {
             String flagStr = pw + EF;
             newFlag = Integer.parseInt(flagStr);
         }
+        System.out.println("New flag: " + newFlag);
         return newFlag;
     }
 
@@ -128,18 +240,24 @@ abstract public class GenericRobot {
         // see FlagConstants.java for a breakdown on entries.
         HashMap<Integer, MapLocation> res = new HashMap<>();
         // try to get flag from a given bot
-        if (rc.canSenseRobot(id)) {
-            RobotInfo info = rc.senseRobot(id);
-            int flag = rc.getFlag(info.getID());
+        if (rc.canGetFlag(id)) {
+            RobotInfo info = null;
+            if(rc.canSenseRobot(id))
+                info = rc.senseRobot(id);
+            int flag = rc.getFlag(id);
             // make sure this is one of ours!
             if (isOurs(flag))
                 res = parseFlag(info, flag);
-            else
+            else {
                 // add our own location since the table requires a MapLocation
+                System.out.println("retrieveFlag -> This wasn't one of our flags!");
                 res.put(ERROR, rc.getLocation());
+            }
         }
-        else
+        else{
+            System.out.println("retrieveFlag -> Could not sense bot from given ID!");
             res.put(ERROR, rc.getLocation());
+        }
         return res;
     }
 
@@ -147,24 +265,35 @@ abstract public class GenericRobot {
         HashMap<Integer, MapLocation> res = new HashMap<>();
         // NOTE: this is redundant if parseFlag is called from retrieveFlag
         // this is here in case parseFlag is called separately.
+        MapLocation location = null;
+        if(info != null)
+            location = info.getLocation();
         if (!isOurs(flagOrig)){
             res.put(ERROR, info.getLocation());
             return res;
         }
         int len = countDigis(flagOrig);
+        System.out.println("parseFlag -> len of given flag: " + len);
         // this is an alert!
         if (len == 3){
+            System.out.println("parseFlag -> Received an alert!");
             // remove first two digits, then test against constants
             int flag = flagOrig % 10;
-            if (flag == NEUTRAL_ENLIGHTENMENT_CENTER_FLAG)
-                res.put(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG, info.getLocation());
-            else if (flag == NEED_HELP)
-                res.put(NEED_HELP, info.getLocation());
-            else if (flag == GO_HERE)
-                res.put(GO_HERE, info.getLocation());
+            if (flag == NEUTRAL_ENLIGHTENMENT_CENTER_FLAG) {
+                System.out.println("parseFlag -> Found a neutral EC!");
+                res.put(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG, location);
+            }
+            else if (flag == NEED_HELP) {
+                System.out.println("parseFlag -> someone needs help!");
+                res.put(NEED_HELP, location);
+            }
+            else if (flag == GO_HERE) {
+                System.out.println("parseFlag -> need to go this way!");
+                res.put(GO_HERE, location);
+            }
             else {
                 System.out.println("parseFlag -> Unable to parse 3-digit flag!");
-                res.put(ERROR, info.getLocation());
+                res.put(ERROR, location);
             }
         }
         // this is enemy info!
@@ -268,6 +397,9 @@ abstract public class GenericRobot {
      * @return MapLocation
      */
     public MapLocation decodeLocationFromFlag(int flagOrig){
+        // is this flag less than 8 digits?s
+        if(countDigis(flagOrig) < 8)
+            return new MapLocation(0,0);
         // remove first two (since it's the password)
         int flagTemp = flagOrig % 1000000;
         // split into two separate integers
@@ -333,5 +465,52 @@ abstract public class GenericRobot {
             rc.move(dir);
             return true;
         } else return false;
+    }
+
+    /**
+     * Function to process a nearby politician and save its ID for later reference
+     * @param robot the other politician
+     * @throws GameActionException because it uses the RobotController
+     */
+    protected void updateContact(RobotInfo robot) throws GameActionException {
+        if(robot.getType() != RobotType.MUCKRAKER) return;
+        int friendID = robot.getID();
+        //retrieveFlag(rc, friendID);
+        System.out.println("Found a friend! ID #" + friendID);
+        if(!rolodex.contains(friendID)) rolodex.add(friendID);
+    }
+
+    /**
+     * Function to go through rolodex and check each stored robot
+     * @throws GameActionException cause RobotController
+     */
+    protected void checkRolodex() throws GameActionException{
+        System.out.println("Here is my rolodex:");
+        LinkedList<Integer> toRemove = new LinkedList<>();
+        for (Integer id:
+                rolodex) {
+            try {
+                HashMap<Integer, MapLocation> flag = retrieveFlag(rc, id);
+                if(rc.canSenseRobot(id)) {
+                    RobotInfo friend = rc.senseRobot(id);
+                    System.out.println("ID #" + id + " at location " + friend.getLocation() + " with flag " + flag);
+                } else {
+                    System.out.println("ID #" + id + " with flag " + flag + " out of range!");
+                }
+                if(!flag.containsKey(ERROR)) {
+                    // if no rx source, use this one
+                    if(rxsender == -1) rxsender = id;
+                    break;
+                }
+            } catch(GameActionException e) { // the ID could not be found, meaning it's time to delete that entry
+                System.out.println("ID #" + id + " is dead!");
+                if(rxsender == id) rxsender = -1;
+                toRemove.add(id);
+            }
+        }
+        for (Integer del:
+                toRemove) {
+            rolodex.remove(del);
+        }
     }
 }

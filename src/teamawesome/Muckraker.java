@@ -40,7 +40,7 @@ public strictfp class Muckraker extends GenericRobot {
 
         for (RobotInfo robot : rc.senseNearbyRobots()) {
             // ENEMY
-            if (robot.getTeam() == enemy) { // Slanderer
+            if (robot.getTeam() != rc.getTeam()) { // Slanderer
                 if (robot.type.canBeExposed()) {
                     // It's a slanderer... go get them!
                     if (rc.canExpose(robot.location)) {
@@ -59,9 +59,7 @@ public strictfp class Muckraker extends GenericRobot {
                     enemyECDirection = rc.getLocation().directionTo(enemyECLocation);
 
                     // set Flag to let other muck's know
-                    int flagValue = makeFlag(ENEMY_ENLIGHTENMENT_CENTER_FLAG, 0);
-                    if (rc.canSetFlag(flagValue))
-                        rc.setFlag(flagValue);
+                    txLocation(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG, robot.getLocation(), 0);
 
                     break;
                 }
