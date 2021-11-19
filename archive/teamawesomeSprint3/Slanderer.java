@@ -5,7 +5,7 @@ import battlecode.common.*;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class Slanderer extends RobotPlayer {
+public class Slanderer extends GenericRobot {
     public String robotStatement = "I'm a " + rc.getType() + "! Location " + rc.getLocation();
     public int dirIdx;
 
