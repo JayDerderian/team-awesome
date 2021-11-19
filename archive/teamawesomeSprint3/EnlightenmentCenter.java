@@ -1,8 +1,8 @@
 package teamawesome;
 
 import battlecode.common.*;
-import java.util.HashMap;
-public class EnlightenmentCenter extends RobotPlayer{
+
+public class EnlightenmentCenter extends GenericRobot{
 
     /**
      * Enlightenment Center Variables
@@ -19,7 +19,6 @@ public class EnlightenmentCenter extends RobotPlayer{
     public void turn() throws GameActionException {
         int round = rc.getRoundNum();
         double myInf = rc.getInfluence();
-        Team myTeam = rc.getTeam();
         double inf;
         RobotType toBuild = strategicSpawnableRobotType(round);
         // check for nearby muckrakers, build a politician to defend
@@ -28,7 +27,6 @@ public class EnlightenmentCenter extends RobotPlayer{
             if(robot.getType() == RobotType.MUCKRAKER && robot.getTeam() != rc.getTeam())
                 toBuild = RobotType.POLITICIAN;
         }
-        if(scoutedAge > 0 && scoutedAge < 6) toBuild = RobotType.POLITICIAN;
 
         if(round < 300){
             for (RobotInfo robot:
@@ -63,7 +61,7 @@ public class EnlightenmentCenter extends RobotPlayer{
         //sense enemy robots
         for (RobotInfo robot:
                 rc.senseNearbyRobots()) {
-            if(robot.getTeam() != myTeam){
+            if(robot.getTeam() != rc.getTeam()){
 
                 switch (robot.type) {
                     case POLITICIAN:
@@ -73,29 +71,8 @@ public class EnlightenmentCenter extends RobotPlayer{
                     case MUCKRAKER:
                         rc.setFlag(makeFlag(FlagConstants.ENEMY_MUCKRAKER_NEARBY_FLAG, 0));   break;
                 }
-            } if(robot.getTeam() == myTeam) {
-                updateContact(robot);
             }
 
-        }
-
-        // handle comms
-        if(scoutedAge > 50) {
-            scouted = null;
-            rxsender = -1;
-            scoutedAge = 0;
-        }
-        if(rxsender == -1 && scouted == null) {
-            checkRolodex();
-        }
-        if(rxsender != -1) {
-            HashMap<Integer, MapLocation> location = rxLocation(rxsender);
-            if(location.containsKey(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG)) {
-                System.out.println("Neutral EC Scouted by " + rxsender);
-                scouted = location.get(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG);
-            }
-            txLocation(FlagConstants.NEUTRAL_ENLIGHTENMENT_CENTER_FLAG, scouted, 0);
-            ++scoutedAge;
         }
 
         //if low influence, raise need help flag

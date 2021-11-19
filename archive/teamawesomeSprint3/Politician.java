@@ -1,5 +1,6 @@
 package teamawesome;
 import battlecode.common.*;
+import com.sun.tools.doclint.Checker;
 
 import java.util.*;
 
@@ -9,19 +10,17 @@ import java.util.*;
  * the politician robot. constructor requires a RobotController object
  * RobotPlayer should call turn() once per turn to exercise the robot
  */
-public class Politician extends RobotPlayer {
+public class Politician extends GenericRobot {
 
     LinkedList<MapLocation> history;
     HashMap<Direction, Double> momentum;
+    int mothership = -1;
     int homeFlag = -1;
     public String robotStatement = "I'm a " + rc.getType() + "! Location " + rc.getLocation();
     public boolean empowered;
-    int foundEC; // ID of a fellow politician which found an EC
+    LinkedList<Integer> rolodex;
     boolean juggernaut; // juggernaut Politicians will ignore all enemies and focus on neutral ECs
     boolean ECsighted;
-    int sync;
-    MapLocation dest;
-    int destAge;
 
     public Politician(RobotController newRc) {
         super(newRc);
@@ -44,9 +43,7 @@ public class Politician extends RobotPlayer {
                 Direction.values()) {
             if(d != Direction.CENTER) momentum.put(d, 0.0);
         }
-        dest = null;
-        ECsighted = false;
-        foundEC = -1;
+        rolodex = new LinkedList<>();
     }
 
     /**
@@ -55,38 +52,20 @@ public class Politician extends RobotPlayer {
      * @throws GameActionException
      */
     public void turn() throws GameActionException {
-        System.out.println("I'm a politician! My mothership is " + mothership + " and their flag is " + homeFlag);
         // check mothership for flag value
-        rc.setFlag(FlagConstants.NEUTRAL);
-        MapLocation myLoc = rc.getLocation();
+        rc.setFlag(0);
         // read mothership flag
         if(mothership != -1) {
             try{
-                HashMap<Integer, MapLocation> flag = rxLocation(mothership);
-                if(flag != null)
-                    if(flag.containsKey(FlagConstants.NEUTRAL_ENLIGHTENMENT_CENTER_FLAG)) {
-                        MapLocation newDest = flag.get(FlagConstants.NEUTRAL_ENLIGHTENMENT_CENTER_FLAG);
-                        if(!newDest.equals(myLoc)) {
-                            dest = myLoc;
-                            System.out.println("Location Received: " + dest + " so I'll go " +
-                                    rc.getLocation().directionTo(dest));
-                        }
-
-                    } else if(flag.containsKey(FlagConstants.NEED_HELP)) {
-                        MapLocation newDest = flag.get(FlagConstants.NEED_HELP);
-                        if(newDest.distanceSquaredTo(myLoc) > 25) {
-                            dest = newDest;
-                            System.out.println("Location Received: " + dest + " so I'll go " +
-                                    rc.getLocation().directionTo(dest));
-                        }
-                    }
+                homeFlag = rc.getFlag(mothership);
             } catch(GameActionException e) {
                 // if cannot read mothership flag, the mothership EC is dead
-                mothership = -1;
                 homeFlag = -1;
             }
         }
-        //checkRolodex();
+        ECsighted = false;
+        System.out.println("I'm a politician! My mothership is " + mothership + " and their flag is " + homeFlag);
+        checkRolodex();
         Team enemy = rc.getTeam().opponent();
         int actionRadius = rc.getType().actionRadiusSquared;
         RobotInfo[] attackable = rc.senseNearbyRobots(actionRadius, enemy);
@@ -147,8 +126,6 @@ public class Politician extends RobotPlayer {
                 Direction.values()) {
             initWeights(locations, d);
         }
-        // if there is a destination, weight that heavily
-        seekDest(locations);
         // check nearby robots
         RobotInfo[] info = rc.senseNearbyRobots();
         // update weights of different directions depending on what robots are that way
@@ -184,17 +161,16 @@ public class Politician extends RobotPlayer {
         return toMove;
     }
 
-    protected boolean seekDest(HashMap<Direction, Double> locations) {
-        if(dest != null) {
-            if(rc.getLocation().distanceSquaredTo(dest) < 25) {
-                dest = null;
-                return true;
-            }
-            locations.remove(rc.getLocation().directionTo(dest));
-            locations.put(rc.getLocation().directionTo(dest), 25.0);
-            return true;
-        }
-        return false;
+    /**
+     * Function to process a nearby politician and save its ID for later reference
+     * @param robot the other politician
+     * @throws GameActionException because it uses the RobotController
+     */
+    private void checkPolitic(RobotInfo robot) throws GameActionException {
+        int friendID = robot.getID();
+        //retrieveFlag(rc, friendID);
+        System.out.println("Found another politician! ID #" + friendID);
+        if(!rolodex.contains(friendID)) rolodex.add(friendID);
     }
 
     private void initWeights(HashMap<Direction, Double> locations, Direction d) throws GameActionException {
@@ -221,45 +197,58 @@ public class Politician extends RobotPlayer {
         double dirWeight = locations.get(robotDirection);
         // prefer to go toward enemy robots
         if(robot.getTeam() != rc.getTeam()) {
-            dirWeight += 2;
+            dirWeight += 1;
             if(robot.getType() == RobotType.ENLIGHTENMENT_CENTER) {
                 dirWeight += 15;
-                int type = FlagConstants.NEUTRAL_ENLIGHTENMENT_CENTER_FLAG;
-                if(robot.getTeam() == rc.getTeam().opponent()) type = FlagConstants.ENEMY_ENLIGHTENMENT_CENTER_FLAG;
-                if(txLocation(type, robot.getLocation(), 0))
-                    System.out.println("Message Sent!");
+                // raise a flag that an EC has been found
+                ECsighted = true;
+                rc.setFlag(makeFlag(FlagConstants.NEUTRAL_ENLIGHTENMENT_CENTER_FLAG, 0));
             }
         } else {
             if(robot.getType() != RobotType.POLITICIAN)
                 dirWeight -= 0.5;
             else if(!ECsighted){
-                updateContact(robot);
-                int flag = poliReadFlag(rc.getFlag(robot.getID()));
+                checkPolitic(robot);
+                HashMap<Integer, MapLocation> flag = retrieveFlag(rc, robot.getID());
                 // strongly prefer to travel toward politicians that have sighted a neutral EC
-                if(flag == FlagConstants.NEUTRAL_ENLIGHTENMENT_CENTER_FLAG) {
+                if(flag.containsKey(FlagConstants.NEUTRAL_ENLIGHTENMENT_CENTER_FLAG)) {
                     System.out.println("An ally found a neutral EC! Location: " +
-                            robot.getLocation());
-                    //dirWeight += 5;
+                            flag.get(FlagConstants.NEUTRAL_ENLIGHTENMENT_CENTER_FLAG));
+                    dirWeight += 5;
                 }
+
             }
             if(robot.getType() == RobotType.ENLIGHTENMENT_CENTER) mothership = robot.getID();
         }
         locations.put(robotDirection, dirWeight);
     }
 
-
-
-    protected int poliReadFlag(int rawFlag) {
-        int flag;
-        int len = countDigis(rawFlag);
-        flag = rawFlag % 10;
-        if(flag == FlagConstants.NEUTRAL_ENLIGHTENMENT_CENTER_FLAG)
-            return FlagConstants.NEUTRAL_ENLIGHTENMENT_CENTER_FLAG;
-        if(flag == FlagConstants.NEED_HELP)
-            return FlagConstants.NEED_HELP;
-        if(flag == FlagConstants.ENEMY_ENLIGHTENMENT_CENTER_FLAG)
-            return FlagConstants.ENEMY_ENLIGHTENMENT_CENTER_FLAG;
-        else return FlagConstants.NEUTRAL;
+    /**
+     * Function to go through rolodex and check each politician
+     * @throws GameActionException cause RobotController
+     */
+    private void checkRolodex() throws GameActionException{
+        System.out.println("Here is my rolodex:");
+        LinkedList<Integer> toRemove = new LinkedList<>();
+        for (Integer id:
+             rolodex) {
+            try {
+                int flag = rc.getFlag(id);
+                if(rc.canSenseRobot(id)) {
+                    RobotInfo friend = rc.senseRobot(id);
+                    System.out.println("ID #" + id + " at location " + friend.getLocation() + " with flag " + flag);
+                } else {
+                    System.out.println("ID #" + id + " with flag " + flag + " cannot be sensed!");
+                }
+            } catch(GameActionException e) { // the ID could not be found, meaning it's time to delete that entry
+                System.out.println("ID #" + id + " is dead!");
+                toRemove.add(id);
+            }
+        }
+        for (Integer del:
+             toRemove) {
+            rolodex.remove(del);
+        }
     }
 }
 

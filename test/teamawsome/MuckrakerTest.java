@@ -4,11 +4,10 @@ import battlecode.common.*;
 import org.junit.Test;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-import teamawesome.GenericRobot;
+//import teamawesome.GenericRobot;
 import teamawesome.Muckraker;
 
 /**
@@ -37,6 +36,7 @@ public class MuckrakerTest {
     RobotInfo teamBot3 = new RobotInfo(8, Team.A, RobotType.POLITICIAN, 1, 1, new MapLocation(20200, 20200));
     RobotInfo teamBot4 = new RobotInfo(9, Team.A, RobotType.ENLIGHTENMENT_CENTER, 1, 1, new MapLocation(20200, 20200));
     RobotInfo[] teamRobotInfoArray = {teamBot1};
+    RobotInfo[] teamMuckInfoArray = {teamBot2, enemyEC1};
 
     @Test
     public void ifMuckrakerRobotCreatedThenMuckrakerClassIsCalled() {
@@ -67,7 +67,7 @@ public class MuckrakerTest {
     @Test
     public void ifCanMoveInPossibleDirThenStoreItAsPrevMove() throws GameActionException {
         RobotController rc = mock(RobotController.class);
-        GenericRobot gr = mock(GenericRobot.class);
+//        GenericRobot gr = mock(GenericRobot.class);
         when(rc.getType()).thenReturn(RobotType.MUCKRAKER);
         when(rc.getLocation()).thenReturn(new MapLocation(20100, 20100));
         when(rc.getTeam()).thenReturn(Team.A);
@@ -81,7 +81,7 @@ public class MuckrakerTest {
 
         assertEquals(enemyRobotInfoArray[0].getLocation(), map2);
         assertEquals(rc.getLocation().directionTo(enemyRobotInfoArray[0].getLocation()), Direction.SOUTHWEST);
-        assertEquals(robot.prevMovedDir, null);
+        assertNull(robot.prevMovedDir);
     }
 
     @Test
@@ -105,39 +105,62 @@ public class MuckrakerTest {
         assertEquals(rc.getFlag(11), 11400);
     }
 
-
-
-//    @Test
-//    public void ifNeutralECDetectedThenGetItsMapLocationAndSetFlag() throws GameActionException {
-//        RobotController rc = mock(RobotController.class);
-//        when(rc.getType()).thenReturn(RobotType.MUCKRAKER);
-//        when(rc.getTeam()).thenReturn(Team.A);
-//        when(rc.senseNearbyRobots()).thenReturn(neutralECRobotInfoArray);
-//        when(rc.getID()).thenReturn(4);
-//        when(rc.canSetFlag(1231)).thenReturn(true);
-//        when(rc.getFlag(4)).thenReturn(1231);
-//
-//        Muckraker robot = new Muckraker(rc);
-//        robot.turn();
-//
-//        assertEquals(robot.neutralLocation.x, 20100 );
-//        assertEquals(robot.neutralLocation.y, 20100);
-//        assertEquals(rc.getFlag(rc.getID()), 1231);
-//    }
-
     @Test
-    public void ifTeamRobotDetectedThenGetItsFlag() throws GameActionException {
+    public void ifSensedOurTeamBotGetItsFlagAndDetermineWhichDirectionToMove() throws GameActionException {
         RobotController rc = mock(RobotController.class);
         when(rc.getType()).thenReturn(RobotType.MUCKRAKER);
+        when(rc.getLocation()).thenReturn(new MapLocation(20200, 20200));
         when(rc.getTeam()).thenReturn(Team.A);
         when(rc.senseNearbyRobots()).thenReturn(teamRobotInfoArray);
         when(rc.canGetFlag(6)).thenReturn(true);
-        when(rc.getFlag(6)).thenReturn(20200);
+        when(rc.getFlag(6)).thenReturn(11400);
 
         Muckraker robot = new Muckraker(rc);
         robot.turn();
 
-        //assertEquals(robot.getFlag, 20200);
+        assertEquals(rc.getLocation().directionTo(teamRobotInfoArray[0].getLocation()), Direction.CENTER);
+        assertEquals(robot.botDirectionToMove, Direction.CENTER);
+        assertNull(robot.prevMovedDir);
     }
+
+    @Test
+    public void ifFellowMuckFlag11400FoundTryMoveInBotDirTillEnemyECDiscovered() throws GameActionException {
+        RobotController rc = mock(RobotController.class);
+        when(rc.getType()).thenReturn(RobotType.MUCKRAKER);
+        when(rc.getID()).thenReturn(101);
+        when(rc.getLocation()).thenReturn(new MapLocation(20200, 20200));
+        when(rc.getTeam()).thenReturn(Team.A);
+        when(rc.senseNearbyRobots()).thenReturn(teamMuckInfoArray);
+        when(rc.canGetFlag(6)).thenReturn(true);
+        when(rc.getFlag(6)).thenReturn(11400);
+        when(rc.canMove(Direction.CENTER)).thenReturn(true);
+
+        Muckraker robot = new Muckraker(rc);
+        robot.turn();
+
+        assertEquals(rc.getLocation().directionTo(teamRobotInfoArray[0].getLocation()), Direction.CENTER);
+        assertEquals(true, rc.canMove(Direction.CENTER));
+        assertTrue(robot.enemyEcFound);
+    }
+
+//    @Test
+//    public void ifEnemyECFoundTryToMoveInThatDirWithInSquareWithLowPass() throws GameActionException {
+//        RobotController rc = mock(RobotController.class);
+//        when(rc.getType()).thenReturn(RobotType.MUCKRAKER);
+//        when(rc.getLocation()).thenReturn(new MapLocation(20200, 20200));
+//        when(rc.getTeam()).thenReturn(Team.A);
+//        when(rc.senseNearbyRobots()).thenReturn(enemyECRobotInfoArray);
+//        when(rc.canSetFlag(11400)).thenReturn(true);
+//        when(rc.canGetFlag(11)).thenReturn(true);
+//        when(rc.getFlag(11)).thenReturn(11400);
+////        when(rc.canMove(Direction.SOUTHWEST)).thenReturn(false);
+//
+//        Muckraker robot = new Muckraker(rc);
+//        robot.turn();
+//
+//
+//        assertEquals(rc.getLocation().directionTo(enemyRobotInfoArray[0].getLocation()), Direction.SOUTHWEST);
+//
+//    }
 
 }
