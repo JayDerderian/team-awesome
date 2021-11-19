@@ -2,6 +2,7 @@ package teamawesome;
 
 import battlecode.common.*;
 import java.util.HashMap;
+import static teamawesome.FlagConstants.*;
 public class EnlightenmentCenter extends RobotPlayer{
 
     /**
