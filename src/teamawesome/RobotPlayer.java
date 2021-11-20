@@ -4,6 +4,9 @@ import static teamawesome.FlagConstants.*;
 import battlecode.common.*;
 import java.util.HashMap;
 import java.lang.Math;
+import java.util.LinkedList;
+import java.util.Map;
+
 
 /**
  * RobotPlayer (Abstract class)
@@ -14,6 +17,17 @@ import java.lang.Math;
  */
 abstract public strictfp class RobotPlayer {
     static RobotController rc;
+    protected int rxsender;
+    protected int rxsync;
+    protected int rxcode;
+    protected int rxtype;
+    protected int txsync;
+    LinkedList<Integer> rolodex;
+    MapLocation scouted;
+    int scoutedAge;
+    protected static final int swizzle = 10000;
+    int mothership = -1;
+
     public static final RobotType[] spawnableRobot = {
             RobotType.POLITICIAN,
             RobotType.SLANDERER,
@@ -33,6 +47,13 @@ abstract public strictfp class RobotPlayer {
 
     public RobotPlayer(RobotController newRc) {
         rc = newRc;
+        txsync = -1;
+        rxsync = -1;
+        rxtype = ERROR;
+        rxsender = -1;
+        rolodex = new LinkedList<>();
+        scouted = null;
+        scoutedAge = 0;
     }
 
     /**
@@ -86,6 +107,146 @@ abstract public strictfp class RobotPlayer {
             }
         }
     }
+    /**
+     * Function to sync reception of location data
+     * @param ID robot to receive location data from
+     * @return the location of the robot
+     * @throws GameActionException
+     */
+    protected Map<Integer, MapLocation> rxLocation(int ID) throws GameActionException{
+        System.out.println("Reception initiated");
+        if(rxsender == -1) rxsender = ID;
+        if(rxsender != ID) return null; // only talk to current rxsender
+        RobotInfo info = rc.senseRobot(ID); // NOTE ADDED AS A TEMP FIX!
+        Map<Integer, MapLocation> flag = retrieveFlag(rc, info);
+        Map.Entry<Integer, MapLocation> flagval = flag.entrySet().iterator().next();
+        int code = flagval.getKey();
+        MapLocation loc = flagval.getValue();
+        if(rxsync == -1) {
+            // if rxsync is unset and the flag is valid, read the flag and set rxsync
+            if(code != ERROR && code != LOCATION_INFO)
+                rxsync = 1;
+            rxcode = code;
+            flag.clear();
+            flag.put(NONE, null);
+        } else if(rxsync == 1 && code == LOCATION_INFO) {
+            // if rxsync is a valid value, clear flag and put the stored code
+            flag.clear();
+            try {
+                MapLocation decipherLoc = loc.translate(swizzle, swizzle);
+                rc.setIndicatorDot(decipherLoc, 255, 0, 255);
+                System.out.println("rx: " + ID + " reports code " +
+                        rxcode + " at " + decipherLoc);
+                if(validateLocation(decipherLoc)) {
+                    flag.put(rxcode, decipherLoc);
+                    System.out.println("Receive success!");
+                } else {
+                    System.out.println("Invalid location received, terminating communication");
+                    rxsender = -1;
+                }
+            } catch(NullPointerException n) {
+                System.out.println("No Location data found!");
+            }
+            rxsync = -1;
+        } else {
+            System.out.println("Commmunication error, terminating communication");
+            rxsender = -1;
+            rxsync = -1;
+        }
+        return flag;
+    }
+
+
+
+    protected void updateContact(RobotInfo robot) throws GameActionException {
+        if(robot.getType() != RobotType.MUCKRAKER) return;
+        int friendID = robot.getID();
+        //retrieveFlag(rc, friendID);
+        System.out.println("Found a friend! ID #" + friendID);
+        if(!rolodex.contains(friendID)) rolodex.add(friendID);
+    }
+
+    /**
+     * Function to go through rolodex and check each stored robot
+     * @throws GameActionException cause RobotController
+     */
+    protected void checkRolodex() throws GameActionException{
+        System.out.println("I have " + rolodex.size() + " contacts. Here is my rolodex:");
+        LinkedList<Integer> toRemove = new LinkedList<>();
+        for (Integer id:
+                rolodex) {
+            if(Clock.getBytecodesLeft() < 500) return;
+            try {
+                // ADDED AS A TEMP FIX!!
+                if(rc.canSenseRobot(id)){
+                    RobotInfo info = rc.senseRobot(id);
+                    Map<Integer, MapLocation> flag = retrieveFlag(rc, info);
+                    if(!flag.containsKey(ERROR)) {
+                        // if no rx source, use this one
+                        if (rxsender == -1) rxsender = id;
+                        break;
+                    }
+                }
+            } catch(GameActionException e) { // the ID could not be found, meaning it's time to delete that entry
+                System.out.println("ID #" + id + " is dead!");
+                if(rxsender == id) rxsender = -1;
+                toRemove.add(id);
+            }
+        }
+        for (Integer del:
+                toRemove) {
+            int startcode = Clock.getBytecodeNum();
+            rolodex.remove(del);
+            System.out.println("checkRolodex: removing entry used " + (Clock.getBytecodeNum() - startcode) + " bytecodes");
+
+        }
+    }
+
+    /**
+     * Function to sync the transmission of location data via the flag system
+     * @param type the message to be sent
+     * @param loc the location to be encoded
+     * @param conv conviction level
+     * @return success of the operation
+     * @throws GameActionException because rc
+     */
+    protected boolean txLocation(int type, MapLocation loc, int conv) throws GameActionException{
+        if(loc == null) return false;
+        System.out.println("Transmission Initiated, sending code " + type + " for location " + loc);
+        if(txsync == 1) {
+            // we broadcast the type last time, now broadcast location
+            txsync = -1;
+            MapLocation cipherLoc = loc.translate(-swizzle, -swizzle);
+            int newFlag = encodeLocationInFlag(cipherLoc);
+            if(rc.canSetFlag(newFlag)) {
+                rc.setFlag(newFlag);
+                return true;
+            }
+        } else {
+            // we need to broadcast the type
+            txsync = 1;
+            int newFlag = makeFlag(type, conv);
+            if(rc.canSetFlag(newFlag)) {
+                rc.setFlag(newFlag);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * given a location, validates that it is a possible location given BattleCode rules
+     * @param loc location to be validated
+     * @return validity of loc
+     */
+    protected boolean validateLocation(MapLocation loc) {
+        if(loc == null) return false;
+        int x = loc.x;
+        int y = loc.y;
+        if(x < 10000 || x > 30000) return false;
+        return y >= 10000 && y <= 30000;
+    }
+
 
     /**
      * Takes a the base flag (see FlagConstants.java), and optional conviction level.
@@ -161,17 +322,16 @@ abstract public strictfp class RobotPlayer {
      * If there's an error at any point, then a map containing the key ERROR
      * will be returned.
      *
-     * @param id
      * @return HashTable
      **/
-    public HashMap<Integer, MapLocation> retrieveFlag (RobotController rc, int id) throws GameActionException {
+    public HashMap<Integer, MapLocation> retrieveFlag (RobotController rc, RobotInfo info) throws GameActionException {
         // hash table containing all flag info.
         // see FlagConstants.java for a breakdown on entries.
         HashMap<Integer, MapLocation> res = new HashMap<>();
         // try to get flag from a given bot
+        int id = info.getID();
         if (rc.canSenseRobot(id)) {
-            RobotInfo info = rc.senseRobot(id);
-            int flag = rc.getFlag(info.getID());
+            int flag = rc.getFlag(id);
             // make sure this is one of ours!
             if (isOurs(flag))
                 res = parseFlag(info, flag);
@@ -281,7 +441,6 @@ abstract public strictfp class RobotPlayer {
      *    to contained x and y fields.
      *
      */
-
 
     /**
      * Takes a MapLocation as an argument and returns encoded x/y coordinates
