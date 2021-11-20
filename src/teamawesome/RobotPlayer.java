@@ -117,7 +117,8 @@ abstract public strictfp class RobotPlayer {
         System.out.println("Reception initiated");
         if(rxsender == -1) rxsender = ID;
         if(rxsender != ID) return null; // only talk to current rxsender
-        Map<Integer, MapLocation> flag = retrieveFlag(rc, ID);
+        RobotInfo info = rc.senseRobot(ID); // NOTE ADDED AS A TEMP FIX!
+        Map<Integer, MapLocation> flag = retrieveFlag(rc, info);
         Map.Entry<Integer, MapLocation> flagval = flag.entrySet().iterator().next();
         int code = flagval.getKey();
         MapLocation loc = flagval.getValue();
@@ -176,11 +177,15 @@ abstract public strictfp class RobotPlayer {
                 rolodex) {
             if(Clock.getBytecodesLeft() < 500) return;
             try {
-                Map<Integer, MapLocation> flag = retrieveFlag(rc, id);
-                if(!flag.containsKey(ERROR)) {
-                    // if no rx source, use this one
-                    if(rxsender == -1) rxsender = id;
-                    break;
+                // ADDED AS A TEMP FIX!!
+                if(rc.canSenseRobot(id)){
+                    RobotInfo info = rc.senseRobot(id);
+                    Map<Integer, MapLocation> flag = retrieveFlag(rc, info);
+                    if(!flag.containsKey(ERROR)) {
+                        // if no rx source, use this one
+                        if (rxsender == -1) rxsender = id;
+                        break;
+                    }
                 }
             } catch(GameActionException e) { // the ID could not be found, meaning it's time to delete that entry
                 System.out.println("ID #" + id + " is dead!");
@@ -241,8 +246,6 @@ abstract public strictfp class RobotPlayer {
         if(x < 10000 || x > 30000) return false;
         return y >= 10000 && y <= 30000;
     }
-
-
 
 
     /**
@@ -438,7 +441,6 @@ abstract public strictfp class RobotPlayer {
      *    to contained x and y fields.
      *
      */
-
 
     /**
      * Takes a MapLocation as an argument and returns encoded x/y coordinates
