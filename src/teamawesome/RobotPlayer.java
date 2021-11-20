@@ -161,17 +161,16 @@ abstract public strictfp class RobotPlayer {
      * If there's an error at any point, then a map containing the key ERROR
      * will be returned.
      *
-     * @param id
      * @return HashTable
      **/
-    public HashMap<Integer, MapLocation> retrieveFlag (RobotController rc, int id) throws GameActionException {
+    public HashMap<Integer, MapLocation> retrieveFlag (RobotController rc, RobotInfo info) throws GameActionException {
         // hash table containing all flag info.
         // see FlagConstants.java for a breakdown on entries.
         HashMap<Integer, MapLocation> res = new HashMap<>();
         // try to get flag from a given bot
+        int id = info.getID();
         if (rc.canSenseRobot(id)) {
-            RobotInfo info = rc.senseRobot(id);
-            int flag = rc.getFlag(info.getID());
+            int flag = rc.getFlag(id);
             // make sure this is one of ours!
             if (isOurs(flag))
                 res = parseFlag(info, flag);
