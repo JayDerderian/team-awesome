@@ -8,7 +8,9 @@ public strictfp class Muckraker extends RobotPlayer {
      * Variables of Muckraker
      */
     public String robotStatement = "I'm a " + rc.getType() + "! Location " + rc.getLocation();
+
     public MapLocation enemyECLocation;
+    public MapLocation homeECLocation;
     public Direction enemyECDirection;
     public Direction botDirectionToMove;
     public Direction prevMovedDir;
@@ -34,6 +36,7 @@ public strictfp class Muckraker extends RobotPlayer {
         xLean = 0; yLean = 0; // Reset guiding
         System.out.println(robotStatement);
         Team enemy = rc.getTeam().opponent();
+        homeECLocation = rc.getLocation();
 
         for (RobotInfo robot : rc.senseNearbyRobots()) {
             // ENEMY
@@ -43,7 +46,14 @@ public strictfp class Muckraker extends RobotPlayer {
                        return;
                 }
                 if (robot.type == RobotType.ENLIGHTENMENT_CENTER) { // enemy EC
-                   setEnemyECFlag(robot);
+                    enemyEcFound = true;
+                    enemyECLocation = robot.getLocation();
+                    enemyECLocationSet = true;
+                    enemyECDirection = rc.getLocation().directionTo(enemyECLocation);
+
+                    // set Flag to let other muck's know
+                    txLocation(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG, robot.getLocation(), 0);
+
                     break;
                 }
             } else if (robot.getTeam() != enemy) { // OUR TEAM
