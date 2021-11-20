@@ -39,47 +39,47 @@ public class EnlightenmentCenterTest {
      * Final flag number should be = 50 for Enemy Muckracker Detection.
      * @throws GameActionException
      */
-    @Test
-    public void ifEnemyMuckrackerDetectedSetFlag() throws GameActionException {
-        RobotController rc = mock(RobotController.class);
-        when(rc.getType()).thenReturn(RobotType.ENLIGHTENMENT_CENTER);
-        when(rc.getTeam()).thenReturn(Team.A);
-        when(rc.senseNearbyRobots()).thenReturn(enemyRobotInfoArray);
-        when(rc.getID()).thenReturn(4);
-        when(rc.getFlag(rc.getID())).thenReturn(11300);
-
-        EnlightenmentCenter center = new EnlightenmentCenter(rc);
-        center.turn();
-
-
-        System.out.println(rc.getID());
-        System.out.println(center.retrieveFlag(rc, 4));
-        //assertEquals(rc.getFlag(rc.getID()), 50);
-    }
-
-    /**
-     * When an enemy bot is detected, base conviction = 30.
-     * If bot is a Muckracker, then conviction is set to ++20.
-     * Final flag number should be = 50 for Enemy Muckracker Detection.
-     * @throws GameActionException
-     */
-    @Test
-    public void ifEnemyPoliticianDetectedSetFlag() throws GameActionException {
-        RobotController rc = mock(RobotController.class);
-        when(rc.getType()).thenReturn(RobotType.ENLIGHTENMENT_CENTER);
-        when(rc.getTeam()).thenReturn(Team.A);
-        when(rc.senseNearbyRobots()).thenReturn(pEnemyRobotInfoArray);
-        when(rc.getID()).thenReturn(4);
-        when(rc.getFlag(rc.getID())).thenReturn(11300);
-
-        EnlightenmentCenter center = new EnlightenmentCenter(rc);
-        center.turn();
-
-
-        System.out.println(rc.getID());
-        System.out.println(center.retrieveFlag(rc, 4));
-        //assertEquals(rc.getFlag(rc.getID()), 50);
-    }
+//    @Test
+//    public void ifEnemyMuckrackerDetectedSetFlag() throws GameActionException {
+//        RobotController rc = mock(RobotController.class);
+//        when(rc.getType()).thenReturn(RobotType.ENLIGHTENMENT_CENTER);
+//        when(rc.getTeam()).thenReturn(Team.A);
+//        when(rc.senseNearbyRobots()).thenReturn(enemyRobotInfoArray);
+//        when(rc.getID()).thenReturn(4);
+//        when(rc.getFlag(rc.getID())).thenReturn(11300);
+//
+//        EnlightenmentCenter center = new EnlightenmentCenter(rc);
+//        center.turn();
+//
+//
+//        System.out.println(rc.getID());
+//        System.out.println(center.retrieveFlag(rc, 4));
+//        //assertEquals(rc.getFlag(rc.getID()), 50);
+//    }
+//
+//    /**
+//     * When an enemy bot is detected, base conviction = 30.
+//     * If bot is a Muckracker, then conviction is set to ++20.
+//     * Final flag number should be = 50 for Enemy Muckracker Detection.
+//     * @throws GameActionException
+//     */
+//    @Test
+//    public void ifEnemyPoliticianDetectedSetFlag() throws GameActionException {
+//        RobotController rc = mock(RobotController.class);
+//        when(rc.getType()).thenReturn(RobotType.ENLIGHTENMENT_CENTER);
+//        when(rc.getTeam()).thenReturn(Team.A);
+//        when(rc.senseNearbyRobots()).thenReturn(pEnemyRobotInfoArray);
+//        when(rc.getID()).thenReturn(4);
+//        when(rc.getFlag(rc.getID())).thenReturn(11300);
+//
+//        EnlightenmentCenter center = new EnlightenmentCenter(rc);
+//        center.turn();
+//
+//
+//        System.out.println(rc.getID());
+//        System.out.println(center.retrieveFlag(rc, 4));
+//        //assertEquals(rc.getFlag(rc.getID()), 50);
+//    }
 
     /**
      * If the round is between 500 and 900, robot creation type is Politician.
