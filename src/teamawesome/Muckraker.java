@@ -138,8 +138,9 @@ public strictfp class Muckraker extends RobotPlayer {
 //                } }
         } else { // If enemy EC found, then move in close proximity to the enemy EC
             // if adjacent to enemy EC, then hault the movement; sence and expose is the only task to do.
-            if(rc.adjacentLocation(rc.getLocation().directionTo(enemyECLocation)) == enemyECLocation){
-                if(rc.canSetFlag(makeFlag(ENEMY_SLANDERER_NEARBY_FLAG, 0)))
+            if (nextToEnemyEC()) {
+                System.out.println("***** NEXT TO ENEMY EC **********");
+                if (rc.canSetFlag(makeFlag(ENEMY_SLANDERER_NEARBY_FLAG, 0)))
                     rc.setFlag(makeFlag(ENEMY_SLANDERER_NEARBY_FLAG, 0));
                 for (RobotInfo robot : rc.senseNearbyRobots()) {
                     // ENEMY
@@ -170,41 +171,61 @@ public strictfp class Muckraker extends RobotPlayer {
 //                            Direction possibleDir = rc.getLocation().directionTo(robot.getLocation());
 //                            if (tryMove(possibleDir))
 //                                prevMovedDir = possibleDir;
-                            Direction possibleDir = rc.getLocation().directionTo(enemyECLocation);
-                            if(enemyECLocationSet && tryMove(possibleDir)) {
-                                prevMovedDir = possibleDir;
-                                System.out.println("Muck Moved!");
-                            }
-                            else {
-                                Direction possibleDir1 = getHighPassableDirection();
-                                if (tryMove(possibleDir1)) {
-                                    prevMovedDir = possibleDir1;
-                                    System.out.println("Muck Moved!");
-                                } else if (tryMove(randomDirection())) {
-                                    System.out.println("Muck moved!");
-                                }
-                            }
+//                            Direction possibleDir = rc.getLocation().directionTo(enemyECLocation);
+//                            if(enemyECLocationSet && tryMove(possibleDir)) {
+//                                prevMovedDir = possibleDir;
+//                                System.out.println("Muck Moved!");
+//                            }
+//                            else {
+//                                Direction possibleDir1 = getHighPassableDirection();
+//                                if (tryMove(possibleDir1)) {
+//                                    prevMovedDir = possibleDir1;
+//                                    System.out.println("Muck Moved!");
+//                                } else if (tryMove(randomDirection())) {
+//                                    System.out.println("Muck moved!");
+//                                }
+//                            }
                             return;
                         }
                     }
                 }
             }
-//            Direction possibleDir = rc.getLocation().directionTo(enemyECLocation);
-//            if(enemyECLocationSet && tryMove(possibleDir)) {
-//                prevMovedDir = possibleDir;
-//                System.out.println("Muck Moved!");
-//            }
-//            else {
-//                Direction possibleDir1 = getHighPassableDirection();
-//                if (tryMove(possibleDir1)) {
-//                    prevMovedDir = possibleDir1;
-//                    System.out.println("Muck Moved!");
-//                } else if (tryMove(randomDirection())) {
-//                    System.out.println("Muck moved!");
-//                }
-//            }
+            Direction possibleDir = rc.getLocation().directionTo(enemyECLocation);
+            if (enemyECLocationSet && tryMove(possibleDir)) {
+                prevMovedDir = possibleDir;
+                System.out.println("Muck Moved!");
+            } else {
+                Direction possibleDir1 = getHighPassableDirection();
+                if (tryMove(possibleDir1)) {
+                    prevMovedDir = possibleDir1;
+                    System.out.println("Muck Moved!");
+                } else if (tryMove(randomDirection())) {
+                    System.out.println("Muck moved!");
+                }
             }
-        } }
+        }
+            }
+        }
+
+
+    private boolean nextToEnemyEC() {
+        MapLocation myLocation = rc.getLocation();
+        int xLoc = myLocation.x;
+        int yLoc = myLocation.y;
+        int xE = enemyECLocation.x;
+        int yE = enemyECLocation.y;
+        if((xLoc-1 == xE && yLoc == yE) ||
+                (xLoc+1 == xE && yLoc == yE) ||
+                (xLoc == xE && yLoc+1 == yE) ||
+                (xLoc == xE && yLoc-1 == yE) ||
+                (xLoc+1 == xE && yLoc-1 == yE) ||
+                (xLoc+1 == xE && yLoc+1 == yE) ||
+                (xLoc-1 == xE && yLoc+1 == yE)||
+                (xLoc-1 == xE && yLoc-1 == yE)) {
+            return true;
+        }
+        return false;
+    }
 
     private Direction getHighPassableDirection() throws GameActionException {
         double maxPass = 0.0;
