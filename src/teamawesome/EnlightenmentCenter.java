@@ -11,6 +11,7 @@ public class EnlightenmentCenter extends RobotPlayer{
      * Enlightenment Center Variables
      */
     protected static final int BID_START = 800;
+    public int flagValue;
     public String robotStatement = "I'm an " + rc.getType() + "! Location " + rc.getLocation();
     protected RobotType lastBuilt;
     public EnlightenmentCenter(RobotController newRc) {
@@ -77,7 +78,8 @@ public class EnlightenmentCenter extends RobotPlayer{
                     case SLANDERER:
                         rc.setFlag(makeFlag(FlagConstants.ENEMY_SLANDERER_NEARBY_FLAG, 0));   break;
                     case MUCKRAKER:
-                        rc.setFlag(makeFlag(FlagConstants.ENEMY_MUCKRAKER_NEARBY_FLAG, 0));   break;
+                        flagValue = makeFlag(FlagConstants.ENEMY_MUCKRAKER_NEARBY_FLAG, 0);
+                        rc.setFlag(flagValue);   break;
                 }
             } if(robot.getTeam() == myTeam) {
                 updateContact(robot);
