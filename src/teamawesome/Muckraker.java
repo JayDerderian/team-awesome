@@ -1,5 +1,8 @@
 package teamawesome;
 import battlecode.common.*;
+
+import java.util.Random;
+
 import static teamawesome.FlagConstants.*;
 
 public strictfp class Muckraker extends RobotPlayer {
@@ -112,36 +115,26 @@ public strictfp class Muckraker extends RobotPlayer {
         if(!enemyEcFound) { // Initially explore map quickly (along with Slanders)
             if (xLean == 0 && yLean == 0) {
                 int[] x1 = {0, 1, -1, 3, -3, 2, -2, 4, -4};
-                for (int i: x1) {
+                int randomIndex = new Random().nextInt(x1.length);
+                int arrLength = x1.length-1;
+                int i;
+                while (arrLength >= 0) {
+                    i = x1[randomIndex];
                     if (rc.canMove(RobotPlayer.directions[myMod((dirIdx + i), RobotPlayer.directions.length)])) {
                         rc.move(RobotPlayer.directions[myMod((dirIdx + i), RobotPlayer.directions.length)]);
-                        dirIdx += i;
+                        dirIdx += x1[randomIndex];
                         break;
                     }
                     if(enemyEcFound)
                         break;
+                    arrLength--;
+                    randomIndex = (randomIndex+1)%x1.length;
                 }
             }
-//            else {
-//                // Clean the leans somewhat
-//                if (Math.abs(xLean) > 2 * Math.abs(yLean)) {yLean = 0;}
-//                else if (Math.abs(yLean) > 2 * Math.abs(xLean)) {xLean = 0;}
-//                xLean = Math.min(1, Math.max(-1, xLean)) * -1;
-//                yLean = Math.min(1, Math.max(-1, yLean)) * -1;
-//                for (Direction dir : RobotPlayer.directions) {
-//                    if (dir.getDeltaY() == yLean && dir.getDeltaX() == xLean) {
-//                        if (rc.canMove(dir)) { rc.move(dir); }
-//                        return;
-//                    }
-//                    if(enemyEcFound)
-//                        break;
-//                } }
         } else { // If enemy EC found, then move in close proximity to the enemy EC
             // if adjacent to enemy EC, then hault the movement; sence and expose is the only task to do.
             if (nextToEnemyEC()) {
                 System.out.println("***** NEXT TO ENEMY EC **********");
-//                if (rc.canSetFlag(makeFlag(ENEMY_SLANDERER_NEARBY_FLAG, 0)))
-//                    rc.setFlag(makeFlag(ENEMY_SLANDERER_NEARBY_FLAG, 0));
                 for (RobotInfo robot : rc.senseNearbyRobots()) {
                     // ENEMY
                     if (robot.getTeam() == enemy) { // Slanderer
@@ -150,13 +143,15 @@ public strictfp class Muckraker extends RobotPlayer {
                             if (rc.canExpose(robot.location)) {
                                 System.out.println("e x p o s e d");
                                 rc.expose(robot.location);
-//                            Direction possibleDir = rc.getLocation().directionTo(robot.getLocation());
-//                            if (tryMove(possibleDir))
-//                                prevMovedDir = possibleDir;
                                 return;
                             }
                         }
                     }
+//                    if(robot.getTeam() != enemy) {
+//                        if(robot.type == RobotType.POLITICIAN) {
+//
+//                        }
+//                    }
                 }
             }
             else {
@@ -168,23 +163,6 @@ public strictfp class Muckraker extends RobotPlayer {
                         if (rc.canExpose(robot.location)) {
                             System.out.println("e x p o s e d");
                             rc.expose(robot.location);
-//                            Direction possibleDir = rc.getLocation().directionTo(robot.getLocation());
-//                            if (tryMove(possibleDir))
-//                                prevMovedDir = possibleDir;
-//                            Direction possibleDir = rc.getLocation().directionTo(enemyECLocation);
-//                            if(enemyECLocationSet && tryMove(possibleDir)) {
-//                                prevMovedDir = possibleDir;
-//                                System.out.println("Muck Moved!");
-//                            }
-//                            else {
-//                                Direction possibleDir1 = getHighPassableDirection();
-//                                if (tryMove(possibleDir1)) {
-//                                    prevMovedDir = possibleDir1;
-//                                    System.out.println("Muck Moved!");
-//                                } else if (tryMove(randomDirection())) {
-//                                    System.out.println("Muck moved!");
-//                                }
-//                            }
                             return;
                         }
                     }
@@ -207,8 +185,7 @@ public strictfp class Muckraker extends RobotPlayer {
             }
         }
 
-
-    private boolean nextToEnemyEC() {
+    public boolean nextToEnemyEC() {
         MapLocation myLocation = rc.getLocation();
         int xLoc = myLocation.x;
         int yLoc = myLocation.y;
