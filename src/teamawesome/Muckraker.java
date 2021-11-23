@@ -137,6 +137,22 @@ public strictfp class Muckraker extends RobotPlayer {
 //                        break;
 //                } }
         } else { // If enemy EC found, then move in close proximity to the enemy EC
+            for (RobotInfo robot : rc.senseNearbyRobots()) {
+                // ENEMY
+                if (robot.getTeam() == enemy) { // Slanderer
+                    if (robot.type.canBeExposed()) {
+                        // It's a slanderer... go get them!
+                        if (rc.canExpose(robot.location)) {
+                            System.out.println("e x p o s e d");
+                            rc.expose(robot.location);
+//                            Direction possibleDir = rc.getLocation().directionTo(robot.getLocation());
+//                            if (tryMove(possibleDir))
+//                                prevMovedDir = possibleDir;
+                            return;
+                        }
+                    }
+                }
+            }
             Direction possibleDir = rc.getLocation().directionTo(enemyECLocation);
             if(enemyECLocationSet && tryMove(possibleDir)) {
                 prevMovedDir = possibleDir;
