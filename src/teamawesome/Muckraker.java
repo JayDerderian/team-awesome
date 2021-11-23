@@ -140,8 +140,8 @@ public strictfp class Muckraker extends RobotPlayer {
             // if adjacent to enemy EC, then hault the movement; sence and expose is the only task to do.
             if (nextToEnemyEC()) {
                 System.out.println("***** NEXT TO ENEMY EC **********");
-                if (rc.canSetFlag(makeFlag(ENEMY_SLANDERER_NEARBY_FLAG, 0)))
-                    rc.setFlag(makeFlag(ENEMY_SLANDERER_NEARBY_FLAG, 0));
+//                if (rc.canSetFlag(makeFlag(ENEMY_SLANDERER_NEARBY_FLAG, 0)))
+//                    rc.setFlag(makeFlag(ENEMY_SLANDERER_NEARBY_FLAG, 0));
                 for (RobotInfo robot : rc.senseNearbyRobots()) {
                     // ENEMY
                     if (robot.getTeam() == enemy) { // Slanderer
