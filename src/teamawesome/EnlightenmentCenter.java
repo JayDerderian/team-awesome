@@ -56,12 +56,14 @@ public class EnlightenmentCenter extends RobotPlayer{
         }
         else if(toBuild == RobotType.SLANDERER){
             inf = Math.pow((round *.01), 2) + 80;
-            if(myInf < inf) inf = 50;
         }else{
-            inf = 20;
+            inf = 1;
             // prevent getting stuck just building muckrakers
             if(lastBuilt == RobotType.MUCKRAKER) toBuild = RobotType.SLANDERER;
         }
+
+        //if influence of home EC is high, generate muckrackers with MORE influence
+
 
 
         //sense enemy robots
