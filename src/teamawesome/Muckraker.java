@@ -51,8 +51,7 @@ public strictfp class Muckraker extends RobotPlayer {
                     enemyECLocationSet = true;
                     enemyECDirection = rc.getLocation().directionTo(enemyECLocation);
 
-                    // set Flag to let other muck's know
-                    txLocation(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG, robot.getLocation(), 0);
+
 
                     break;
                 }
@@ -86,6 +85,8 @@ public strictfp class Muckraker extends RobotPlayer {
                                         rc.setFlag(flagValue);
                                 } } } } } }
         }
+        // set Flag to let other muck's know
+        if(enemyECLocationSet) txLocation(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG, enemyECLocation, 0);
 
         // Move Muckraker
         if(!enemyEcFound) { // Initially explore map quickly (along with Slanders)

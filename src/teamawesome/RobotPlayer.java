@@ -22,10 +22,11 @@ abstract public strictfp class RobotPlayer {
     protected int rxcode;
     protected int rxtype;
     protected int txsync;
+    protected int commlag;
     LinkedList<Integer> rolodex;
     MapLocation scouted;
     int scoutedAge;
-    protected static final int swizzle = 10000;
+    protected static final int swizzle = 0;
     int mothership = -1;
 
     public static final RobotType[] spawnableRobot = {
@@ -54,6 +55,7 @@ abstract public strictfp class RobotPlayer {
         rolodex = new LinkedList<>();
         scouted = null;
         scoutedAge = 0;
+        commlag = 0;
     }
 
     /**
@@ -117,8 +119,7 @@ abstract public strictfp class RobotPlayer {
         System.out.println("Reception initiated");
         if(rxsender == -1) rxsender = ID;
         if(rxsender != ID) return null; // only talk to current rxsender
-        RobotInfo info = rc.senseRobot(ID); // NOTE ADDED AS A TEMP FIX!
-        Map<Integer, MapLocation> flag = retrieveFlag(rc, info);
+        Map<Integer, MapLocation> flag = retrieveFlag(rc, ID);
         Map.Entry<Integer, MapLocation> flagval = flag.entrySet().iterator().next();
         int code = flagval.getKey();
         MapLocation loc = flagval.getValue();
@@ -128,8 +129,9 @@ abstract public strictfp class RobotPlayer {
                 rxsync = 1;
             rxcode = code;
             flag.clear();
-            flag.put(NONE, null);
-        } else if(rxsync == 1 && code == LOCATION_INFO) {
+            flag.put(code, null);
+            commlag = 0;
+        } else if(rxsync == 1) {
             // if rxsync is a valid value, clear flag and put the stored code
             flag.clear();
             try {
@@ -148,8 +150,11 @@ abstract public strictfp class RobotPlayer {
                 System.out.println("No Location data found!");
             }
             rxsync = -1;
+        } else if(commlag < 5) {
+            System.out.println("Lagging... waiting " + (5 - commlag) + " more rounds");
+            ++commlag;
         } else {
-            System.out.println("Commmunication error, terminating communication");
+            System.out.println("Communication error, terminating communication");
             rxsender = -1;
             rxsync = -1;
         }
@@ -178,14 +183,25 @@ abstract public strictfp class RobotPlayer {
             if(Clock.getBytecodesLeft() < 500) return;
             try {
                 // ADDED AS A TEMP FIX!!
-                if(rc.canSenseRobot(id)){
-                    RobotInfo info = rc.senseRobot(id);
-                    Map<Integer, MapLocation> flag = retrieveFlag(rc, info);
-                    if(!flag.containsKey(ERROR)) {
+                if(rc.canGetFlag(id)){
+                    RobotInfo info;
+                    Map<Integer, MapLocation> flag;
+                    if(!rc.canSenseRobot(id))
+                        flag = retrieveFlag(rc, id);
+                    else {
+                        info = rc.senseRobot(id);
+                        flag = retrieveFlag(rc, info);
+                    }
+                    if(flag.containsKey(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG)) {
                         // if no rx source, use this one
+                        System.out.println("ID #" + id + " found an EC! Beginning comms");
                         if (rxsender == -1) rxsender = id;
                         break;
+                    } else {
+                        System.out.println("Hi ID #" + id + ", glad you're still out there!");
                     }
+                } else {
+                    System.out.println("ID#" + id + " is out of comms range!");
                 }
             } catch(GameActionException e) { // the ID could not be found, meaning it's time to delete that entry
                 System.out.println("ID #" + id + " is dead!");
@@ -330,6 +346,18 @@ abstract public strictfp class RobotPlayer {
         HashMap<Integer, MapLocation> res = new HashMap<>();
         // try to get flag from a given bot
         int id = info.getID();
+        return retrieveFlag(rc, info, res, id);
+    }
+
+    public HashMap<Integer, MapLocation> retrieveFlag (RobotController rc, int ID) throws GameActionException {
+        // hash table containing all flag info.
+        // see FlagConstants.java for a breakdown on entries.
+        HashMap<Integer, MapLocation> res = new HashMap<>();
+        // try to get flag from a given bot;
+        return retrieveFlag(rc, null, res, ID);
+    }
+
+    private HashMap<Integer, MapLocation> retrieveFlag(RobotController rc, RobotInfo info, HashMap<Integer, MapLocation> res, int id) throws GameActionException {
         if (rc.canSenseRobot(id)) {
             int flag = rc.getFlag(id);
             // make sure this is one of ours!
@@ -338,6 +366,10 @@ abstract public strictfp class RobotPlayer {
             else
                 // add our own location since the table requires a MapLocation
                 res.put(ERROR, rc.getLocation());
+        }
+        else if(this.getClass() == EnlightenmentCenter.class && rc.canGetFlag(id)) {
+            int flag = rc.getFlag(id);
+            res = parseFlag(null, flag);
         }
         else
             res.put(ERROR, rc.getLocation());
@@ -348,24 +380,29 @@ abstract public strictfp class RobotPlayer {
         HashMap<Integer, MapLocation> res = new HashMap<>();
         // NOTE: this is redundant if parseFlag is called from retrieveFlag
         // this is here in case parseFlag is called separately.
+        MapLocation location;
+        if(info == null) location = null;
+        else location = info.getLocation();
         if (!isOurs(flagOrig)){
-            res.put(ERROR, info.getLocation());
+            System.out.println("Not one of ours! proceed with caution");
+            res.put(ERROR, location);
             return res;
         }
         int len = countDigis(flagOrig);
+        System.out.println("Flag length: " + len);
         // this is an alert!
         if (len == 3){
             // remove first two digits, then test against constants
             int flag = flagOrig % 10;
             if (flag == NEUTRAL_ENLIGHTENMENT_CENTER_FLAG)
-                res.put(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG, info.getLocation());
+                res.put(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG, location);
             else if (flag == NEED_HELP)
-                res.put(NEED_HELP, info.getLocation());
+                res.put(NEED_HELP, location);
             else if (flag == GO_HERE)
-                res.put(GO_HERE, info.getLocation());
+                res.put(GO_HERE, location);
             else {
                 System.out.println("parseFlag -> Unable to parse 3-digit flag!");
-                res.put(ERROR, info.getLocation());
+                res.put(ERROR, location);
             }
         }
         // this is enemy info!
@@ -376,21 +413,22 @@ abstract public strictfp class RobotPlayer {
             int conv = flagTemp % 100;
             int flag = flagTemp - conv;
             if (flag == ENEMY_ENLIGHTENMENT_CENTER_FLAG)
-                res.put(ENEMY_ENLIGHTENMENT_CENTER_FLAG, info.getLocation());
+                res.put(ENEMY_ENLIGHTENMENT_CENTER_FLAG, location);
             // enemy politician!
             if (flag/100 == 1)
-                res.put(ENEMY_POLITICIAN_FLAG, info.getLocation());
+                res.put(ENEMY_POLITICIAN_FLAG, location);
                 // enemy slanderer!
             else if (flag/100 == 2)
-                res.put(ENEMY_SLANDERER_NEARBY_FLAG, info.getLocation());
+                res.put(ENEMY_SLANDERER_NEARBY_FLAG, location);
                 // enemy muckraker!
             else if (flag/100 == 3)
-                res.put(ENEMY_MUCKRAKER_NEARBY_FLAG, info.getLocation());
+                res.put(ENEMY_MUCKRAKER_NEARBY_FLAG, location);
             else
-                res.put(ERROR, info.getLocation());
+                res.put(ERROR, location);
         }
         // this is location info!
         else if (len == 8){
+            System.out.println("Location data received! Attempting to decode");
             MapLocation loc = decodeLocationFromFlag(flagOrig);
             res.put(LOCATION_INFO, loc);
         }
