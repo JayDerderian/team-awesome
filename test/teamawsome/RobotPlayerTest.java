@@ -290,6 +290,7 @@ public class RobotPlayerTest {
         fail("correct flag not found");
     }
 
+    // test if the EC is able to receive a location
     @Test
     public void canReceiveLocation() throws GameActionException{
         Map<Integer, MapLocation> flag = new HashMap<>();
