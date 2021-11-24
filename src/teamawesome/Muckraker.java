@@ -105,15 +105,16 @@ public strictfp class Muckraker extends RobotPlayer {
             if (nextToEnemyEC()) {
                 System.out.println("***** NEXT TO ENEMY EC **********");
                 for (RobotInfo robot : rc.senseNearbyRobots()) {
-                    // ENEMY
+                    // ENEMY converted to Our team
                     if (robot.getTeam() == enemy) { // Slanderer
                         if (robot.type.canBeExposed()) {
                             // It's a slanderer... go get them!
                             enemySlandExpose(robot, 3);
-                        } else if (robot.getTeam() == rc.getTeam() && robot.getType() == RobotType.ENLIGHTENMENT_CENTER) { // enemy EC converted to our team EC
-                            resetFlagAndMove(0);
-                            break;
                         }
+                    }
+                    if (robot.getTeam() == rc.getTeam() && robot.getType() == RobotType.ENLIGHTENMENT_CENTER) { // enemy EC converted to our team EC
+                        resetFlagAndMove(0);
+                        break;
                     }
 //                    else if(robot.getTeam() == rc.getTeam()) { // if our team politicians nearby to empower, given them way.
 //                        if(robot.getType() == RobotType.POLITICIAN) {
@@ -142,6 +143,10 @@ public strictfp class Muckraker extends RobotPlayer {
                         // It's a slanderer... go get them!
                         enemySlandExpose(robot, 4);
                     }
+                }
+                if (robot.getTeam() == rc.getTeam() && robot.getType() == RobotType.ENLIGHTENMENT_CENTER) { // enemy EC converted to our team EC
+                    resetFlagAndMove(0);
+                    break;
                 }
             }
             Direction possibleDir = rc.getLocation().directionTo(enemyECLocation);
