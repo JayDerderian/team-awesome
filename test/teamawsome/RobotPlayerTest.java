@@ -79,31 +79,27 @@ public class RobotPlayerTest {
     public void canMakeFlag() {
         RobotController rc = mock(RobotController.class);
         Politician testBot = new Politician(rc);
-        int test = 11400;
         int testFlag = testBot.makeFlag(ENEMY_ENLIGHTENMENT_CENTER_FLAG, 0);
-        assertEquals(test, testFlag);
+        assertEquals(11400, testFlag);
     }
 
     @Test
     public void canMakeFlag2() {
         RobotController rc = mock(RobotController.class);
         Politician testBot = new Politician(rc);
-        int test = 11302;
         int testFlag = testBot.makeFlag(ENEMY_MUCKRAKER_NEARBY_FLAG, 2);
-        assertEquals(test, testFlag);
+        assertEquals(11302, testFlag);
     }
 
     @Test
     public void encodeDecodeCoordinatesTest() {
         RobotController rc = mock(RobotController.class);
         Politician testBot = new Politician(rc);
-        int x = 12300;
-        int y = 32100;
-        MapLocation loc = new MapLocation(x, y);
+        MapLocation loc = new MapLocation(12300, 32100);
         int flag = testBot.encodeLocationInFlag(loc);
         MapLocation loc2 = testBot.decodeLocationFromFlag(flag);
-        assertEquals(x, loc2.x);
-        assertEquals(y, loc2.y);
+        assertEquals(12300, loc2.x);
+        assertEquals(32100, loc2.y);
     }
 
     //-----------------------------------------FLAG PARSING--------------------------------------//
@@ -157,9 +153,7 @@ public class RobotPlayerTest {
     public void encodeMapCoordinates() {
         RobotController rc = mock(RobotController.class);
         Politician testBot = new Politician(rc);
-        int x = 12300;
-        int y = 32100;
-        MapLocation loc = new MapLocation(x, y);
+        MapLocation loc = new MapLocation(12300, 32100);
         int flag = testBot.encodeLocationInFlag(loc);
         assertEquals(11123321, flag);
     }
@@ -168,12 +162,9 @@ public class RobotPlayerTest {
     public void decodeMapCoordinates() {
         RobotController rc = mock(RobotController.class);
         Politician testBot = new Politician(rc);
-        int flag = 11123321;
-        int x = 12300;
-        int y = 32100;
-        MapLocation loc = testBot.decodeLocationFromFlag(flag);
-        assertEquals(x, loc.x);
-        assertEquals(y, loc.y);
+        MapLocation loc = testBot.decodeLocationFromFlag(11123321);
+        assertEquals(12300, loc.x);
+        assertEquals(32100, loc.y);
     }
 
 
