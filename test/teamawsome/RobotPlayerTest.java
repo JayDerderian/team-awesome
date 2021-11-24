@@ -137,104 +137,9 @@ public class RobotPlayerTest {
         assertEquals(y, loc.y);
     }
 
-    //-------------------------------ENEMY / NEUTRAL EC DETECTION--------------------------------//
 
-//    @Test
-//    public void detectEnemies(){
-//        RobotController rc = mock(RobotController.class);
-//        Politician testBot = new Politician(rc);
-//        when(rc.senseNearbyRobots()).thenReturn(enemyRobotInfoArray);
-//        HashMap<Integer, MapLocation> res = testBot.findThreats(rc);
-//        assertFalse(res.containsKey(ERROR));
-//        assertTrue(res.containsKey(ENEMY_INFO));
-//    }
-//
-//    @Test
-//    public void detectNeutralEC(){
-//        RobotController rc = mock(RobotController.class);
-//        Politician testBot = new Politician(rc);
-//        when(rc.senseNearbyRobots()).thenReturn(neutralECRobotInfoArray);
-//        HashMap<Integer, MapLocation> res = testBot.findNeutralECs(rc);
-//        assertFalse(res.containsKey(ERROR));
-//        assertTrue(res.containsKey(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG));
-//    }
+    //--------------------------------------COMMUNICATION-----------------------------------------//
 
-    //--------------------------------------FLAG PARSING-----------------------------------------//
-
-    /*
-    @Test - successful retrieval of flag
-    @Test - successful parsing of flag against a known and expected result
-    @Test - successful retrieval of location from bot who's flag we retrieved.
-
-    all tests should pass bad info to make sure methods are catching them!
-     */
-
-//    @Test
-//    public void canParse3DigitFlag() throws GameActionException {
-//        RobotController rc1 = mock(RobotController.class);
-//        RobotController rc2 = mock(RobotController.class);
-//        Politician testBot1 = new Politician(rc1);
-//        Politician testBot2 = new Politician(rc2);
-//        RobotInfo info = new RobotInfo(1, Team.B, RobotType.POLITICIAN, 1, 1, new MapLocation(20000, 20000));
-//
-//        when(rc1.senseRobot(rc2.getID())).thenReturn(info);
-//
-//        int baseFlag = 111;  // "Neutral EC found!"
-//        int newFlag = testBot2.makeFlag(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG, 0);
-//        System.out.println("canParse3DigitFlag -> new flag = " + newFlag);
-//        // sanity checks
-//        assertEquals(baseFlag, newFlag);
-//        rc2.setFlag(newFlag);
-//
-//        // sense bot 2's info and get their flag
-//        RobotInfo friendlyBot = rc1.senseRobot(rc2.getID());
-//        int friendlyFlag = rc1.getFlag(rc2.getID());
-//        System.out.println("canParse3DigitFlag -> rc2's flag = " + friendlyFlag);
-//        HashMap<Integer, MapLocation> res = testBot1.parseFlag(friendlyBot, friendlyFlag);    //Getting a null pointer exception here!!
-//
-//        assertFalse(res.containsKey(ERROR));
-//        assertTrue(res.containsKey(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG));
-//    }
-//
-//    @Test
-//    public void canParse5DigitFlag() throws GameActionException {
-//        RobotController rc1 = mock(RobotController.class);
-//        RobotController rc2 = mock(RobotController.class);
-//        Politician testBot1 = new Politician(rc1);
-//        Politician testBot2 = new Politician(rc2);
-//
-//        int baseFlag = 11404;  // "Enemy EC found!"
-//        rc2.setFlag(testBot2.makeFlag(ENEMY_ENLIGHTENMENT_CENTER_FLAG, 0));
-//        // sanity check
-//        if(rc1.getFlag(rc2.getID()) != baseFlag)
-//            assertNotEquals(rc1.getFlag(rc2.getID()), baseFlag);
-//
-//        // sense bot 2's info and get their flag
-//        RobotInfo friendlyBot = rc1.senseRobot(rc2.getID());
-//        int friendlyFlag = rc1.getFlag(rc2.getID());
-//        HashMap<Integer, MapLocation> res = testBot1.parseFlag(friendlyBot, friendlyFlag);    //Getting a null pointer exception here!!
-//        assertTrue(res.containsKey(ENEMY_ENLIGHTENMENT_CENTER_FLAG));
-//    }
-
-//    @Test
-//    public void canRetrieve() throws GameActionException{
-//        RobotController rc1 = mock(RobotController.class);
-//        RobotController rc2 = mock(RobotController.class);
-//        Politician testBot1 = new Politician(rc1);
-//        Politician testBot2 = new Politician(rc2);
-//
-//        int baseFlag = 11209;  // "Enemy EC found!"
-//        rc2.setFlag(testBot2.makeFlag(ENEMY_SLANDERER_NEARBY_FLAG, 9));
-//        // sanity check
-//        if(rc1.getFlag(rc2.getID()) != baseFlag)
-//            assertNotEquals(rc1.getFlag(rc2.getID()), baseFlag);
-//
-//        // sense bot 2's info and get their flag
-//        HashMap<Integer, MapLocation> res = testBot1.retrieveFlag(rc1, rc2.getID());
-//        if(res.containsKey(ERROR))
-//            assertTrue(res.containsKey(ERROR));
-//        assertTrue(res.containsKey(ENEMY_SLANDERER_NEARBY_FLAG));
-//    }
 
     /*
     Communications tests
@@ -321,4 +226,42 @@ public class RobotPlayerTest {
         fail("correct flag not found");
     }
 
+    /*
+    @Test - successful alert flag parse
+    @Test - successful enemy info flag parse
+    @Test - successful approx location coord parse
+
+    all tests should pass bad info to make sure methods are catching them!
+     */
+
+    @Test
+    public void canParse3DigitFlag() throws GameActionException {
+        RobotController rc = mock(RobotController.class);
+        Politician testBot = new Politician(rc);
+        int testFlag = 111;       // "Neutral EC found!"
+        HashMap<Integer, MapLocation> result = testBot.parseFlag(neutralEC1,testFlag);
+        assertTrue(result.containsKey(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG));
+    }
+
+    @Test
+    public void canParse5DigitFlag() throws GameActionException {
+        RobotController rc = mock(RobotController.class);
+        Politician testBot = new Politician(rc);
+        int testFlag = 11205;       // "Enemy Slanderer with 05 conviction"
+        HashMap<Integer, MapLocation> result = testBot.parseFlag(neutralEC1,testFlag);
+        assertTrue(result.containsKey(ENEMY_SLANDERER_NEARBY_FLAG));
+    }
+
+    @Test
+    public void canParse8DigitFlag() throws GameActionException{
+        RobotController rc = mock(RobotController.class);
+        Politician testBot = new Politician(rc);
+        int testFlag = 11201201;                                                       // test flag
+        int x = 20100; int y = 20100;                                                  // neutralEC1's location coordindates
+        HashMap<Integer, MapLocation> result = testBot.parseFlag(neutralEC1,testFlag); // attempt to parse test flag
+        assertTrue(result.containsKey(LOCATION_INFO));                                 // make sure it worked
+        MapLocation loc = result.get(LOCATION_INFO);                                   // attempt to get location info
+        assertEquals(loc.x,x);                                                         // final tests
+        assertEquals(loc.y,y);
+    }
 }

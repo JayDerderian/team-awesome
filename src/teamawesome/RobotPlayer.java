@@ -379,11 +379,11 @@ abstract public strictfp class RobotPlayer {
 
     public HashMap<Integer, MapLocation> parseFlag(RobotInfo info, int flagOrig){
         HashMap<Integer, MapLocation> res = new HashMap<>();
-        // NOTE: this is redundant if parseFlag is called from retrieveFlag
-        // this is here in case parseFlag is called separately.
         MapLocation location;
         if(info == null) location = null;
         else location = info.getLocation();
+        // NOTE: this is redundant if parseFlag is called from retrieveFlag
+        // this is here in case parseFlag is called separately.
         if (!isOurs(flagOrig)){
             System.out.println("Not one of ours! proceed with caution");
             res.put(ERROR, location);
