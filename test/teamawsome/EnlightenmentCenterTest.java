@@ -17,11 +17,15 @@ public class EnlightenmentCenterTest {
     RobotInfo enemy2 = new RobotInfo(2, Team.B, RobotType.MUCKRAKER, 1, 1, new MapLocation(20000, 20000));
     RobotInfo enemy3 = new RobotInfo(3, Team.B, RobotType.MUCKRAKER, 1, 1, new MapLocation(20000, 20000));
     RobotInfo[] enemyRobotInfoArray = { enemy1, enemy2, enemy3 };
+    RobotInfo[] enemyRobotInfoArray1 = { enemy1 };
 
     RobotInfo pEnemy1 = new RobotInfo(1, Team.B, RobotType.POLITICIAN, 1, 1, new MapLocation(20000, 20000));
     RobotInfo pEnemy2 = new RobotInfo(2, Team.B, RobotType.POLITICIAN, 1, 1, new MapLocation(20000, 20000));
     RobotInfo pEnemy3 = new RobotInfo(3, Team.B, RobotType.POLITICIAN, 1, 1, new MapLocation(20000, 20000));
     RobotInfo[] pEnemyRobotInfoArray = { pEnemy1, pEnemy2, pEnemy3 };
+
+    RobotInfo teamBot1 = new RobotInfo(7, Team.A, RobotType.ENLIGHTENMENT_CENTER, 1, 1, new MapLocation(20200, 20200));
+    RobotInfo[] teamRobotInfoArray = {teamBot1};
 
     @Test
     public void ifEnlightenmentCenterCreatedThenECClassIsCalled() {
@@ -42,21 +46,19 @@ public class EnlightenmentCenterTest {
     @Test
     public void ifEnemyMuckrackerDetectedSetFlag() throws GameActionException {
         RobotController rc = mock(RobotController.class);
-        when(rc.getType()).thenReturn(RobotType.ENLIGHTENMENT_CENTER);
-        when(rc.getTeam()).thenReturn(Team.A);
-        when(rc.senseNearbyRobots()).thenReturn(enemyRobotInfoArray);
-        when(rc.getID()).thenReturn(4);
-        when(rc.canGetFlag(rc.getID())).thenReturn(true);
+        when(rc.getType()).thenReturn(RobotType.ENLIGHTENMENT_CENTER); // mocked robot type =EC
+        when(rc.getID()).thenReturn(101); // ID for EC
+        when(rc.getTeam()).thenReturn(Team.A); // EC team = A
+        when(rc.senseNearbyRobots(40, Team.A)).thenReturn(teamRobotInfoArray); // for the constructor in RobotPlayer
+        when(rc.senseNearbyRobots()).thenReturn(enemyRobotInfoArray1);
 
-        //when(rc.getFlag(rc.getID())).thenReturn(11300);
+//        when(rc.canSetFlag(11300)).thenReturn(true); // can EC set flag to 11300 (did not use in code)
 
         EnlightenmentCenter center = new EnlightenmentCenter(rc);
         center.turn();
 
-
-        //System.out.println(rc.getID());
         System.out.println(rc.getFlag(rc.getID()));
-        //assertEquals(rc.getFlag(rc.getID()), 50);
+        assertEquals(center.flagValue, 11300);
     }
 //
 //    /**
