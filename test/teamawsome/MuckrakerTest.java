@@ -31,12 +31,16 @@ public class MuckrakerTest {
     RobotInfo enemyEC2 = new RobotInfo(11, Team.B, RobotType.ENLIGHTENMENT_CENTER, 0, 0, new MapLocation(20300, 20300));
     RobotInfo[] enemyECRobotInfoArray = { enemyEC1 };
 
+    RobotInfo enemyMuck1 = new RobotInfo(12, Team.B, RobotType.MUCKRAKER, 0,0, new MapLocation(2400,2400));
+    RobotInfo[] enemyMuckRobotInfoArray = { enemyMuck1 };
+
     RobotInfo teamBot1 = new RobotInfo(6, Team.A, RobotType.SLANDERER, 1, 1, new MapLocation(20200, 20200));
     RobotInfo teamBot2 = new RobotInfo(7, Team.A, RobotType.MUCKRAKER, 1, 1, new MapLocation(20200, 20200));
     RobotInfo teamBot3 = new RobotInfo(8, Team.A, RobotType.POLITICIAN, 1, 1, new MapLocation(20200, 20200));
     RobotInfo teamBot4 = new RobotInfo(9, Team.A, RobotType.ENLIGHTENMENT_CENTER, 1, 1, new MapLocation(20200, 20200));
     RobotInfo[] teamRobotInfoArray = {teamBot1};
     RobotInfo[] teamMuckInfoArray = {teamBot2, enemyEC1};
+    RobotInfo[] teamMuckInfoArray1 = { teamBot2 };
 
     @Test
     public void ifMuckrakerRobotCreatedThenMuckrakerClassIsCalled() {
@@ -143,24 +147,19 @@ public class MuckrakerTest {
         assertTrue(robot.enemyEcFound);
     }
 
-//    @Test
-//    public void ifEnemyECFoundTryToMoveInThatDirWithInSquareWithLowPass() throws GameActionException {
-//        RobotController rc = mock(RobotController.class);
-//        when(rc.getType()).thenReturn(RobotType.MUCKRAKER);
-//        when(rc.getLocation()).thenReturn(new MapLocation(20200, 20200));
-//        when(rc.getTeam()).thenReturn(Team.A);
-//        when(rc.senseNearbyRobots()).thenReturn(enemyECRobotInfoArray);
-//        when(rc.canSetFlag(11400)).thenReturn(true);
-//        when(rc.canGetFlag(11)).thenReturn(true);
-//        when(rc.getFlag(11)).thenReturn(11400);
-////        when(rc.canMove(Direction.SOUTHWEST)).thenReturn(false);
-//
-//        Muckraker robot = new Muckraker(rc);
-//        robot.turn();
-//
-//
-//        assertEquals(rc.getLocation().directionTo(enemyRobotInfoArray[0].getLocation()), Direction.SOUTHWEST);
-//
-//    }
+    @Test
+    public void ifEnemyMuckFoundAlertTeamWithFlag() throws GameActionException {
+        RobotController rc = mock(RobotController.class);
+        when(rc.getType()).thenReturn(RobotType.MUCKRAKER);
+        when(rc.getID()).thenReturn(101);
+        when(rc.getLocation()).thenReturn(new MapLocation(20200, 20200));
+        when(rc.getTeam()).thenReturn(Team.A);
+        when(rc.senseNearbyRobots()).thenReturn(enemyMuckRobotInfoArray);
+
+        Muckraker robot = new Muckraker(rc);
+        robot.turn();
+
+        assertEquals(robot.flagValue, 11300);
+    }
 
 }

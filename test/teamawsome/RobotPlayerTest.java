@@ -1,9 +1,13 @@
 package teamawsome;
 
 import battlecode.common.*;
+import teamawesome.EnlightenmentCenter;
+import teamawesome.Muckraker;
 import teamawesome.Politician;
 
 import org.junit.Test;
+import teamawesome.RobotPlayer;
+
 import static org.junit.Assert.*;
 import static teamawesome.FlagConstants.*;
 
