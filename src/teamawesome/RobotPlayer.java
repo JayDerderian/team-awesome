@@ -110,7 +110,11 @@ abstract public strictfp class RobotPlayer {
             turnCount += 1;
             // special case: slanderers become politicians after some time
             if(robot.getClass() == Slanderer.class && rc.getType() == RobotType.POLITICIAN) {
-                robot = new Politician(robot.rc); // remake this robot as a politician
+                int mother = robot.mothership;
+                MapLocation loc = robot.motherLoc;
+                robot = new Politician(RobotPlayer.rc); // remake this robot as a politician
+                robot.mothership = mother;
+                robot.motherLoc = loc;
             }
             try {
                 // actuate the robot for one round
