@@ -22,17 +22,12 @@ public class Politician extends RobotPlayer {
     int sync;
     MapLocation dest;
     int destAge;
+    MapLocation myLoc;
 
     public Politician(RobotController newRc) {
         super(newRc);
         setup();
-        juggernaut = false;
-    }
-
-    public Politician(RobotController newRc, boolean juggernautStatus) {
-        super(newRc);
-        setup();
-        juggernaut = juggernautStatus;
+        juggernaut = rc.getInfluence() > 400;
     }
 
     private void setup() {
@@ -57,8 +52,8 @@ public class Politician extends RobotPlayer {
     public void turn() throws GameActionException {
         System.out.println("I'm a politician! My mothership is " + mothership + " and their flag is " + homeFlag);
         // check mothership for flag value
-        rc.setFlag(FlagConstants.NEUTRAL);
-        MapLocation myLoc = rc.getLocation();
+        hasSetFlag = false;
+        myLoc = rc.getLocation();
         // read mothership flag
         if(mothership != -1) {
             try{
@@ -66,14 +61,13 @@ public class Politician extends RobotPlayer {
                 if(flag != null)
                     if(flag.containsKey(FlagConstants.NEUTRAL_ENLIGHTENMENT_CENTER_FLAG)) {
                         MapLocation newDest = flag.get(FlagConstants.NEUTRAL_ENLIGHTENMENT_CENTER_FLAG);
-                        if(!newDest.equals(myLoc)) {
-                            dest = myLoc;
-                            System.out.println("Location Received: " + dest + " so I'll go " +
-                                    rc.getLocation().directionTo(dest));
-                        }
-
+                        checkAndGo(myLoc, newDest);
+                    } else if(flag.containsKey(FlagConstants.ENEMY_ENLIGHTENMENT_CENTER_FLAG)) {
+                        MapLocation newDest = flag.get(FlagConstants.ENEMY_ENLIGHTENMENT_CENTER_FLAG);
+                        checkAndGo(myLoc, newDest);
                     } else if(flag.containsKey(FlagConstants.NEED_HELP)) {
-                        MapLocation newDest = flag.get(FlagConstants.NEED_HELP);
+                        MapLocation newDest = motherLoc;
+                        juggernaut = false;
                         if(newDest.distanceSquaredTo(myLoc) > 25) {
                             dest = newDest;
                             System.out.println("Location Received: " + dest + " so I'll go " +
@@ -90,6 +84,16 @@ public class Politician extends RobotPlayer {
         Team enemy = rc.getTeam().opponent();
         int actionRadius = rc.getType().actionRadiusSquared;
         RobotInfo[] attackable = rc.senseNearbyRobots(actionRadius, enemy);
+        for (RobotInfo ec:
+             attackable) {
+            if(ec.getType() == RobotType.ENLIGHTENMENT_CENTER) {
+                System.out.println("empowering...");
+                rc.empower(actionRadius);
+                System.out.println("empowered");
+                empowered = true;
+                return;
+            }
+        }
         if (attackable.length != 0 && rc.canEmpower(actionRadius) && !juggernaut) {
             System.out.println("empowering...");
             rc.empower(actionRadius);
@@ -119,6 +123,16 @@ public class Politician extends RobotPlayer {
             if(momentum.containsKey(d)) momentum.put(d, momentum.get(d) - 1);
             else momentum.put(d, 1.0);
         }
+        if(!hasSetFlag && rc.canSetFlag(FlagConstants.NEUTRAL)) rc.setFlag(FlagConstants.NEUTRAL);
+    }
+
+    private void checkAndGo(MapLocation myLoc, MapLocation newDest) {
+        if(newDest != null)
+            if(!newDest.equals(myLoc)) {
+                dest = newDest;
+                System.out.println("Location Received: " + dest + " so I'll go " +
+                        rc.getLocation().directionTo(dest));
+            }
     }
 
     /**
@@ -156,13 +170,23 @@ public class Politician extends RobotPlayer {
                 info) {
             updateWeights(locations, robot);
         }
-        // prefer to go away from the way we came
+        // prefer to go away from the way we came, also check if we're stuck
+        MapLocation checkVal = history.get(0);
+        boolean same = true;
         for(MapLocation l :
                 history) {
-            if(rc.getLocation().directionTo(l) != Direction.CENTER) {
+            if(myLoc.directionTo(l) != Direction.CENTER) {
                 Direction histDirection = rc.getLocation().directionTo(l);
                 locations.put(histDirection, locations.get(histDirection) - 0.25);
             }
+            // check if all locations in history are the same
+            if(same) if(!myLoc.equals(checkVal)){
+                same = false;
+            }
+        }
+        if(same) {
+            dest = null;
+            destAge = 0;
         }
         // select the direction with the highest weight
         Map.Entry<Direction, Double> best = null;

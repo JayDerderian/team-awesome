@@ -52,7 +52,7 @@ public strictfp class Muckraker extends RobotPlayer {
                 } else if(robot.type == RobotType.MUCKRAKER) {
                     enemyMuckFoundAction(robot, 1);
                 }
-            } else if (robot.getTeam() != enemy) { // OUR TEAM
+            } else if (robot.getTeam() == rc.getTeam()) { // OUR TEAM
 
                 if(rc.canGetFlag(robot.ID)) {
                     int flagValue = rc.getFlag(robot.ID);
@@ -95,6 +95,11 @@ public strictfp class Muckraker extends RobotPlayer {
                                     if (rc.canSetFlag(flagValue))
                                         rc.setFlag(flagValue);
                                 } } } } } }
+            else {
+                if(robot.getType() == RobotType.ENLIGHTENMENT_CENTER) {
+                    txLocation(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG, robot.getLocation(), 0);
+                }
+            }
         }
 
         // Move Muckraker
@@ -186,7 +191,7 @@ public strictfp class Muckraker extends RobotPlayer {
         enemyECDirection = rc.getLocation().directionTo(enemyECLocation);
 
         // set Flag to let other muck's know
-        txLocation(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG, enemyECLocation, 0);
+        txLocation(ENEMY_ENLIGHTENMENT_CENTER_FLAG, enemyECLocation, 0);
     }
 
     public void enemySlandExpose(RobotInfo robot, int i) throws GameActionException {

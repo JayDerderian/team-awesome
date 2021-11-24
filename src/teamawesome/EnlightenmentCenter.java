@@ -13,9 +13,13 @@ public class EnlightenmentCenter extends RobotPlayer{
     protected static final int BID_START = 800;
     public String robotStatement = "I'm an " + rc.getType() + "! Location " + rc.getLocation();
     protected RobotType lastBuilt;
+    boolean needJuggernaut;
+    boolean needHelp;
     public EnlightenmentCenter(RobotController newRc) {
         super(newRc);
         lastBuilt = null;
+        needJuggernaut = false;
+        needHelp = false;
     }
 
     @Override
@@ -25,13 +29,8 @@ public class EnlightenmentCenter extends RobotPlayer{
         Team myTeam = rc.getTeam();
         double inf;
         RobotType toBuild = strategicSpawnableRobotType(round);
-        // check for nearby muckrakers, build a politician to defend
+        // scan surroundings
         RobotInfo[] robots = rc.senseNearbyRobots();
-        for (RobotInfo robot:
-             robots) {
-            if(robot.getType() == RobotType.MUCKRAKER && robot.getTeam() != myTeam)
-                toBuild = RobotType.POLITICIAN;
-        }
         if(scoutedAge > 0 && scoutedAge < 6) toBuild = RobotType.POLITICIAN;
 
         if(round < 300){
@@ -53,6 +52,9 @@ public class EnlightenmentCenter extends RobotPlayer{
                 inf = Math.pow((round *.01), 2) + 50;
             }
             if(myInf < inf) inf = 50;
+            if(scouted != null && myInf > 500)
+                inf = 500;
+
         }
         else if(toBuild == RobotType.SLANDERER){
             inf = Math.pow((round *.01), 2) + 80;
@@ -60,6 +62,22 @@ public class EnlightenmentCenter extends RobotPlayer{
             inf = 1;
             // prevent getting stuck just building muckrakers
             if(lastBuilt == RobotType.MUCKRAKER) toBuild = RobotType.SLANDERER;
+        }
+        // handle special case builds
+        if(needJuggernaut && myInf > 500) {
+            toBuild = RobotType.POLITICIAN;
+            inf = 500;
+            needJuggernaut = false;
+        } else if(needHelp && myInf > 50) {
+            toBuild = RobotType.SLANDERER;
+            inf = 0.9 * myInf;
+            needHelp = false;
+        }
+        // finally check and defend against muckrakers
+        for (RobotInfo robot:
+                robots) {
+            if(robot.getType() == RobotType.MUCKRAKER && robot.getTeam() != myTeam)
+                toBuild = RobotType.POLITICIAN;
         }
 
         //if influence of home EC is high, generate muckrackers with MORE influence
@@ -79,7 +97,7 @@ public class EnlightenmentCenter extends RobotPlayer{
                     case MUCKRAKER:
                         rc.setFlag(makeFlag(FlagConstants.ENEMY_MUCKRAKER_NEARBY_FLAG, 0));   break;
                 }
-            } if(robot.getTeam() == myTeam) {
+            } if(robot.getTeam() == myTeam && rolodex.size() < 50) {
                 updateContact(robot);
             }
 
@@ -87,28 +105,36 @@ public class EnlightenmentCenter extends RobotPlayer{
 
         // handle comms
         if(scoutedAge > 50) {
-            scouted = null;
-            rxsender = -1;
-            scoutedAge = 0;
+            resetScoutVariables();
         }
         if(rxsender == -1) {
             checkRolodex();
+            if(rxsender == 1) needJuggernaut = true;
         }
         if(rxsender != -1) {
             Map<Integer, MapLocation> location = rxLocation(rxsender);
+            int flag = NEUTRAL_ENLIGHTENMENT_CENTER_FLAG;
             if(location.containsKey(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG)) {
                 System.out.println("Neutral EC Scouted by " + rxsender);
-                MapLocation loc = location.get(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG);
-                if(loc != null)
-                    scouted = loc;
+            } else if(location.containsKey(ENEMY_ENLIGHTENMENT_CENTER_FLAG)) {
+                flag = ENEMY_ENLIGHTENMENT_CENTER_FLAG;
+                System.out.println("Enemy EC scouted by " + rxsender);
             }
-            txLocation(FlagConstants.NEUTRAL_ENLIGHTENMENT_CENTER_FLAG, scouted, 0);
+            MapLocation loc = location.get(flag);
+            if(loc != null)
+                scouted = loc;
+            txLocation(flag, scouted, 0);
             ++scoutedAge;
+            if(scoutedAge > 6 && loc == null) {
+                System.out.println("Comms timeout...");
+                resetScoutVariables();
+            }
         }
 
         //if low influence, raise need help flag
         if(round > 100 && rc.getInfluence() < 200 && rc.getConviction() < 200){
             rc.setFlag(makeFlag(FlagConstants.NEED_HELP, 0));
+            needHelp = true;
         }
 
         //build
@@ -125,7 +151,8 @@ public class EnlightenmentCenter extends RobotPlayer{
         int toBid;
         //if(round < BID_START){
             toBid = (int)Math.pow((round *.01), 2);
-            if(rc.canBid((int)toBid)){
+            // bid whenever possible, unless a juggernaut or help is needed
+            if(rc.canBid((int)toBid ) && !needJuggernaut && !needHelp){
                 System.out.println("Round " + round + " bidding " + toBid);
                 rc.bid((int)toBid);
             }
@@ -136,6 +163,14 @@ public class EnlightenmentCenter extends RobotPlayer{
             }
         }*/
     }
+
+    private void resetScoutVariables() {
+        scouted = null;
+        rxsender = -1;
+        scoutedAge = 0;
+        needJuggernaut = false;
+    }
+
     /**
      * Returns a random spawnable RobotType
      *

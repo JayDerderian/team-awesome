@@ -24,6 +24,7 @@ abstract public strictfp class RobotPlayer {
     protected int rxtype;
     protected int txsync;
     protected int commlag;
+    boolean hasSetFlag;
     LinkedList<Integer> rolodex;
     MapLocation scouted;
     int scoutedAge;
@@ -73,6 +74,7 @@ abstract public strictfp class RobotPlayer {
         scoutedAge = 0;
         commlag = 0;
         testMode = false;
+        hasSetFlag = false;
     }
 
     /**
@@ -169,6 +171,7 @@ abstract public strictfp class RobotPlayer {
                 }
             } catch(NullPointerException n) {
                 System.out.println("No Location data found!");
+                rxsender = -1;
             }
             rxsync = -1;
         } else if(commlag < 5) {
@@ -185,9 +188,8 @@ abstract public strictfp class RobotPlayer {
 
 
     protected void updateContact(RobotInfo robot) throws GameActionException {
-        if(robot.getType() != RobotType.MUCKRAKER) return;
+        if(robot.getType() != RobotType.MUCKRAKER && robot.getType() != RobotType.SLANDERER) return;
         int friendID = robot.getID();
-        //retrieveFlag(rc, friendID);
         System.out.println("Found a friend! ID #" + friendID);
         if(!rolodex.contains(friendID)) rolodex.add(friendID);
     }
@@ -214,7 +216,12 @@ abstract public strictfp class RobotPlayer {
                     }
                     if(flag.containsKey(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG)) {
                         // if no rx source, use this one
-                        System.out.println("ID #" + id + " found an EC! Beginning comms");
+                        System.out.println("ID #" + id + " found a neutral EC! Beginning comms");
+                        if (rxsender == -1) rxsender = id;
+                        break;
+                    } else if(flag.containsKey(ENEMY_ENLIGHTENMENT_CENTER_FLAG)) {
+                        // if no rx source, use this one
+                        System.out.println("ID #" + id + " found an enemy EC! Beginning comms");
                         if (rxsender == -1) rxsender = id;
                         break;
                     } else {
@@ -250,13 +257,18 @@ abstract public strictfp class RobotPlayer {
         //if(loc == null) return false;
         System.out.println("Transmission Initiated, sending code " + type + " for location " + loc);
         if(txsync != -1) {
-            // we broadcast the type last time, now broadcast location
-            txsync = -1;
-            MapLocation cipherLoc = loc.translate(-swizzle, -swizzle);
-            int newFlag = encodeLocationInFlag(cipherLoc);
-            if(rc.canSetFlag(newFlag)) {
-                rc.setFlag(newFlag);
-                return true;
+            if(loc == null) {
+                System.out.println("comms error!");
+            } else {
+                // we broadcast the type last time, now broadcast location
+                txsync = -1;
+                MapLocation cipherLoc = loc.translate(-swizzle, -swizzle);
+                int newFlag = encodeLocationInFlag(cipherLoc);
+                if(rc.canSetFlag(newFlag)) {
+                    rc.setFlag(newFlag);
+                    hasSetFlag = true;
+                    return true;
+                }
             }
         } else {
             // we need to broadcast the type
@@ -264,6 +276,7 @@ abstract public strictfp class RobotPlayer {
             int newFlag = makeFlag(type, conv);
             if(rc.canSetFlag(newFlag)) {
                 rc.setFlag(newFlag);
+                hasSetFlag = true;
                 return true;
             }
         }
@@ -448,7 +461,7 @@ abstract public strictfp class RobotPlayer {
         }
         // this is location info!
         else if (len == 8){
-            System.out.println("Location data received! Attempting to decode");
+            System.out.println("Location data received: " + flagOrig + " Attempting to decode");
             MapLocation loc = decodeLocationFromFlag(flagOrig);
             res.put(LOCATION_INFO, loc);
         }

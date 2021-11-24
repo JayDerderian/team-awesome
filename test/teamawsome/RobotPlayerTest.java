@@ -275,7 +275,7 @@ public class RobotPlayerTest {
 
         // verify the muckraker set its flag
         verify(rc).setFlag(flag1.capture());
-        assertEquals((long)flag1.getValue(), 111);
+        assertEquals((long)flag1.getValue(), 11400);
 
         // actuate another turn and check location is set correctly
         muck.turn();
