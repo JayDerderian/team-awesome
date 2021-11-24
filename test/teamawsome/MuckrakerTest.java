@@ -40,7 +40,7 @@ public class MuckrakerTest {
     RobotInfo teamBot4 = new RobotInfo(9, Team.A, RobotType.ENLIGHTENMENT_CENTER, 1, 1, new MapLocation(20200, 20200));
     RobotInfo[] teamRobotInfoArray = {teamBot1};
     RobotInfo[] teamMuckInfoArray = {teamBot2, enemyEC1};
-    RobotInfo[] teamMuckInfoArray1 = { teamBot2 };
+    RobotInfo[] teamMuckInfoArray1 = { teamBot4 };
 
     @Test
     public void ifMuckrakerRobotCreatedThenMuckrakerClassIsCalled() {
@@ -154,6 +154,8 @@ public class MuckrakerTest {
         when(rc.getID()).thenReturn(101);
         when(rc.getLocation()).thenReturn(new MapLocation(20200, 20200));
         when(rc.getTeam()).thenReturn(Team.A);
+//        when(rc.getType().sensorRadiusSquared).thenReturn(30);
+        when(rc.senseNearbyRobots(30, Team.A)).thenReturn(teamMuckInfoArray1);
         when(rc.senseNearbyRobots()).thenReturn(enemyMuckRobotInfoArray);
 
         Muckraker robot = new Muckraker(rc);

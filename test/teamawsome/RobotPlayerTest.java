@@ -1,10 +1,10 @@
 package teamawsome;
 
 import battlecode.common.*;
-import teamawesome.EnlightenmentCenter;
-import teamawesome.Muckraker;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import teamawesome.EnlightenmentCenter;
+import teamawesome.Muckraker;
 import teamawesome.Politician;
 
 import org.junit.Test;
@@ -171,7 +171,6 @@ public class RobotPlayerTest {
     @Test - successful retrieval of flag
     @Test - successful parsing of flag against a known and expected result
     @Test - successful retrieval of location from bot who's flag we retrieved.
-
     all tests should pass bad info to make sure methods are catching them!
      */
 

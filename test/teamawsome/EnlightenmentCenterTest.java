@@ -24,6 +24,9 @@ public class EnlightenmentCenterTest {
     RobotInfo pEnemy3 = new RobotInfo(3, Team.B, RobotType.POLITICIAN, 1, 1, new MapLocation(20000, 20000));
     RobotInfo[] pEnemyRobotInfoArray = { pEnemy1, pEnemy2, pEnemy3 };
 
+    RobotInfo teamBot1 = new RobotInfo(7, Team.A, RobotType.ENLIGHTENMENT_CENTER, 1, 1, new MapLocation(20200, 20200));
+    RobotInfo[] teamRobotInfoArray = {teamBot1};
+
     @Test
     public void ifEnlightenmentCenterCreatedThenECClassIsCalled() {
         RobotController rc = mock(RobotController.class);
@@ -46,7 +49,8 @@ public class EnlightenmentCenterTest {
         when(rc.getType()).thenReturn(RobotType.ENLIGHTENMENT_CENTER); // mocked robot type =EC
         when(rc.getID()).thenReturn(101); // ID for EC
         when(rc.getTeam()).thenReturn(Team.A); // EC team = A
-        when(rc.senseNearbyRobots()).thenReturn(enemyRobotInfoArray1); // what EC can scense
+        when(rc.senseNearbyRobots(40, Team.A)).thenReturn(teamRobotInfoArray); // for the constructor in RobotPlayer
+        when(rc.senseNearbyRobots()).thenReturn(enemyRobotInfoArray1);
 
 //        when(rc.canSetFlag(11300)).thenReturn(true); // can EC set flag to 11300 (did not use in code)
 
