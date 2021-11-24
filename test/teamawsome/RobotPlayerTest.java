@@ -321,4 +321,16 @@ public class RobotPlayerTest {
         fail("correct flag not found");
     }
 
+    @Test
+    public void newRobotKnowsItsMothership() {
+        RobotController rc = mock(RobotController.class);
+        when(rc.getTeam()).thenReturn(Team.A);
+        when(rc.senseNearbyRobots(anyInt(), eq(Team.A))).thenReturn(PoliticianTest.PoliticECTest);
+        when(rc.getType()).thenReturn(RobotType.MUCKRAKER);
+
+        Muckraker muck = new Muckraker(rc);
+        assertEquals(muck.mothership, PoliticianTest.teamBot4.ID);
+        assertEquals(muck.motherLoc, PoliticianTest.teamBot4.getLocation());
+    }
+
 }

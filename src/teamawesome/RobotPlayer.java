@@ -29,6 +29,7 @@ abstract public strictfp class RobotPlayer {
     int scoutedAge;
     protected static final int swizzle = 0;
     public int mothership = -1;
+    public MapLocation motherLoc;
 
     public static final RobotType[] spawnableRobot = {
             RobotType.POLITICIAN,
@@ -49,6 +50,15 @@ abstract public strictfp class RobotPlayer {
 
     public RobotPlayer(RobotController newRc) {
         rc = newRc;
+        // look around and learn who your mama is
+        RobotInfo[] wheresMommy = rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, rc.getTeam());
+        for (RobotInfo info:
+             wheresMommy) {
+            if(info.getType() == RobotType.ENLIGHTENMENT_CENTER) {
+                mothership = info.getID();
+                motherLoc = info.getLocation();
+            }
+        }
         txsync = -1;
         rxsync = -1;
         rxtype = ERROR;
