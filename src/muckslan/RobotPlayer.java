@@ -77,8 +77,6 @@ public strictfp class RobotPlayer {
         for (Direction dir : directions) {
             if (rc.canBuildRobot(toBuild, dir, influence)) {
                 rc.buildRobot(toBuild, dir, influence);
-            } else {
-                break;
             }
         }
         int toBid = (int)(0.05 * rc.getInfluence());

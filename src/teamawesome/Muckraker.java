@@ -1,6 +1,7 @@
 package teamawesome;
 import battlecode.common.*;
 
+import java.util.Map;
 import java.util.Random;
 
 import static teamawesome.FlagConstants.*;
@@ -227,6 +228,28 @@ public strictfp class Muckraker extends RobotPlayer {
     }
 
     public Direction getHighPassableDirection() throws GameActionException {
+        MapLocation myLoc = rc.getLocation();
+        // read mothership flag
+        if(mothership != -1) {
+            try{
+                Map<Integer, MapLocation> flag = rxLocation(mothership);
+                if(flag != null)
+                    if(flag.containsKey(FlagConstants.ENEMY_ENLIGHTENMENT_CENTER_FLAG)) {
+                        MapLocation newDest = flag.get(FlagConstants.ENEMY_ENLIGHTENMENT_CENTER_FLAG);
+                        checkAndGo(myLoc, newDest);
+                        if(enemyECLocation != null) {
+                            enemyEcFound = true;
+                            enemyECLocation = newDest;
+                            enemyECLocationSet = true;
+                            enemyECDirection = myLoc.directionTo(enemyECLocation);
+                            System.out.println("setting a course for " + newDest);
+                        }
+                    }
+            } catch(GameActionException e) {
+                // if cannot read mothership flag, the mothership EC is dead
+                mothership = -1;
+            }
+        }
         double maxPass = 0.0;
         Direction maxPassDir = randomDirection();
         for(Direction d: Direction.values()){

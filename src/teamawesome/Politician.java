@@ -20,7 +20,6 @@ public class Politician extends RobotPlayer {
     boolean juggernaut; // juggernaut Politicians will ignore all enemies and focus on neutral ECs
     boolean ECsighted;
     int sync;
-    MapLocation dest;
     int destAge;
     MapLocation myLoc;
 
@@ -126,14 +125,7 @@ public class Politician extends RobotPlayer {
         if(!hasSetFlag && rc.canSetFlag(FlagConstants.NEUTRAL)) rc.setFlag(FlagConstants.NEUTRAL);
     }
 
-    private void checkAndGo(MapLocation myLoc, MapLocation newDest) {
-        if(newDest != null)
-            if(!newDest.equals(myLoc)) {
-                dest = newDest;
-                System.out.println("Location Received: " + dest + " so I'll go " +
-                        rc.getLocation().directionTo(dest));
-            }
-    }
+
 
     /**
      * Function for the politician to decide which direction to move

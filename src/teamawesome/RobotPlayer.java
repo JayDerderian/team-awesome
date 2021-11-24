@@ -31,6 +31,7 @@ abstract public strictfp class RobotPlayer {
     protected static final int swizzle = 0;
     public int mothership = -1;
     public MapLocation motherLoc;
+    MapLocation dest;
 
     public static final RobotType[] spawnableRobot = {
             RobotType.POLITICIAN,
@@ -229,6 +230,7 @@ abstract public strictfp class RobotPlayer {
                     }
                 } else {
                     System.out.println("ID#" + id + " is out of comms range!");
+                    toRemove.add(id);
                 }
             } catch(GameActionException e) { // the ID could not be found, meaning it's time to delete that entry
                 System.out.println("ID #" + id + " is dead!");
@@ -605,5 +607,14 @@ abstract public strictfp class RobotPlayer {
             rc.move(dir);
             return true;
         } else return false;
+    }
+
+    protected void checkAndGo(MapLocation myLoc, MapLocation newDest) {
+        if(newDest != null)
+            if(!newDest.equals(myLoc)) {
+                dest = newDest;
+                System.out.println("Location Received: " + dest + " so I'll go " +
+                        rc.getLocation().directionTo(dest));
+            }
     }
 }

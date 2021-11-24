@@ -15,6 +15,8 @@ public class EnlightenmentCenter extends RobotPlayer{
     protected RobotType lastBuilt;
     boolean needJuggernaut;
     boolean needHelp;
+    boolean slandererNearby;
+    boolean enemyMuckNearby;
     public EnlightenmentCenter(RobotController newRc) {
         super(newRc);
         lastBuilt = null;
@@ -24,6 +26,7 @@ public class EnlightenmentCenter extends RobotPlayer{
 
     @Override
     public void turn() throws GameActionException {
+        enemyMuckNearby = false;
         int round = rc.getRoundNum();
         double myInf = rc.getInfluence();
         Team myTeam = rc.getTeam();
@@ -43,6 +46,31 @@ public class EnlightenmentCenter extends RobotPlayer{
                     }
                 }
             }
+        }
+        //sense surrounding robots
+        slandererNearby = false;
+        for (RobotInfo robot:
+                robots) {
+            if(robot.getTeam() != myTeam){
+
+                switch (robot.type) {
+                    case POLITICIAN:
+                        //rc.setFlag(makeFlag(FlagConstants.ENEMY_POLITICIAN_FLAG, 0));
+                        break;
+                    case SLANDERER:
+                        //rc.setFlag(makeFlag(FlagConstants.ENEMY_SLANDERER_NEARBY_FLAG, 0));
+                        break;
+                    case MUCKRAKER:
+                        //rc.setFlag(makeFlag(FlagConstants.ENEMY_MUCKRAKER_NEARBY_FLAG, 0));
+                        enemyMuckNearby = true;
+                        if(toBuild == RobotType.SLANDERER) toBuild = RobotType.ENLIGHTENMENT_CENTER;
+                        break;
+                }
+            } if(robot.getTeam() == myTeam) {
+                if(rolodex.size() < 50) updateContact(robot);
+                if(robot.getType() == RobotType.SLANDERER) slandererNearby = true;
+            }
+
         }
 
         if(toBuild == RobotType.POLITICIAN){
@@ -68,40 +96,26 @@ public class EnlightenmentCenter extends RobotPlayer{
             toBuild = RobotType.POLITICIAN;
             inf = 500;
             needJuggernaut = false;
-        } else if(needHelp && myInf > 50) {
+        } else if(needHelp && myInf > 50 && !enemyMuckNearby) {
             toBuild = RobotType.SLANDERER;
             inf = 0.9 * myInf;
             needHelp = false;
         }
         // finally check and defend against muckrakers
-        for (RobotInfo robot:
-                robots) {
-            if(robot.getType() == RobotType.MUCKRAKER && robot.getTeam() != myTeam)
-                toBuild = RobotType.POLITICIAN;
+        if(slandererNearby && enemyMuckNearby) {
+                if(myInf > 200) {
+                    toBuild = RobotType.POLITICIAN;
+                    inf = 0.5 * myInf;
+                } else {
+                    toBuild = RobotType.ENLIGHTENMENT_CENTER;
+                }
         }
 
         //if influence of home EC is high, generate muckrackers with MORE influence
 
 
 
-        //sense enemy robots
-        for (RobotInfo robot:
-                robots) {
-            if(robot.getTeam() != myTeam){
 
-                switch (robot.type) {
-                    case POLITICIAN:
-                        rc.setFlag(makeFlag(FlagConstants.ENEMY_POLITICIAN_FLAG, 0));   break;
-                    case SLANDERER:
-                        rc.setFlag(makeFlag(FlagConstants.ENEMY_SLANDERER_NEARBY_FLAG, 0));   break;
-                    case MUCKRAKER:
-                        rc.setFlag(makeFlag(FlagConstants.ENEMY_MUCKRAKER_NEARBY_FLAG, 0));   break;
-                }
-            } if(robot.getTeam() == myTeam && rolodex.size() < 50) {
-                updateContact(robot);
-            }
-
-        }
 
         // handle comms
         if(scoutedAge > 50) {
@@ -133,17 +147,24 @@ public class EnlightenmentCenter extends RobotPlayer{
 
         //if low influence, raise need help flag
         if(round > 100 && rc.getInfluence() < 200 && rc.getConviction() < 200){
-            rc.setFlag(makeFlag(FlagConstants.NEED_HELP, 0));
+            //rc.setFlag(makeFlag(FlagConstants.NEED_HELP, 0));
             needHelp = true;
         }
 
         //build
-        for (Direction dir : teamawesome.RobotPlayer.directions) {
+        Direction prefDir = directions[round % 8];
+        if(rc.canBuildRobot(toBuild, prefDir, (int) inf)) {
+            System.out.println("Building a " + toBuild + " in the " + prefDir + " direction with " + inf + " influence!");
+            lastBuilt = toBuild;
+            rc.buildRobot(toBuild, prefDir, (int) inf);
+        } else {
+            for (Direction dir : teamawesome.RobotPlayer.directions) {
 
-            if (rc.canBuildRobot(toBuild, dir, (int) inf)) {
-                System.out.println("Building a " + toBuild + " in the " + dir + " direction with " + inf + " influence!");
-                lastBuilt = toBuild;
-                rc.buildRobot(toBuild, dir, (int) inf);
+                if (rc.canBuildRobot(toBuild, dir, (int) inf)) {
+                    System.out.println("Building a " + toBuild + " in the " + dir + " direction with " + inf + " influence!");
+                    lastBuilt = toBuild;
+                    rc.buildRobot(toBuild, dir, (int) inf);
+                }
             }
         }
 
