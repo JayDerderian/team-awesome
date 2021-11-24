@@ -23,14 +23,14 @@ public class PoliticianTest {
     public static RobotInfo enemy1 = new RobotInfo(1, Team.B, RobotType.SLANDERER, 1, 1, new MapLocation(20000, 20000));
     public static RobotInfo enemy2 = new RobotInfo(2, Team.B, RobotType.SLANDERER, 1, 1, new MapLocation(20000, 20000));
     public static RobotInfo enemy3 = new RobotInfo(3, Team.B, RobotType.SLANDERER, 1, 1, new MapLocation(20000, 20000));
-    public static RobotInfo enemy4 = new RobotInfo(10, Team.B, RobotType.ENLIGHTENMENT_CENTER, 1, 1, new MapLocation(20000, 20000));
-    public static RobotInfo enemy5 = new RobotInfo(11, Team.B, RobotType.MUCKRAKER, 1, 1, new MapLocation(20000, 20000));
+    public static RobotInfo enemy4 = new RobotInfo(10, Team.B, RobotType.ENLIGHTENMENT_CENTER, 1, 1, new MapLocation(20255, 20255));
+    public static RobotInfo enemy5 = new RobotInfo(11, Team.B, RobotType.MUCKRAKER, 1, 1, new MapLocation(20255, 20255));
     public static RobotInfo[] enemyRobotInfoArray = { enemy1, enemy2, enemy3, enemy5 };
     public static RobotInfo[] noNearbyArray = {};
     public static RobotInfo[] enemyEC = {enemy4};
 
-    public static RobotInfo neutralEC1 = new RobotInfo(4, Team.NEUTRAL, RobotType.ENLIGHTENMENT_CENTER, 0, 0, new MapLocation(20100, 20100));
-    public static RobotInfo neutralEC2 = new RobotInfo(5, Team.NEUTRAL, RobotType.ENLIGHTENMENT_CENTER, 0, 0, new MapLocation(20100, 20100));
+    public static RobotInfo neutralEC1 = new RobotInfo(4, Team.NEUTRAL, RobotType.ENLIGHTENMENT_CENTER, 0, 0, new MapLocation(20255, 20255));
+    public static RobotInfo neutralEC2 = new RobotInfo(5, Team.NEUTRAL, RobotType.ENLIGHTENMENT_CENTER, 0, 0, new MapLocation(20255, 20255));
     public static RobotInfo[] neutralECRobotInfoArray = { neutralEC1 };
 
     public static RobotInfo teamBot1 = new RobotInfo(6, Team.A, RobotType.SLANDERER, 1, 1, new MapLocation(20200, 20200));
@@ -50,6 +50,7 @@ public class PoliticianTest {
     @Test
     public void ifPoliticianRobotCreatedThenPoliticianClassIsCalled() {
         RobotController rc = mock(RobotController.class);
+        RobotPlayerTest.setupForMothership(rc, RobotType.ENLIGHTENMENT_CENTER);
         when(rc.getType()).thenReturn(RobotType.POLITICIAN);
 
         Politician robot = new Politician(rc);
@@ -60,6 +61,7 @@ public class PoliticianTest {
     @Test
     public void ifEnemyRobotSensedAndCanBeEmpoweredThenEmpower() throws GameActionException {
         RobotController rc = mock(RobotController.class);
+        RobotPlayerTest.setupForMothership(rc, RobotType.ENLIGHTENMENT_CENTER);
         when(rc.getType()).thenReturn(RobotType.POLITICIAN);
         when(rc.getTeam()).thenReturn(Team.A);
         when(rc.senseNearbyRobots(9, Team.B)).thenReturn(enemyRobotInfoArray);
@@ -74,6 +76,7 @@ public class PoliticianTest {
     @Test
     public void ifNeutralECDetectedThenEmpower() throws GameActionException {
         RobotController rc = mock(RobotController.class);
+        RobotPlayerTest.setupForMothership(rc, RobotType.ENLIGHTENMENT_CENTER);
         when(rc.getType()).thenReturn(RobotType.POLITICIAN);
         when(rc.getTeam()).thenReturn(Team.A);
         when(rc.senseNearbyRobots(9, Team.B)).thenReturn(noNearbyArray);
@@ -89,6 +92,7 @@ public class PoliticianTest {
     @Test
     public void politicianMovesIfNoEmpowerableRobots() throws GameActionException {
         RobotController rc = mock(RobotController.class);
+        RobotPlayerTest.setupForMothership(rc, RobotType.ENLIGHTENMENT_CENTER);
         when(rc.getType()).thenReturn(RobotType.POLITICIAN);
         when(rc.getTeam()).thenReturn(Team.A);
         // show no convertible units
@@ -112,6 +116,7 @@ public class PoliticianTest {
     @Test
     public void politicianFindsMotherShip() throws GameActionException {
         RobotController rc = mock(RobotController.class);
+        RobotPlayerTest.setupForMothership(rc, RobotType.ENLIGHTENMENT_CENTER);
         when(rc.getType()).thenReturn(RobotType.POLITICIAN);
         when(rc.getTeam()).thenReturn(Team.A);
         // show no convertible units

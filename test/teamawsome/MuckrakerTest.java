@@ -41,7 +41,7 @@ public class MuckrakerTest {
     @Test
     public void ifMuckrakerRobotCreatedThenMuckrakerClassIsCalled() {
         RobotController rc = mock(RobotController.class);
-        when(rc.getType()).thenReturn(RobotType.MUCKRAKER);
+        RobotPlayerTest.setupForMothership(rc, RobotType.MUCKRAKER);
 
         Muckraker robot = new Muckraker(rc);
 
@@ -51,7 +51,7 @@ public class MuckrakerTest {
     @Test
     public void ifEnemyRobotSensedAndCanBeExposeThenExpose() throws GameActionException {
         RobotController rc = mock(RobotController.class);
-        when(rc.getType()).thenReturn(RobotType.MUCKRAKER);
+        RobotPlayerTest.setupForMothership(rc, RobotType.MUCKRAKER);
         when(rc.getLocation()).thenReturn(new MapLocation(20200, 20200));
         when(rc.getTeam()).thenReturn(Team.A);
         when(rc.senseNearbyRobots()).thenReturn(enemyRobotInfoArray);
@@ -68,7 +68,7 @@ public class MuckrakerTest {
     public void ifCanMoveInPossibleDirThenStoreItAsPrevMove() throws GameActionException {
         RobotController rc = mock(RobotController.class);
 //        GenericRobot gr = mock(GenericRobot.class);
-        when(rc.getType()).thenReturn(RobotType.MUCKRAKER);
+        RobotPlayerTest.setupForMothership(rc, RobotType.MUCKRAKER);
         when(rc.getLocation()).thenReturn(new MapLocation(20100, 20100));
         when(rc.getTeam()).thenReturn(Team.A);
         when(rc.senseNearbyRobots()).thenReturn(enemyRobotInfoArray);
@@ -87,7 +87,7 @@ public class MuckrakerTest {
     @Test
     public void ifEnemyECSensedThenSetAllEnemyECVariablesAndSetCorrectFlag() throws GameActionException {
         RobotController rc = mock(RobotController.class);
-        when(rc.getType()).thenReturn(RobotType.MUCKRAKER);
+        RobotPlayerTest.setupForMothership(rc, RobotType.MUCKRAKER);
         when(rc.getLocation()).thenReturn(new MapLocation(20200, 20200));
         when(rc.getTeam()).thenReturn(Team.A);
         when(rc.senseNearbyRobots()).thenReturn(enemyECRobotInfoArray);
@@ -108,7 +108,7 @@ public class MuckrakerTest {
     @Test
     public void ifSensedOurTeamBotGetItsFlagAndDetermineWhichDirectionToMove() throws GameActionException {
         RobotController rc = mock(RobotController.class);
-        when(rc.getType()).thenReturn(RobotType.MUCKRAKER);
+        RobotPlayerTest.setupForMothership(rc, RobotType.MUCKRAKER);
         when(rc.getLocation()).thenReturn(new MapLocation(20200, 20200));
         when(rc.getTeam()).thenReturn(Team.A);
         when(rc.senseNearbyRobots()).thenReturn(teamRobotInfoArray);
@@ -126,7 +126,7 @@ public class MuckrakerTest {
     @Test
     public void ifFellowMuckFlag11400FoundTryMoveInBotDirTillEnemyECDiscovered() throws GameActionException {
         RobotController rc = mock(RobotController.class);
-        when(rc.getType()).thenReturn(RobotType.MUCKRAKER);
+        RobotPlayerTest.setupForMothership(rc, RobotType.MUCKRAKER);
         when(rc.getID()).thenReturn(101);
         when(rc.getLocation()).thenReturn(new MapLocation(20200, 20200));
         when(rc.getTeam()).thenReturn(Team.A);

@@ -52,11 +52,16 @@ abstract public strictfp class RobotPlayer {
         rc = newRc;
         // look around and learn who your mama is
         RobotInfo[] wheresMommy = rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, rc.getTeam());
-        for (RobotInfo info:
-             wheresMommy) {
-            if(info.getType() == RobotType.ENLIGHTENMENT_CENTER) {
-                mothership = info.getID();
-                motherLoc = info.getLocation();
+        if(rc.getType() == RobotType.ENLIGHTENMENT_CENTER) {
+            mothership = rc.getID();
+            motherLoc = rc.getLocation();
+        } else {
+            for (RobotInfo info:
+                    wheresMommy) {
+                if(info.getType() == RobotType.ENLIGHTENMENT_CENTER) {
+                    mothership = info.getID();
+                    motherLoc = info.getLocation();
+                }
             }
         }
         txsync = -1;
@@ -501,8 +506,9 @@ abstract public strictfp class RobotPlayer {
      */
     public int encodeLocationInFlag(MapLocation loc){
         String pw = Integer.toString(PASSWORD);
-        String xS = Integer.toString(loc.x / 100);
-        String yS = Integer.toString(loc.y / 100);
+        // subtract the mothership location, add 64 to avoid negative values
+        String xS = String.format("%03d", loc.x - motherLoc.x + 64);
+        String yS = String.format("%03d", loc.y - motherLoc.y + 64);
         String flagStr = pw + xS + yS;
         return Integer.parseInt(flagStr);
     }
@@ -515,16 +521,12 @@ abstract public strictfp class RobotPlayer {
      * @return MapLocation
      */
     public MapLocation decodeLocationFromFlag(int flagOrig){
-        // remove first two (since it's the password)
-        int flagTemp = flagOrig % 1000000;
-        // split into two separate integers
-        String flagStr = Integer.toString(flagTemp);
-        int mid = flagStr.length()/2;
-        String xStr = flagStr.substring(0, mid);
-        String yStr = flagStr.substring(mid);
+        String flagStr = Integer.toString(flagOrig);
+        String xStr = flagStr.substring(2, 5);
+        String yStr = flagStr.substring(5);
         int x = Integer.parseInt(xStr);
         int y = Integer.parseInt(yStr);
-        return new MapLocation(x *= 100, y *= 100);
+        return new MapLocation(x + motherLoc.x - 64, y + motherLoc.y - 64);
     }
 
     /**

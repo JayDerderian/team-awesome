@@ -186,9 +186,7 @@ public strictfp class Muckraker extends RobotPlayer {
         enemyECDirection = rc.getLocation().directionTo(enemyECLocation);
 
         // set Flag to let other muck's know
-        int flagValue = makeFlag(ENEMY_ENLIGHTENMENT_CENTER_FLAG, 0);
-        if (rc.canSetFlag(flagValue))
-            rc.setFlag(flagValue);
+        txLocation(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG, enemyECLocation, 0);
     }
 
     public void enemySlandExpose(RobotInfo robot, int i) throws GameActionException {
