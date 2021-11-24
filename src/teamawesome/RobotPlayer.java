@@ -17,6 +17,7 @@ import java.util.Map;
  */
 abstract public strictfp class RobotPlayer {
     static RobotController rc;
+    public boolean testMode;
     protected int rxsender;
     protected int rxsync;
     protected int rxcode;
@@ -27,7 +28,7 @@ abstract public strictfp class RobotPlayer {
     MapLocation scouted;
     int scoutedAge;
     protected static final int swizzle = 0;
-    int mothership = -1;
+    public int mothership = -1;
 
     public static final RobotType[] spawnableRobot = {
             RobotType.POLITICIAN,
@@ -56,6 +57,7 @@ abstract public strictfp class RobotPlayer {
         scouted = null;
         scoutedAge = 0;
         commlag = 0;
+        testMode = false;
     }
 
     /**
@@ -139,7 +141,7 @@ abstract public strictfp class RobotPlayer {
                 rc.setIndicatorDot(decipherLoc, 255, 0, 255);
                 System.out.println("rx: " + ID + " reports code " +
                         rxcode + " at " + decipherLoc);
-                if(validateLocation(decipherLoc)) {
+                if(validateLocation(decipherLoc) || testMode) {
                     flag.put(rxcode, decipherLoc);
                     System.out.println("Receive success!");
                 } else {
@@ -180,9 +182,8 @@ abstract public strictfp class RobotPlayer {
         LinkedList<Integer> toRemove = new LinkedList<>();
         for (Integer id:
                 rolodex) {
-            if(Clock.getBytecodesLeft() < 500) return;
+            if(Clock.getBytecodesLeft() < 500 && !testMode) return;
             try {
-                // ADDED AS A TEMP FIX!!
                 if(rc.canGetFlag(id)){
                     RobotInfo info;
                     Map<Integer, MapLocation> flag;
@@ -227,9 +228,9 @@ abstract public strictfp class RobotPlayer {
      * @throws GameActionException because rc
      */
     protected boolean txLocation(int type, MapLocation loc, int conv) throws GameActionException{
-        if(loc == null) return false;
+        //if(loc == null) return false;
         System.out.println("Transmission Initiated, sending code " + type + " for location " + loc);
-        if(txsync == 1) {
+        if(txsync != -1) {
             // we broadcast the type last time, now broadcast location
             txsync = -1;
             MapLocation cipherLoc = loc.translate(-swizzle, -swizzle);

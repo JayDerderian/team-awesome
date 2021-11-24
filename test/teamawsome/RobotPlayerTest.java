@@ -1,9 +1,15 @@
 package teamawsome;
 
 import battlecode.common.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import teamawesome.EnlightenmentCenter;
+import teamawesome.Muckraker;
 import teamawesome.Politician;
 
 import org.junit.Test;
+import teamawesome.RobotPlayer;
+
 import static org.junit.Assert.*;
 import static teamawesome.FlagConstants.*;
 
@@ -229,4 +235,90 @@ public class RobotPlayerTest {
 //            assertTrue(res.containsKey(ERROR));
 //        assertTrue(res.containsKey(ENEMY_SLANDERER_NEARBY_FLAG));
 //    }
+
+    /*
+    Communications tests
+     */
+    @Captor
+    ArgumentCaptor<Integer> flag1 = ArgumentCaptor.forClass(Integer.class);
+    ArgumentCaptor<Integer> flag2 = ArgumentCaptor.forClass(Integer.class);
+
+    private RobotController getTxTestMuckraker() throws GameActionException {
+        RobotController rc = mock(RobotController.class);
+        when(rc.getType()).thenReturn(RobotType.MUCKRAKER);
+        when(rc.getTeam()).thenReturn(Team.A);
+        when(rc.senseNearbyRobots()).thenReturn(PoliticianTest.enemyEC);
+        when(rc.getLocation()).thenReturn(new MapLocation(20201, 20201));
+        when(rc.adjacentLocation(any())).thenReturn(new MapLocation(20200, 20200));
+        when(rc.onTheMap(any())).thenReturn(true);
+        when(rc.canMove(any())).thenReturn(true);
+        when(rc.canSetFlag(111)).thenReturn(true);
+        when(rc.canSetFlag(11200200)).thenReturn(true);
+        return rc;
+    }
+
+    @Test
+    public void canTransmitLocation() throws GameActionException{
+        // first create a muckraker rc
+        RobotController rc = getTxTestMuckraker();
+
+        // instantiate and activate a muckraker using the mock controller
+        Muckraker muck = new Muckraker(rc);
+        muck.turn();
+
+        // verify the muckraker set its flag
+        verify(rc).setFlag(flag1.capture());
+        assertEquals((long)flag1.getValue(), 111);
+
+        // actuate another turn and check location is set correctly
+        muck.turn();
+        verify(rc, times(2)).setFlag(flag2.capture());
+        for (Integer i:
+                flag2.getAllValues()) {
+            if(i == 11200200) {
+                return;
+            }
+        }
+        fail("correct flag not found");
+    }
+
+    @Test
+    public void canReceiveLocation() throws GameActionException{
+        Map<Integer, MapLocation> flag = new HashMap<>();
+        flag.put(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG, null);
+        // instantiate an EC
+        RobotController rc = mock(RobotController.class);
+        when(rc.getType()).thenReturn(RobotType.ENLIGHTENMENT_CENTER);
+        when(rc.getTeam()).thenReturn(Team.A);
+        when(rc.senseNearbyRobots()).thenReturn(enemyRobotInfoArray);
+        when(rc.getInfluence()).thenReturn(500);
+        when(rc.getRoundNum()).thenReturn(350);
+        when(rc.senseNearbyRobots()).thenReturn(PoliticianTest.teamRobotInfoArray);
+        when(rc.canSetFlag(111)).thenReturn(true);
+        when(rc.canSetFlag(11111111)).thenReturn(true);
+        when(rc.canGetFlag(7)).thenReturn(true);
+        when(rc.getFlag(7)).thenReturn(111);
+        EnlightenmentCenter center = new EnlightenmentCenter(rc);
+        center.testMode = true;
+
+        // execute a turn
+        center.turn();
+
+        // check that the EC has set its flag
+        verify(rc).setFlag(flag1.capture());
+        assertEquals((long)flag1.getValue(), 111);
+
+        // change the mock behavior to model a real muckraker and execute another turn
+        when(rc.getFlag(7)).thenReturn(11111111);
+        center.turn();
+        verify(rc, times(2)).setFlag(flag1.capture());
+        for (Integer i:
+                flag1.getAllValues()) {
+            if(i == 11111111) {
+                return;
+            }
+        }
+        fail("correct flag not found");
+    }
+
 }

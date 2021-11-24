@@ -96,7 +96,9 @@ public class EnlightenmentCenter extends RobotPlayer{
             Map<Integer, MapLocation> location = rxLocation(rxsender);
             if(location.containsKey(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG)) {
                 System.out.println("Neutral EC Scouted by " + rxsender);
-                scouted = location.get(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG);
+                MapLocation loc = location.get(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG);
+                if(loc != null)
+                    scouted = loc;
             }
             txLocation(FlagConstants.NEUTRAL_ENLIGHTENMENT_CENTER_FLAG, scouted, 0);
             ++scoutedAge;
