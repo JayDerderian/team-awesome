@@ -27,26 +27,26 @@ public class RobotPlayerTest {
     RobotInfo enemy2 = new RobotInfo(2, Team.B, RobotType.MUCKRAKER, 1, 1, new MapLocation(20000, 20000));
     RobotInfo enemy3 = new RobotInfo(3, Team.B, RobotType.SLANDERER, 1, 1, new MapLocation(20000, 20000));
     RobotInfo enemy4 = new RobotInfo(4, Team.B, RobotType.ENLIGHTENMENT_CENTER, 1, 1, new MapLocation(21000, 23000));
-    RobotInfo[] enemyRobotInfoArray = { enemy1, enemy2, enemy3, enemy4 };
+    RobotInfo[] enemyRobotInfoArray = {enemy1, enemy2, enemy3, enemy4};
 
     // Neutral EC's
     RobotInfo neutralEC1 = new RobotInfo(5, Team.NEUTRAL, RobotType.ENLIGHTENMENT_CENTER, 0, 0, new MapLocation(20100, 20100));
     RobotInfo neutralEC2 = new RobotInfo(6, Team.NEUTRAL, RobotType.ENLIGHTENMENT_CENTER, 0, 0, new MapLocation(20100, 20100));
-    RobotInfo[] neutralECRobotInfoArray = { neutralEC1 };
+    RobotInfo[] neutralECRobotInfoArray = {neutralEC1};
 
     // Team bots
     RobotInfo teamBot1 = new RobotInfo(7, Team.A, RobotType.SLANDERER, 1, 1, new MapLocation(20200, 20200));
     RobotInfo teamBot2 = new RobotInfo(8, Team.A, RobotType.MUCKRAKER, 1, 1, new MapLocation(20200, 20200));
     RobotInfo teamBot3 = new RobotInfo(9, Team.A, RobotType.POLITICIAN, 1, 1, new MapLocation(20200, 20200));
     RobotInfo teamBot4 = new RobotInfo(10, Team.A, RobotType.ENLIGHTENMENT_CENTER, 1, 1, new MapLocation(20200, 20200));
-    RobotInfo[] teamRobotInfoArray = { teamBot1, teamBot2, teamBot3, teamBot4 };
+    RobotInfo[] teamRobotInfoArray = {teamBot1, teamBot2, teamBot3, teamBot4};
 
 
     //--------------------------------------TEST HELPERS-----------------------------------------//
     // NOTE: These should not be called directly! They're used by the parser and retriever methods.
 
     @Test
-    public void testDigitCounter(){
+    public void testDigitCounter() {
         RobotController rc = mock(RobotController.class);
         Politician testBot = new Politician(rc);
         int total = testBot.countDigis(11111);
@@ -54,14 +54,14 @@ public class RobotPlayerTest {
     }
 
     @Test
-    public void testIsOurs(){
+    public void testIsOurs() {
         RobotController rc = mock(RobotController.class);
         Politician testBot = new Politician(rc);
         assertTrue(testBot.isOurs(11400));
     }
 
     @Test
-    public void testIsOursWithWrongKindOfFlag(){
+    public void testIsOursWithWrongKindOfFlag() {
         RobotController rc = mock(RobotController.class);
         Politician testBot = new Politician(rc);
         assertFalse(testBot.isOurs(12400));
@@ -76,20 +76,20 @@ public class RobotPlayerTest {
      */
 
     @Test
-    public void canMakeFlag(){
+    public void canMakeFlag() {
         RobotController rc = mock(RobotController.class);
         Politician testBot = new Politician(rc);
         int test = 11400;
-        int testFlag = testBot.makeFlag(ENEMY_ENLIGHTENMENT_CENTER_FLAG,0);
+        int testFlag = testBot.makeFlag(ENEMY_ENLIGHTENMENT_CENTER_FLAG, 0);
         assertEquals(test, testFlag);
     }
 
     @Test
-    public void canMakeFlag2(){
+    public void canMakeFlag2() {
         RobotController rc = mock(RobotController.class);
         Politician testBot = new Politician(rc);
         int test = 11302;
-        int testFlag = testBot.makeFlag(ENEMY_MUCKRAKER_NEARBY_FLAG,2);
+        int testFlag = testBot.makeFlag(ENEMY_MUCKRAKER_NEARBY_FLAG, 2);
         assertEquals(test, testFlag);
     }
 
@@ -99,11 +99,50 @@ public class RobotPlayerTest {
         Politician testBot = new Politician(rc);
         int x = 12300;
         int y = 32100;
-        MapLocation loc = new MapLocation(x,y);
+        MapLocation loc = new MapLocation(x, y);
         int flag = testBot.encodeLocationInFlag(loc);
         MapLocation loc2 = testBot.decodeLocationFromFlag(flag);
         assertEquals(x, loc2.x);
         assertEquals(y, loc2.y);
+    }
+
+    //-----------------------------------------FLAG PARSING--------------------------------------//
+
+    /*
+    @Test - successful alert flag parse
+    @Test - successful enemy info flag parse
+    @Test - successful approx location coord parse
+     */
+
+    @Test
+    public void canParse3DigitFlag() throws GameActionException {
+        RobotController rc = mock(RobotController.class);
+        Politician testBot = new Politician(rc);
+        int testFlag = 111;       // "Neutral EC found!"
+        HashMap<Integer, MapLocation> result = testBot.parseFlag(neutralEC1,testFlag);
+        assertTrue(result.containsKey(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG));
+    }
+
+    @Test
+    public void canParse5DigitFlag() throws GameActionException {
+        RobotController rc = mock(RobotController.class);
+        Politician testBot = new Politician(rc);
+        int testFlag = 11205;       // "Enemy Slanderer with 05 conviction"
+        HashMap<Integer, MapLocation> result = testBot.parseFlag(neutralEC1,testFlag);
+        assertTrue(result.containsKey(ENEMY_SLANDERER_NEARBY_FLAG));
+    }
+
+    @Test
+    public void canParse8DigitFlag() throws GameActionException{
+        RobotController rc = mock(RobotController.class);
+        Politician testBot = new Politician(rc);
+        int testFlag = 11201201;                                                       // test flag
+        int x = 20100; int y = 20100;                                                  // neutralEC1's location coordindates
+        HashMap<Integer, MapLocation> result = testBot.parseFlag(neutralEC1,testFlag); // attempt to parse test flag
+        assertTrue(result.containsKey(LOCATION_INFO));                                 // make sure it worked
+        MapLocation loc = result.get(LOCATION_INFO);                                   // attempt to get location info
+        assertEquals(loc.x,x);                                                         // final tests
+        assertEquals(loc.y,y);
     }
 
 
@@ -115,18 +154,18 @@ public class RobotPlayerTest {
      */
 
     @Test
-    public void encodeMapCoordinates(){
+    public void encodeMapCoordinates() {
         RobotController rc = mock(RobotController.class);
         Politician testBot = new Politician(rc);
         int x = 12300;
         int y = 32100;
-        MapLocation loc = new MapLocation(x,y);
+        MapLocation loc = new MapLocation(x, y);
         int flag = testBot.encodeLocationInFlag(loc);
         assertEquals(11123321, flag);
     }
 
     @Test
-    public void decodeMapCoordinates(){
+    public void decodeMapCoordinates() {
         RobotController rc = mock(RobotController.class);
         Politician testBot = new Politician(rc);
         int flag = 11123321;
@@ -163,7 +202,7 @@ public class RobotPlayerTest {
     }
 
     @Test
-    public void canTransmitLocation() throws GameActionException{
+    public void canTransmitLocation() throws GameActionException {
         // first create a muckraker rc
         RobotController rc = getTxTestMuckraker();
 
@@ -173,14 +212,14 @@ public class RobotPlayerTest {
 
         // verify the muckraker set its flag
         verify(rc).setFlag(flag1.capture());
-        assertEquals((long)flag1.getValue(), 111);
+        assertEquals((long) flag1.getValue(), 111);
 
         // actuate another turn and check location is set correctly
         muck.turn();
         verify(rc, times(2)).setFlag(flag2.capture());
-        for (Integer i:
+        for (Integer i :
                 flag2.getAllValues()) {
-            if(i == 11200200) {
+            if (i == 11200200) {
                 return;
             }
         }
@@ -188,7 +227,7 @@ public class RobotPlayerTest {
     }
 
     @Test
-    public void canReceiveLocation() throws GameActionException{
+    public void canReceiveLocation() throws GameActionException {
         Map<Integer, MapLocation> flag = new HashMap<>();
         flag.put(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG, null);
         // instantiate an EC
@@ -211,57 +250,18 @@ public class RobotPlayerTest {
 
         // check that the EC has set its flag
         verify(rc).setFlag(flag1.capture());
-        assertEquals((long)flag1.getValue(), 111);
+        assertEquals((long) flag1.getValue(), 111);
 
         // change the mock behavior to model a real muckraker and execute another turn
         when(rc.getFlag(7)).thenReturn(11111111);
         center.turn();
         verify(rc, times(2)).setFlag(flag1.capture());
-        for (Integer i:
+        for (Integer i :
                 flag1.getAllValues()) {
-            if(i == 11111111) {
+            if (i == 11111111) {
                 return;
             }
         }
         fail("correct flag not found");
-    }
-
-    /*
-    @Test - successful alert flag parse
-    @Test - successful enemy info flag parse
-    @Test - successful approx location coord parse
-
-    all tests should pass bad info to make sure methods are catching them!
-     */
-
-    @Test
-    public void canParse3DigitFlag() throws GameActionException {
-        RobotController rc = mock(RobotController.class);
-        Politician testBot = new Politician(rc);
-        int testFlag = 111;       // "Neutral EC found!"
-        HashMap<Integer, MapLocation> result = testBot.parseFlag(neutralEC1,testFlag);
-        assertTrue(result.containsKey(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG));
-    }
-
-    @Test
-    public void canParse5DigitFlag() throws GameActionException {
-        RobotController rc = mock(RobotController.class);
-        Politician testBot = new Politician(rc);
-        int testFlag = 11205;       // "Enemy Slanderer with 05 conviction"
-        HashMap<Integer, MapLocation> result = testBot.parseFlag(neutralEC1,testFlag);
-        assertTrue(result.containsKey(ENEMY_SLANDERER_NEARBY_FLAG));
-    }
-
-    @Test
-    public void canParse8DigitFlag() throws GameActionException{
-        RobotController rc = mock(RobotController.class);
-        Politician testBot = new Politician(rc);
-        int testFlag = 11201201;                                                       // test flag
-        int x = 20100; int y = 20100;                                                  // neutralEC1's location coordindates
-        HashMap<Integer, MapLocation> result = testBot.parseFlag(neutralEC1,testFlag); // attempt to parse test flag
-        assertTrue(result.containsKey(LOCATION_INFO));                                 // make sure it worked
-        MapLocation loc = result.get(LOCATION_INFO);                                   // attempt to get location info
-        assertEquals(loc.x,x);                                                         // final tests
-        assertEquals(loc.y,y);
     }
 }
