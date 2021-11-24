@@ -121,6 +121,7 @@ public class RobotPlayerTest {
         int testFlag = 111;       // "Neutral EC found!"
         HashMap<Integer, MapLocation> result = testBot.parseFlag(neutralEC1,testFlag);
         assertTrue(result.containsKey(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG));
+        assertEquals(5, neutralEC1.ID);
     }
 
     @Test
@@ -130,19 +131,18 @@ public class RobotPlayerTest {
         int testFlag = 11205;       // "Enemy Slanderer with 05 conviction"
         HashMap<Integer, MapLocation> result = testBot.parseFlag(neutralEC1,testFlag);
         assertTrue(result.containsKey(ENEMY_SLANDERER_NEARBY_FLAG));
+        assertEquals(5,neutralEC1.ID);
     }
 
     @Test
     public void canParse8DigitFlag() throws GameActionException{
         RobotController rc = mock(RobotController.class);
         Politician testBot = new Politician(rc);
-        int testFlag = 11201201;                                                       // test flag
-        int x = 20100; int y = 20100;                                                  // neutralEC1's location coordindates
-        HashMap<Integer, MapLocation> result = testBot.parseFlag(neutralEC1,testFlag); // attempt to parse test flag
-        assertTrue(result.containsKey(LOCATION_INFO));                                 // make sure it worked
-        MapLocation loc = result.get(LOCATION_INFO);                                   // attempt to get location info
-        assertEquals(loc.x,x);                                                         // final tests
-        assertEquals(loc.y,y);
+        HashMap<Integer, MapLocation> result = testBot.parseFlag(neutralEC1,11201201);
+        assertTrue(result.containsKey(LOCATION_INFO));
+        MapLocation loc = result.get(LOCATION_INFO);
+        assertEquals(20100,loc.x);
+        assertEquals(20100,loc.x);
     }
 
 
