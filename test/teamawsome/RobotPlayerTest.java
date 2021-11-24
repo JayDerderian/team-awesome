@@ -154,7 +154,7 @@ public class RobotPlayerTest {
 
     @Test
     public void canParse3DigitFlag() throws GameActionException {
-        RobotController rc = mock(RobotController.class);
+        RobotController rc = getSpawnRobot();
         Politician testBot = new Politician(rc);
         int testFlag = 111;       // "Neutral EC found!"
         HashMap<Integer, MapLocation> result = testBot.parseFlag(neutralEC1,testFlag);
@@ -164,23 +164,12 @@ public class RobotPlayerTest {
 
     @Test
     public void canParse5DigitFlag() throws GameActionException {
-        RobotController rc = mock(RobotController.class);
+        RobotController rc = getSpawnRobot();
         Politician testBot = new Politician(rc);
         int testFlag = 11205;       // "Enemy Slanderer with 05 conviction"
         HashMap<Integer, MapLocation> result = testBot.parseFlag(neutralEC1,testFlag);
         assertTrue(result.containsKey(ENEMY_SLANDERER_NEARBY_FLAG));
         assertEquals(5,neutralEC1.ID);
-    }
-
-    @Test
-    public void canParse8DigitFlag() throws GameActionException{
-        RobotController rc = mock(RobotController.class);
-        Politician testBot = new Politician(rc);
-        HashMap<Integer, MapLocation> result = testBot.parseFlag(neutralEC1,11201201);
-        assertTrue(result.containsKey(LOCATION_INFO));
-        MapLocation loc = result.get(LOCATION_INFO);
-        assertEquals(20100,loc.x);
-        assertEquals(20100,loc.x);
     }
 
 
