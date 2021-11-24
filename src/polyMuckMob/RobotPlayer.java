@@ -111,20 +111,20 @@ public class RobotPlayer {
         xLean = 0; yLean = 0; // Reset guiding
         Team enemy = rc.getTeam().opponent();
         int actionRadius = rc.getType().actionRadiusSquared;
-//        RobotInfo[] attackable = rc.senseNearbyRobots(actionRadius, enemy);
+        RobotInfo[] attackable = rc.senseNearbyRobots(actionRadius, enemy);
 
-//        if (attackable.length != 0 && rc.canEmpower(actionRadius)) {
-//            System.out.println("empowering...");
-//            rc.empower(actionRadius);
-//            System.out.println("empowered");
-//            return;
-//        } else {
-//            RobotInfo[] convertable = rc.senseNearbyRobots(actionRadius, Team.NEUTRAL);
-//            if(convertable.length != 0 && rc.canEmpower(actionRadius)) {
-//                System.out.println("you will be assimilated");
-//                rc.empower(actionRadius);
-//            }
-//        }
+        if (attackable.length != 0 && rc.canEmpower(actionRadius)) {
+            System.out.println("empowering...");
+            rc.empower(actionRadius);
+            System.out.println("empowered");
+            return;
+        } else {
+            RobotInfo[] convertable = rc.senseNearbyRobots(actionRadius, Team.NEUTRAL);
+            if(convertable.length != 0 && rc.canEmpower(actionRadius)) {
+                System.out.println("you will be assimilated");
+                rc.empower(actionRadius);
+            }
+        }
         for (RobotInfo robot : rc.senseNearbyRobots()) {
             // ENEMY
             if(robot.getTeam() == Team.NEUTRAL) {

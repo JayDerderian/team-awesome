@@ -34,7 +34,7 @@ public class SlanderderTest {
     @Test
     public void ifSlandererRobotCreatedThenSlandererClassIsCalled() {
         RobotController rc = mock(RobotController.class);
-        when(rc.getType()).thenReturn(RobotType.SLANDERER);
+        RobotPlayerTest.setupForMothership(rc, RobotType.SLANDERER);
 
         Slanderer robot = new Slanderer(rc);
 
@@ -44,8 +44,7 @@ public class SlanderderTest {
     @Test
     public void ifSlandererRobotSensedRobotNearby() throws GameActionException {
         RobotController rc = mock(RobotController.class);
-        when(rc.getType()).thenReturn(RobotType.SLANDERER);
-        when(rc.getTeam()).thenReturn(Team.A);
+        RobotPlayerTest.setupForMothership(rc, RobotType.SLANDERER);
         when(rc.senseNearbyRobots()).thenReturn(enemyRobotInfoArray);
         when(rc.canExpose(new MapLocation(20000, 20000))).thenReturn(true);
 
@@ -59,8 +58,7 @@ public class SlanderderTest {
     @Test
     public void ifSlanderersDetectedEC() throws GameActionException {
         RobotController rc = mock(RobotController.class);
-        when(rc.getType()).thenReturn(RobotType.SLANDERER);
-        when(rc.getTeam()).thenReturn(Team.A);
+        RobotPlayerTest.setupForMothership(rc, RobotType.SLANDERER);
         when(rc.getLocation()).thenReturn(new MapLocation(20001, 20001));
         when(rc.senseNearbyRobots()).thenReturn(neutralECRobotInfoArray);
         when(rc.canExpose(new MapLocation(20000, 20000))).thenReturn(true);
@@ -74,8 +72,7 @@ public class SlanderderTest {
     @Test
     public void ifSlandererMoveAwayFromEnemies() throws GameActionException {
         RobotController rc = mock(RobotController.class);
-        when(rc.getType()).thenReturn(RobotType.SLANDERER);
-        when(rc.getTeam()).thenReturn(Team.A);
+        RobotPlayerTest.setupForMothership(rc, RobotType.SLANDERER);
         when(rc.senseNearbyRobots()).thenReturn(enemyRobotInfoArray);
         when(rc.canExpose(new MapLocation(20000, 20000))).thenReturn(true);
 

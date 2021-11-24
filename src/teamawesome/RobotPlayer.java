@@ -17,17 +17,20 @@ import java.util.Map;
  */
 abstract public strictfp class RobotPlayer {
     static RobotController rc;
+    public boolean testMode;
     protected int rxsender;
     protected int rxsync;
     protected int rxcode;
     protected int rxtype;
     protected int txsync;
     protected int commlag;
+    boolean hasSetFlag;
     LinkedList<Integer> rolodex;
     MapLocation scouted;
     int scoutedAge;
     protected static final int swizzle = 0;
-    int mothership = -1;
+    public int mothership = -1;
+    public MapLocation motherLoc;
 
     public static final RobotType[] spawnableRobot = {
             RobotType.POLITICIAN,
@@ -48,6 +51,20 @@ abstract public strictfp class RobotPlayer {
 
     public RobotPlayer(RobotController newRc) {
         rc = newRc;
+        // look around and learn who your mama is
+        RobotInfo[] wheresMommy = rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, rc.getTeam());
+        if(rc.getType() == RobotType.ENLIGHTENMENT_CENTER) {
+            mothership = rc.getID();
+            motherLoc = rc.getLocation();
+        } else {
+            for (RobotInfo info:
+                    wheresMommy) {
+                if(info.getType() == RobotType.ENLIGHTENMENT_CENTER) {
+                    mothership = info.getID();
+                    motherLoc = info.getLocation();
+                }
+            }
+        }
         txsync = -1;
         rxsync = -1;
         rxtype = ERROR;
@@ -56,6 +73,8 @@ abstract public strictfp class RobotPlayer {
         scouted = null;
         scoutedAge = 0;
         commlag = 0;
+        testMode = false;
+        hasSetFlag = false;
     }
 
     /**
@@ -93,7 +112,11 @@ abstract public strictfp class RobotPlayer {
             turnCount += 1;
             // special case: slanderers become politicians after some time
             if(robot.getClass() == Slanderer.class && rc.getType() == RobotType.POLITICIAN) {
-                robot = new Politician(robot.rc); // remake this robot as a politician
+                int mother = robot.mothership;
+                MapLocation loc = robot.motherLoc;
+                robot = new Politician(RobotPlayer.rc); // remake this robot as a politician
+                robot.mothership = mother;
+                robot.motherLoc = loc;
             }
             try {
                 // actuate the robot for one round
@@ -139,7 +162,7 @@ abstract public strictfp class RobotPlayer {
                 rc.setIndicatorDot(decipherLoc, 255, 0, 255);
                 System.out.println("rx: " + ID + " reports code " +
                         rxcode + " at " + decipherLoc);
-                if(validateLocation(decipherLoc)) {
+                if(validateLocation(decipherLoc) || testMode) {
                     flag.put(rxcode, decipherLoc);
                     System.out.println("Receive success!");
                 } else {
@@ -148,6 +171,7 @@ abstract public strictfp class RobotPlayer {
                 }
             } catch(NullPointerException n) {
                 System.out.println("No Location data found!");
+                rxsender = -1;
             }
             rxsync = -1;
         } else if(commlag < 5) {
@@ -164,9 +188,8 @@ abstract public strictfp class RobotPlayer {
 
 
     protected void updateContact(RobotInfo robot) throws GameActionException {
-        if(robot.getType() != RobotType.MUCKRAKER) return;
+        if(robot.getType() != RobotType.MUCKRAKER && robot.getType() != RobotType.SLANDERER) return;
         int friendID = robot.getID();
-        //retrieveFlag(rc, friendID);
         System.out.println("Found a friend! ID #" + friendID);
         if(!rolodex.contains(friendID)) rolodex.add(friendID);
     }
@@ -180,9 +203,8 @@ abstract public strictfp class RobotPlayer {
         LinkedList<Integer> toRemove = new LinkedList<>();
         for (Integer id:
                 rolodex) {
-            if(Clock.getBytecodesLeft() < 500) return;
+            if(Clock.getBytecodesLeft() < 500 && !testMode) return;
             try {
-                // ADDED AS A TEMP FIX!!
                 if(rc.canGetFlag(id)){
                     RobotInfo info;
                     Map<Integer, MapLocation> flag;
@@ -194,7 +216,12 @@ abstract public strictfp class RobotPlayer {
                     }
                     if(flag.containsKey(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG)) {
                         // if no rx source, use this one
-                        System.out.println("ID #" + id + " found an EC! Beginning comms");
+                        System.out.println("ID #" + id + " found a neutral EC! Beginning comms");
+                        if (rxsender == -1) rxsender = id;
+                        break;
+                    } else if(flag.containsKey(ENEMY_ENLIGHTENMENT_CENTER_FLAG)) {
+                        // if no rx source, use this one
+                        System.out.println("ID #" + id + " found an enemy EC! Beginning comms");
                         if (rxsender == -1) rxsender = id;
                         break;
                     } else {
@@ -227,16 +254,21 @@ abstract public strictfp class RobotPlayer {
      * @throws GameActionException because rc
      */
     protected boolean txLocation(int type, MapLocation loc, int conv) throws GameActionException{
-        if(loc == null) return false;
+        //if(loc == null) return false;
         System.out.println("Transmission Initiated, sending code " + type + " for location " + loc);
-        if(txsync == 1) {
-            // we broadcast the type last time, now broadcast location
-            txsync = -1;
-            MapLocation cipherLoc = loc.translate(-swizzle, -swizzle);
-            int newFlag = encodeLocationInFlag(cipherLoc);
-            if(rc.canSetFlag(newFlag)) {
-                rc.setFlag(newFlag);
-                return true;
+        if(txsync != -1) {
+            if(loc == null) {
+                System.out.println("comms error!");
+            } else {
+                // we broadcast the type last time, now broadcast location
+                txsync = -1;
+                MapLocation cipherLoc = loc.translate(-swizzle, -swizzle);
+                int newFlag = encodeLocationInFlag(cipherLoc);
+                if(rc.canSetFlag(newFlag)) {
+                    rc.setFlag(newFlag);
+                    hasSetFlag = true;
+                    return true;
+                }
             }
         } else {
             // we need to broadcast the type
@@ -244,6 +276,7 @@ abstract public strictfp class RobotPlayer {
             int newFlag = makeFlag(type, conv);
             if(rc.canSetFlag(newFlag)) {
                 rc.setFlag(newFlag);
+                hasSetFlag = true;
                 return true;
             }
         }
@@ -428,7 +461,7 @@ abstract public strictfp class RobotPlayer {
         }
         // this is location info!
         else if (len == 8){
-            System.out.println("Location data received! Attempting to decode");
+            System.out.println("Location data received: " + flagOrig + " Attempting to decode");
             MapLocation loc = decodeLocationFromFlag(flagOrig);
             res.put(LOCATION_INFO, loc);
         }
@@ -490,8 +523,9 @@ abstract public strictfp class RobotPlayer {
      */
     public int encodeLocationInFlag(MapLocation loc){
         String pw = Integer.toString(PASSWORD);
-        String xS = Integer.toString(loc.x / 100);
-        String yS = Integer.toString(loc.y / 100);
+        // subtract the mothership location, add 64 to avoid negative values
+        String xS = String.format("%03d", loc.x - motherLoc.x + 64);
+        String yS = String.format("%03d", loc.y - motherLoc.y + 64);
         String flagStr = pw + xS + yS;
         return Integer.parseInt(flagStr);
     }
@@ -504,16 +538,12 @@ abstract public strictfp class RobotPlayer {
      * @return MapLocation
      */
     public MapLocation decodeLocationFromFlag(int flagOrig){
-        // remove first two (since it's the password)
-        int flagTemp = flagOrig % 1000000;
-        // split into two separate integers
-        String flagStr = Integer.toString(flagTemp);
-        int mid = flagStr.length()/2;
-        String xStr = flagStr.substring(0, mid);
-        String yStr = flagStr.substring(mid);
+        String flagStr = Integer.toString(flagOrig);
+        String xStr = flagStr.substring(2, 5);
+        String yStr = flagStr.substring(5);
         int x = Integer.parseInt(xStr);
         int y = Integer.parseInt(yStr);
-        return new MapLocation(x *= 100, y *= 100);
+        return new MapLocation(x + motherLoc.x - 64, y + motherLoc.y - 64);
     }
 
     /**

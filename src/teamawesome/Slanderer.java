@@ -5,7 +5,10 @@ import battlecode.common.*;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import static teamawesome.FlagConstants.*;
+
 public class Slanderer extends RobotPlayer {
+
     public String robotStatement = "I'm a " + rc.getType() + "! Location " + rc.getLocation();
     public int dirIdx;
 
@@ -37,13 +40,15 @@ public class Slanderer extends RobotPlayer {
 
     // Run the slanderer
     public void turn() throws GameActionException {
+        hasSetFlag = false;
         xLean = 0; yLean = 0; // Reset guiding
         analyze();
         move();
-        int flag = genFlagNearestEC();
-        System.out.println("My Flag is " + flag);
-        if (rc.canSetFlag(flag)) { rc.setFlag(flag); }
-        else { System.out.println("Can't set it to that!"); }
+        //int flag = genFlagNearestEC();
+        //System.out.println("My Flag is " + flag);
+        //if (rc.canSetFlag(flag)) { rc.setFlag(flag); }
+        //else { System.out.println("Can't set it to that!"); }
+        if(!hasSetFlag && rc.canSetFlag(FlagConstants.NEUTRAL)) rc.setFlag(NEUTRAL);
     }
 
     public void analyze() throws GameActionException {
@@ -61,6 +66,8 @@ public class Slanderer extends RobotPlayer {
             if (robot.getTeam() == rc.getTeam().opponent()) {
                 xLean += robot.getLocation().x - x;
                 yLean += robot.getLocation().y - y;
+            } else if(robot.getTeam() == Team.NEUTRAL) {
+                txLocation(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG, robot.getLocation(), 0);
             }
         }
     }
