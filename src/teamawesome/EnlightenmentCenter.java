@@ -63,7 +63,7 @@ public class EnlightenmentCenter extends RobotPlayer{
             inf = Math.pow((round *.01), 2) + 80;
         }
         else{
-            if(round < 150 && round % 2 == 0) {
+            if(round < 100 && round % 2 == 0) {
                 muckJuggernaut = true;
                 inf = 2;
             } else {
@@ -202,7 +202,7 @@ public class EnlightenmentCenter extends RobotPlayer{
      */
     static RobotType strategicSpawnableRobotType(int round) {
         //if (round < 400){
-        if(round < 150) {
+        if(round < 100) {
             if(round % 5 == 0 || round % 2 == 0){
                 return(RobotType.MUCKRAKER);
             }
