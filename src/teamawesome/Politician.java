@@ -86,7 +86,7 @@ public class Politician extends RobotPlayer {
         RobotInfo[] attackable = rc.senseNearbyRobots(actionRadius, enemy);
         for (RobotInfo ec:
              attackable) {
-            if(ec.getType() == RobotType.ENLIGHTENMENT_CENTER) {
+            if(ec.getType() == RobotType.ENLIGHTENMENT_CENTER && rc.canEmpower(actionRadius)) {
                 System.out.println("empowering...");
                 rc.empower(actionRadius);
                 System.out.println("empowered");

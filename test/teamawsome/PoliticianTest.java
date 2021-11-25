@@ -9,6 +9,7 @@ import static org.mockito.Mockito.*;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.Matchers;
 import teamawesome.Muckraker;
 import teamawesome.Politician;
 
@@ -50,9 +51,7 @@ public class PoliticianTest {
     @Test
     public void ifPoliticianRobotCreatedThenPoliticianClassIsCalled() {
         RobotController rc = mock(RobotController.class);
-        RobotPlayerTest.setupForMothership(rc, RobotType.ENLIGHTENMENT_CENTER);
-        when(rc.getType()).thenReturn(RobotType.POLITICIAN);
-
+        RobotPlayerTest.setupForMothership(rc, RobotType.POLITICIAN);
         Politician robot = new Politician(rc);
 
         assertThat(robot.robotStatement, containsString("I'm a POLITICIAN"));
