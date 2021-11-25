@@ -9,6 +9,7 @@ import static org.mockito.Mockito.*;
 
 //import teamawesome.GenericRobot;
 import teamawesome.Muckraker;
+import teamawesome.RobotPlayer;
 
 /**
  * Constants Meaning
@@ -41,11 +42,16 @@ public class MuckrakerTest {
     RobotInfo[] teamRobotInfoArray = {teamBot1};
     RobotInfo[] teamMuckInfoArray = {teamBot2, enemyEC1};
     RobotInfo[] teamMuckInfoArray1 = { teamBot4 };
+    RobotInfo[] teamMuckInfoArray2 = { teamBot1, teamBot3, teamBot4 };
 
     @Test
     public void ifMuckrakerRobotCreatedThenMuckrakerClassIsCalled() {
         RobotController rc = mock(RobotController.class);
-        RobotPlayerTest.setupForMothership(rc, RobotType.MUCKRAKER);
+        RobotPlayerTest.setupForMothership(rc, RobotType.ENLIGHTENMENT_CENTER);
+        when(rc.getType()).thenReturn(RobotType.MUCKRAKER);
+        when(rc.getLocation()).thenReturn(new MapLocation(20200, 20200));
+        when(rc.senseNearbyRobots(30, Team.A)).thenReturn(teamMuckInfoArray2);
+//        when(new MapLocation(20200, 20200).directionTo(new MapLocation(20200, 20200))).thenReturn(Direction.EAST);
 
         Muckraker robot = new Muckraker(rc);
 

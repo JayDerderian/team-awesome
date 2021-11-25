@@ -20,6 +20,8 @@ public strictfp class Muckraker extends RobotPlayer {
     public boolean enemyECLocationSet = false;
     public boolean enemyEcFound = false;
     public int flagValue;
+    public boolean muckJuggernaut =  false;
+    public Direction dirCreated;
 
     /**
      * constructor
@@ -27,6 +29,11 @@ public strictfp class Muckraker extends RobotPlayer {
      */
     public Muckraker(RobotController newRc) {
         super(newRc);
+        if(rc.getInfluence() == 2) {
+            muckJuggernaut = true;
+            dirCreated = rc.getLocation().directionTo(motherLoc).opposite();
+        }
+//        System.out.println("********** motherLoc = " + motherLoc + " dir = " + dirCreated);
     }
 
     /**
@@ -41,14 +48,14 @@ public strictfp class Muckraker extends RobotPlayer {
         for (RobotInfo robot : rc.senseNearbyRobots()) {
             // ENEMY
             if (robot.getTeam() == enemy) { // Slanderer
-                if (robot.type.canBeExposed()) {
+                if (robot.type.canBeExposed() && !muckJuggernaut) {
                     // It's a slanderer... go get them!
                     enemySlandExpose(robot, 1);
                 }
                 if (robot.type == RobotType.ENLIGHTENMENT_CENTER) { // enemy EC
                     enemyECFoundAction(robot, 1);
                     break;
-                } else if(robot.type == RobotType.MUCKRAKER) {
+                } else if(robot.type == RobotType.MUCKRAKER && !muckJuggernaut) {
                     enemyMuckFoundAction(robot, 1);
                 }
             } else if (robot.getTeam() == rc.getTeam()) { // OUR TEAM
@@ -72,7 +79,7 @@ public strictfp class Muckraker extends RobotPlayer {
                                     }
                                     if (robot1.getType() == RobotType.ENLIGHTENMENT_CENTER) {
                                         enemyECFoundAction(robot1, 2);
-                                    } else if(robot.type == RobotType.MUCKRAKER) {
+                                    } else if(robot.type == RobotType.MUCKRAKER && !muckJuggernaut) {
                                         enemyMuckFoundAction(robot1, 2);
                                     }
                                 } else if (robot1.getTeam() == rc.getTeam() && robot1.getType() == RobotType.ENLIGHTENMENT_CENTER) {
@@ -87,7 +94,16 @@ public strictfp class Muckraker extends RobotPlayer {
         }
 
         // Move Muckraker
-        if(!enemyEcFound) { // Initially explore map quickly (along with Slanders)
+        if(muckJuggernaut) {
+//            Direction dirCreated = rc.getLocation().directionTo(motherLoc).opposite();
+            if(!rc.onTheMap(rc.adjacentLocation(dirCreated)))
+                dirCreated = randomDirection();
+            if (tryMove(dirCreated)) {
+                System.out.println("Muck Moved!");
+            } else {
+                tryMove(randomDirection());
+            }
+        } else if(!enemyEcFound && !muckJuggernaut) { // Initially explore map quickly (along with Slanders)
             if (xLean == 0 && yLean == 0) {
                 int[] x1 = {0, 1, -1, 3, -3, 2, -2, 4, -4};
                 for (int i :x1) {
@@ -116,23 +132,6 @@ public strictfp class Muckraker extends RobotPlayer {
                         resetFlagAndMove(0);
                         break;
                     }
-//                    else if(robot.getTeam() == rc.getTeam()) { // if our team politicians nearby to empower, given them way.
-//                        if(robot.getType() == RobotType.POLITICIAN) {
-//                            Direction possibleDir = rc.getLocation().directionTo(enemyECLocation);
-//                            if (enemyECLocationSet && tryMove(possibleDir)) {
-//                                prevMovedDir = possibleDir;
-//                                System.out.println("Muck Moved!");
-//                            } else {
-//                                Direction possibleDir1 = getHighPassableDirection();
-//                                if (tryMove(possibleDir1)) {
-//                                    prevMovedDir = possibleDir1;
-//                                    System.out.println("Muck Moved!");
-//                                } else if (tryMove(randomDirection())) {
-//                                    System.out.println("Muck moved!");
-//                                }
-//                            }
-//                        }
-//                    }
                 }
             }
             else {

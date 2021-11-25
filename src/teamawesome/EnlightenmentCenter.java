@@ -15,11 +15,13 @@ public class EnlightenmentCenter extends RobotPlayer{
     public String robotStatement = "I'm an " + rc.getType() + "! Location " + rc.getLocation();
     protected RobotType lastBuilt;
     boolean needJuggernaut;
+    boolean muckJuggernaut;
     boolean needHelp;
     public EnlightenmentCenter(RobotController newRc) {
         super(newRc);
         lastBuilt = null;
         needJuggernaut = false;
+        muckJuggernaut = false;
         needHelp = false;
     }
 
@@ -59,10 +61,17 @@ public class EnlightenmentCenter extends RobotPlayer{
         }
         else if(toBuild == RobotType.SLANDERER){
             inf = Math.pow((round *.01), 2) + 80;
-        }else{
-            inf = 1;
+        }
+        else{
+            if(round < 100 && round % 2 == 0) {
+                muckJuggernaut = true;
+                inf = 2;
+            } else {
+                muckJuggernaut = false;
+                inf = 1;
+            }
             // prevent getting stuck just building muckrakers
-            if(lastBuilt == RobotType.MUCKRAKER) toBuild = RobotType.SLANDERER;
+            if(lastBuilt == RobotType.MUCKRAKER && !muckJuggernaut) toBuild = RobotType.SLANDERER;
         }
         // handle special case builds
         if(needJuggernaut && myInf > 500) {
@@ -140,12 +149,22 @@ public class EnlightenmentCenter extends RobotPlayer{
         }
 
         //build
-        for (Direction dir : teamawesome.RobotPlayer.directions) {
+        if(muckJuggernaut){
+            // spawn mucks in all dir
+            for (Direction dir : teamawesome.RobotPlayer.directions) {
+                if (rc.canBuildRobot(toBuild, dir, (int) inf)) {
+                    System.out.println("Building a " + toBuild + " in the " + dir + " direction with " + inf + " influence!");
+                    rc.buildRobot(toBuild, dir, (int) inf);
+                }
+            }
+        } else {
+            for (Direction dir : teamawesome.RobotPlayer.directions) {
 
-            if (rc.canBuildRobot(toBuild, dir, (int) inf)) {
-                System.out.println("Building a " + toBuild + " in the " + dir + " direction with " + inf + " influence!");
-                lastBuilt = toBuild;
-                rc.buildRobot(toBuild, dir, (int) inf);
+                if (rc.canBuildRobot(toBuild, dir, (int) inf)) {
+                    System.out.println("Building a " + toBuild + " in the " + dir + " direction with " + inf + " influence!");
+                    lastBuilt = toBuild;
+                    rc.buildRobot(toBuild, dir, (int) inf);
+                }
             }
         }
 
@@ -193,7 +212,11 @@ public class EnlightenmentCenter extends RobotPlayer{
      */
     static RobotType strategicSpawnableRobotType(int round) {
         //if (round < 400){
-            if(round % 5 == 0){
+        if(round < 100) {
+            if(round % 5 == 0 || round % 2 == 0){
+                return(RobotType.MUCKRAKER);
+            }
+        } else if(round % 5 == 0){
                 return(RobotType.MUCKRAKER);
             }
             if(round %30 == 0){
