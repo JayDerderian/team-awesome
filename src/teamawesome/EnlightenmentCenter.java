@@ -63,7 +63,7 @@ public class EnlightenmentCenter extends RobotPlayer{
             inf = Math.pow((round *.01), 2) + 80;
         }
         else{
-            if(round < 100 && round % 2 == 0) {
+            if(round < 150 && round % 2 == 0) {
                 muckJuggernaut = true;
                 inf = 2;
             } else {
@@ -149,15 +149,6 @@ public class EnlightenmentCenter extends RobotPlayer{
         }
 
         //build
-        if(muckJuggernaut){
-            // spawn mucks in all dir
-            for (Direction dir : teamawesome.RobotPlayer.directions) {
-                if (rc.canBuildRobot(toBuild, dir, (int) inf)) {
-                    System.out.println("Building a " + toBuild + " in the " + dir + " direction with " + inf + " influence!");
-                    rc.buildRobot(toBuild, dir, (int) inf);
-                }
-            }
-        } else {
             for (Direction dir : teamawesome.RobotPlayer.directions) {
 
                 if (rc.canBuildRobot(toBuild, dir, (int) inf)) {
@@ -166,7 +157,6 @@ public class EnlightenmentCenter extends RobotPlayer{
                     rc.buildRobot(toBuild, dir, (int) inf);
                 }
             }
-        }
 
         //Bid
         int toBid;
@@ -212,7 +202,7 @@ public class EnlightenmentCenter extends RobotPlayer{
      */
     static RobotType strategicSpawnableRobotType(int round) {
         //if (round < 400){
-        if(round < 100) {
+        if(round < 150) {
             if(round % 5 == 0 || round % 2 == 0){
                 return(RobotType.MUCKRAKER);
             }

@@ -94,16 +94,7 @@ public strictfp class Muckraker extends RobotPlayer {
         }
 
         // Move Muckraker
-        if(muckJuggernaut) {
-//            Direction dirCreated = rc.getLocation().directionTo(motherLoc).opposite();
-            if(!rc.onTheMap(rc.adjacentLocation(dirCreated)))
-                dirCreated = randomDirection();
-            if (tryMove(dirCreated)) {
-                System.out.println("Muck Moved!");
-            } else {
-                tryMove(randomDirection());
-            }
-        } else if(!enemyEcFound && !muckJuggernaut) { // Initially explore map quickly (along with Slanders)
+        if(!enemyEcFound && !muckJuggernaut) { // Initially explore map quickly (along with Slanders)
             if (xLean == 0 && yLean == 0) {
                 int[] x1 = {0, 1, -1, 3, -3, 2, -2, 4, -4};
                 for (int i :x1) {
@@ -116,6 +107,14 @@ public strictfp class Muckraker extends RobotPlayer {
                         break;
                 }
             }
+        } else if (!enemyEcFound && muckJuggernaut) {
+                if(!rc.onTheMap(rc.adjacentLocation(dirCreated)))
+                    dirCreated = randomDirection();
+                if (tryMove(dirCreated)) {
+                    System.out.println("Muck Moved!");
+                } else {
+                    tryMove(randomDirection());
+                }
         } else { // If enemy EC found, then move in close proximity to the enemy EC
             // if adjacent to enemy EC, then hault the movement; sence and expose is the only task to do.
             if (nextToEnemyEC()) {
