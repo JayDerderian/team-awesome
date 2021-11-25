@@ -130,7 +130,24 @@ public strictfp class Muckraker extends RobotPlayer {
                     if (robot.getTeam() == rc.getTeam() && robot.getType() == RobotType.ENLIGHTENMENT_CENTER) { // enemy EC converted to our team EC
                         resetFlagAndMove(0);
                         break;
+                    } else if(robot.getTeam() == rc.getTeam()) { // if our team politicians nearby to empower, given them way.
+                        if(robot.getType() == RobotType.POLITICIAN) {
+                            Direction possibleDir = rc.getLocation().directionTo(enemyECLocation);
+                            if (enemyECLocationSet && tryMove(possibleDir)) {
+                                prevMovedDir = possibleDir;
+                                System.out.println("Muck Moved!");
+                            } else {
+                                Direction possibleDir1 = getHighPassableDirection();
+                                if (tryMove(possibleDir1)) {
+                                    prevMovedDir = possibleDir1;
+                                    System.out.println("Muck Moved!");
+                                } else if (tryMove(randomDirection())) {
+                                    System.out.println("Muck moved!");
+                                }
+                            }
+                        }
                     }
+
                 }
             }
             else {
