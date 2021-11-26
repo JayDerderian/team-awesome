@@ -31,7 +31,7 @@ public class RobotPlayerTest {
 
     // Neutral EC's
     RobotInfo neutralEC1 = new RobotInfo(5, Team.NEUTRAL, RobotType.ENLIGHTENMENT_CENTER, 0, 0, new MapLocation(20100, 20100));
-    RobotInfo neutralEC2 = new RobotInfo(6, Team.NEUTRAL, RobotType.ENLIGHTENMENT_CENTER, 0, 0, new MapLocation(20100, 20100));
+    RobotInfo neutralEC2 = new RobotInfo(6, Team.NEUTRAL, RobotType.ENLIGHTENMENT_CENTER, 0, 0, new MapLocation(20245, 20237));
     RobotInfo[] neutralECRobotInfoArray = { neutralEC1 };
 
     // Team bots
@@ -43,7 +43,6 @@ public class RobotPlayerTest {
 
 
     //--------------------------------------TEST HELPERS-----------------------------------------//
-    // NOTE: These should not be called directly! They're used by the parser and retriever methods.
 
     @Test
     public void testDigitCounter(){
@@ -74,12 +73,11 @@ public class RobotPlayerTest {
     //-------------------------------------FLAG GENERATION---------------------------------------//
 
     /*
-     @Test - flag generation and see whether we get an error or not from the method
-     @Test - test each flag constant!
+    Enemy info flag tests
      */
 
     @Test
-    public void canMakeFlag(){
+    public void canMakeEnemyECFlag(){
         RobotController rc = mock(RobotController.class);
         setupForMothership(rc, RobotType.POLITICIAN);
         Politician testBot = new Politician(rc);
@@ -89,7 +87,7 @@ public class RobotPlayerTest {
     }
 
     @Test
-    public void canMakeFlag2(){
+    public void canMakeEnemyMuckFlag(){
         RobotController rc = mock(RobotController.class);
         setupForMothership(rc, RobotType.POLITICIAN);
         Politician testBot = new Politician(rc);
@@ -97,6 +95,100 @@ public class RobotPlayerTest {
         int testFlag = testBot.makeFlag(ENEMY_MUCKRAKER_NEARBY_FLAG,2);
         assertEquals(test, testFlag);
     }
+
+    @Test
+    public void canMakeEnemySlanFlag(){
+        RobotController rc = mock(RobotController.class);
+        setupForMothership(rc, RobotType.POLITICIAN);
+        Politician testBot = new Politician(rc);
+        int test = 11204;
+        int testFlag = testBot.makeFlag(ENEMY_SLANDERER_NEARBY_FLAG,4);
+        assertEquals(test, testFlag);
+    }
+
+    @Test
+    public void canMakeEnemyPolFlag(){
+        RobotController rc = mock(RobotController.class);
+        setupForMothership(rc, RobotType.POLITICIAN);
+        Politician testBot = new Politician(rc);
+        int test = 11107;
+        int testFlag = testBot.makeFlag(ENEMY_POLITICIAN_FLAG,7);
+        assertEquals(test, testFlag);
+    }
+
+    /*
+    Alert flag tests
+     */
+
+    @Test
+    public void canMakeNeutralECFlag(){
+        RobotController rc = mock(RobotController.class);
+        setupForMothership(rc, RobotType.POLITICIAN);
+        Politician testBot = new Politician(rc);
+        int testFlag = testBot.makeFlag(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG,0);
+        assertEquals(111, testFlag);
+    }
+
+    @Test
+    public void canMakeNeedHelpFlag(){
+        RobotController rc = mock(RobotController.class);
+        setupForMothership(rc, RobotType.POLITICIAN);
+        Politician testBot = new Politician(rc);
+        int testFlag = testBot.makeFlag(NEED_HELP,0);
+        assertEquals(112, testFlag);
+    }
+
+    @Test
+    public void canMakeGoHereFlag(){
+        RobotController rc = mock(RobotController.class);
+        setupForMothership(rc, RobotType.POLITICIAN);
+        Politician testBot = new Politician(rc);
+        int testFlag = testBot.makeFlag(GO_HERE,0);
+        assertEquals(113, testFlag);
+    }
+
+    @Test
+    public void canMakeEnemyInfoFlag(){
+        RobotController rc = mock(RobotController.class);
+        setupForMothership(rc, RobotType.POLITICIAN);
+        Politician testBot = new Politician(rc);
+        int testFlag = testBot.makeFlag(ENEMY_INFO,0);
+        assertEquals(114, testFlag);
+    }
+
+    @Test
+    public void canMakeOutOfRangeFlag(){
+        RobotController rc = mock(RobotController.class);
+        setupForMothership(rc, RobotType.POLITICIAN);
+        Politician testBot = new Politician(rc);
+        int testFlag = testBot.makeFlag(OUT_OF_RANGE,0);
+        assertEquals(115, testFlag);
+    }
+
+    @Test
+    public void canMakeSendLocationFlag(){
+        RobotController rc = mock(RobotController.class);
+        setupForMothership(rc, RobotType.POLITICIAN);
+        Politician testBot = new Politician(rc);
+        int testFlag = testBot.makeFlag(SEND_LOCATION,0);
+        assertEquals(117, testFlag);
+    }
+
+    @Test
+    public void canMakeLocationInfoFlag(){
+        RobotController rc = mock(RobotController.class);
+        setupForMothership(rc, RobotType.POLITICIAN);
+        Politician testBot = new Politician(rc);
+        int testFlag = testBot.makeFlag(LOCATION_INFO,0);
+        assertEquals(118, testFlag);
+    }
+
+    //-----------------------------------LOCATION ENCODING/DECODING------------------------------//
+
+    /*
+    @Test - make sure a flag is encoded correctly
+    @Test - make sure a flag is decoded correctly
+     */
 
     @Test
     public void encodeDecodeCoordinatesTest() {
@@ -112,13 +204,6 @@ public class RobotPlayerTest {
         assertEquals(y, loc2.y);
     }
 
-
-    //-----------------------------------LOCATION ENCODING/DECODING------------------------------//
-
-    /*
-    @Test - make sure a flag is encoded correctly
-    @Test - make sure a flag is decoded correctly
-     */
 
     @Test
     public void encodeMapCoordinates(){
@@ -170,6 +255,20 @@ public class RobotPlayerTest {
         HashMap<Integer, MapLocation> result = testBot.parseFlag(neutralEC1,testFlag);
         assertTrue(result.containsKey(ENEMY_SLANDERER_NEARBY_FLAG));
         assertEquals(5,neutralEC1.ID);
+    }
+
+    @Test
+    public void canParse8DigitFlag() throws GameActionException{
+        RobotController rc = getSpawnRobot();
+        Politician testBot = new Politician(rc);
+        int flag = 11109101;
+        int x = 20245;
+        int y = 20237;
+        HashMap<Integer, MapLocation> res = testBot.parseFlag(neutralEC2, flag);
+        MapLocation loc = res.get(LOCATION_INFO);
+        assertTrue(res.containsKey(LOCATION_INFO));
+        assertEquals(x, loc.x);
+        assertEquals(y, loc.y);
     }
 
 

@@ -334,6 +334,21 @@ abstract public strictfp class RobotPlayer {
             String flagStr = pw + EF;
             newFlag = Integer.parseInt(flagStr);
         }
+        else if (flag == LOCATION_INFO){
+            String EF = Integer.toString(LOCATION_INFO + conv);
+            String flagStr = pw + EF;
+            newFlag = Integer.parseInt(flagStr);
+        }
+        else if (flag == OUT_OF_RANGE){
+            String EF = Integer.toString(OUT_OF_RANGE + conv);
+            String flagStr = pw + EF;
+            newFlag = Integer.parseInt(flagStr);
+        }
+        else if (flag == ENEMY_INFO){
+            String EF = Integer.toString(ENEMY_INFO + conv);
+            String flagStr = pw + EF;
+            newFlag = Integer.parseInt(flagStr);
+        }
         // 5 digit flags
         else if (flag == ENEMY_POLITICIAN_FLAG){
             String EF = Integer.toString(ENEMY_POLITICIAN_FLAG + conv);
