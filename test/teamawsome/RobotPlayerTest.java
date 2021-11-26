@@ -264,7 +264,12 @@ public class RobotPlayerTest {
 
     @Test
     public void newRobotKnowsItsMothership() {
-        RobotController rc = getSpawnRobot();
+//        RobotController rc = getSpawnRobot();
+        RobotController rc = mock(RobotController.class);
+        RobotPlayerTest.setupForMothership(rc, RobotType.ENLIGHTENMENT_CENTER);
+        when(rc.getType()).thenReturn(RobotType.MUCKRAKER);
+        when(rc.getLocation()).thenReturn(new MapLocation(20200, 20200));
+        when(rc.senseNearbyRobots(30, Team.A)).thenReturn(PoliticianTest.PoliticECTest);
 
         Muckraker muck = new Muckraker(rc);
         assertEquals(muck.mothership, PoliticianTest.teamBot4.ID);

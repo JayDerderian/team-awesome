@@ -9,6 +9,7 @@ import static org.mockito.Mockito.*;
 
 //import teamawesome.GenericRobot;
 import teamawesome.Muckraker;
+import teamawesome.RobotPlayer;
 
 /**
  * Constants Meaning
@@ -29,7 +30,6 @@ public class MuckrakerTest {
 
     RobotInfo enemyEC1 = new RobotInfo(10, Team.B, RobotType.ENLIGHTENMENT_CENTER, 0, 0, new MapLocation(20300, 20300));
     RobotInfo enemyEC2 = new RobotInfo(11, Team.B, RobotType.ENLIGHTENMENT_CENTER, 0, 0, new MapLocation(20300, 20300));
-    RobotInfo[] enemyECRobotInfoArray = { enemyEC1 };
 
     RobotInfo enemyMuck1 = new RobotInfo(12, Team.B, RobotType.MUCKRAKER, 0,0, new MapLocation(2400,2400));
     RobotInfo[] enemyMuckRobotInfoArray = { enemyMuck1 };
@@ -38,14 +38,21 @@ public class MuckrakerTest {
     RobotInfo teamBot2 = new RobotInfo(7, Team.A, RobotType.MUCKRAKER, 1, 1, new MapLocation(20200, 20200));
     RobotInfo teamBot3 = new RobotInfo(8, Team.A, RobotType.POLITICIAN, 1, 1, new MapLocation(20200, 20200));
     RobotInfo teamBot4 = new RobotInfo(9, Team.A, RobotType.ENLIGHTENMENT_CENTER, 1, 1, new MapLocation(20200, 20200));
+    RobotInfo teamBot5 = new RobotInfo(13, Team.A, RobotType.MUCKRAKER, 2, 2, new MapLocation(20200, 20200));
     RobotInfo[] teamRobotInfoArray = {teamBot1};
     RobotInfo[] teamMuckInfoArray = {teamBot2, enemyEC1};
-    RobotInfo[] teamMuckInfoArray1 = { teamBot4 };
+    RobotInfo[] teamMuckECInfoArray = { teamBot4, enemyEC1 };
+    RobotInfo[] teamMuckInfoArray2 = { teamBot1, teamBot3, teamBot4 };
+    RobotInfo[] enemyECRobotInfoArray = { enemyEC1, teamBot3 };
 
     @Test
     public void ifMuckrakerRobotCreatedThenMuckrakerClassIsCalled() {
         RobotController rc = mock(RobotController.class);
-        RobotPlayerTest.setupForMothership(rc, RobotType.MUCKRAKER);
+        RobotPlayerTest.setupForMothership(rc, RobotType.ENLIGHTENMENT_CENTER);
+        when(rc.getType()).thenReturn(RobotType.MUCKRAKER);
+        when(rc.getLocation()).thenReturn(new MapLocation(20200, 20200));
+        when(rc.senseNearbyRobots(30, Team.A)).thenReturn(teamMuckInfoArray2);
+//        when(new MapLocation(20200, 20200).directionTo(new MapLocation(20200, 20200))).thenReturn(Direction.EAST);
 
         Muckraker robot = new Muckraker(rc);
 
@@ -148,20 +155,64 @@ public class MuckrakerTest {
     }
 
     @Test
-    public void ifEnemyMuckFoundAlertTeamWithFlag() throws GameActionException {
+    public void ifMuckJuggernautCreatedStoreDirCreatedVale() throws GameActionException {
         RobotController rc = mock(RobotController.class);
-        when(rc.getType()).thenReturn(RobotType.MUCKRAKER);
-        when(rc.getID()).thenReturn(101);
+        RobotPlayerTest.setupForMothership(rc, RobotType.MUCKRAKER);
+        when(rc.getID()).thenReturn(13);
         when(rc.getLocation()).thenReturn(new MapLocation(20200, 20200));
+        when(rc.senseNearbyRobots()).thenReturn(new RobotInfo[]{teamBot2});
         when(rc.getTeam()).thenReturn(Team.A);
-//        when(rc.getType().sensorRadiusSquared).thenReturn(30);
-        when(rc.senseNearbyRobots(30, Team.A)).thenReturn(teamMuckInfoArray1);
-        when(rc.senseNearbyRobots()).thenReturn(enemyMuckRobotInfoArray);
+        when(rc.getInfluence()).thenReturn(2);
+        when(rc.adjacentLocation(Direction.CENTER)).thenReturn(new MapLocation(20199, 20199));
+        when(rc.onTheMap(new MapLocation(20199, 20199))).thenReturn(true);
 
         Muckraker robot = new Muckraker(rc);
         robot.turn();
 
-        assertEquals(robot.flagValue, 11300);
+        assertEquals(robot.muckJuggernaut, true);
+        assertEquals(robot.dirCreated, Direction.CENTER);
+    }
+
+    @Test
+    public void secondScenseHomeECResetFlagValues() throws GameActionException {
+        RobotController rc = mock(RobotController.class);
+        RobotPlayerTest.setupForMothership(rc, RobotType.MUCKRAKER);
+        when(rc.getID()).thenReturn(13);
+        when(rc.getLocation()).thenReturn(new MapLocation(20200, 20200));
+        when(rc.senseNearbyRobots()).thenReturn(teamMuckECInfoArray);
+        when(rc.getTeam()).thenReturn(Team.A);
+        when(rc.getInfluence()).thenReturn(1);
+        when(rc.canGetFlag(9)).thenReturn(true);
+        when(rc.getFlag(9)).thenReturn(11400);
+        when(rc.canGetFlag(7)).thenReturn(true);
+        when(rc.getFlag(7)).thenReturn(11400);
+        when(rc.canSetFlag(00000)).thenReturn(true);
+        when(rc.canMove(Direction.CENTER)).thenReturn(true);
+        when(rc.canMove(Direction.SOUTH)).thenReturn(true);
+        when(rc.canMove(Direction.NORTHEAST)).thenReturn(true);
+
+        Muckraker robot = new Muckraker(rc);
+        robot.turn();
+
+        assertEquals(robot.flagValue, 00000);
+    }
+
+    @Test
+    public void mucksAdjacentToEnemyECWhenDetectOurTeamPoliticianGiveThemWay() throws GameActionException {
+        RobotController rc = mock(RobotController.class);
+        RobotPlayerTest.setupForMothership(rc, RobotType.MUCKRAKER);
+        when(rc.getID()).thenReturn(13);
+        when(rc.getLocation()).thenReturn(new MapLocation(20299, 20299));
+        when(rc.senseNearbyRobots()).thenReturn(enemyECRobotInfoArray);
+        when(rc.getTeam()).thenReturn(Team.A);
+        when(rc.getInfluence()).thenReturn(1);
+        when(rc.canMove(Direction.NORTHEAST)).thenReturn(true);
+
+        Muckraker robot = new Muckraker(rc);
+        robot.turn();
+
+        assertNotNull(robot.prevMovedDir);
+        assertEquals(robot.prevMovedDir, Direction.NORTHEAST);
     }
 
 }
