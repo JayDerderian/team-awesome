@@ -2,6 +2,8 @@ package teamawsome;
 
 import battlecode.common.*;
 import org.junit.Test;
+
+import static battlecode.common.Direction.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -57,10 +59,13 @@ public class PoliticianTest {
         assertThat(robot.robotStatement, containsString("I'm a POLITICIAN"));
     }
 
+    @Captor
+    ArgumentCaptor<Integer> emp = ArgumentCaptor.forClass(Integer.class);
+
     @Test
     public void ifEnemyRobotSensedAndCanBeEmpoweredThenEmpower() throws GameActionException {
         RobotController rc = mock(RobotController.class);
-        RobotPlayerTest.setupForMothership(rc, RobotType.ENLIGHTENMENT_CENTER);
+        RobotPlayerTest.setupForMothership(rc, RobotType.POLITICIAN);
         when(rc.getType()).thenReturn(RobotType.POLITICIAN);
         when(rc.getTeam()).thenReturn(Team.A);
         when(rc.senseNearbyRobots(9, Team.B)).thenReturn(enemyRobotInfoArray);
@@ -70,16 +75,112 @@ public class PoliticianTest {
         robot.turn();
 
         assertTrue(robot.empowered);
+        verify(rc).empower(emp.capture());
+    }
+
+    @Test
+    public void ifEnemyECSensedAndCanBeEmpoweredThenEmpower() throws GameActionException {
+        RobotController rc = mock(RobotController.class);
+        RobotPlayerTest.setupForMothership(rc, RobotType.POLITICIAN);
+        when(rc.getType()).thenReturn(RobotType.POLITICIAN);
+        when(rc.getTeam()).thenReturn(Team.A);
+        when(rc.senseNearbyRobots(9, Team.B)).thenReturn(noNearbyArray);
+        when(rc.senseNearbyRobots(9, Team.NEUTRAL)).thenReturn(neutralECRobotInfoArray);
+        when(rc.canEmpower(9)).thenReturn(true);
+
+        Politician robot = new Politician(rc);
+        robot.turn();
+
+        assertTrue(robot.empowered);
+        verify(rc).empower(emp.capture());
+    }
+
+    @Captor
+    ArgumentCaptor<Direction> movedir = ArgumentCaptor.forClass(Direction.class);
+
+    @Test
+    public void politicianReadsMothershipFlagForNeutralEC() throws GameActionException{
+        RobotController rc = getCommTestRC();
+        // simulate first phase of tx
+        when(rc.getFlag(9)).thenReturn(111);
+        Politician politic = new Politician(rc);
+        politic.turn();
+        // simulate second phase of tx
+        when(rc.getFlag(9)).thenReturn(11119119);
+        when(rc.canMove(NORTHEAST)).thenReturn(true);
+        politic.turn();
+        verify(rc).move(movedir.capture());
+        assertEquals(movedir.getValue(), NORTHEAST);
+    }
+
+    @Test
+    public void politicianReadsMothershipFlagForEnemyEC() throws GameActionException{
+        RobotController rc = getCommTestRC();
+        // simulate first phase of tx
+        when(rc.getFlag(9)).thenReturn(11400);
+        Politician politic = new Politician(rc);
+        politic.turn();
+        // simulate second phase of tx
+        when(rc.getFlag(9)).thenReturn(11119119);
+        when(rc.canMove(NORTHEAST)).thenReturn(true);
+        politic.turn();
+        verify(rc).move(movedir.capture());
+        assertEquals(movedir.getValue(), NORTHEAST);
+    }
+
+    @Test
+    public void politicianReadsMothershipFlagForHelpNeeded() throws GameActionException{
+        RobotController rc = getCommTestRC();
+        // simulate first phase of tx
+        when(rc.getFlag(9)).thenReturn(112);
+        Politician politic = new Politician(rc);
+        when(rc.canMove(SOUTHWEST)).thenReturn(true);
+        politic.turn();
+        verify(rc).move(movedir.capture());
+        assertEquals(movedir.getValue(), SOUTHWEST);
+    }
+
+    @Test
+    public void politicianDoesntSaveLocationIfTooClose() throws GameActionException{
+        RobotController rc = getCommTestRC();
+        when(rc.getLocation()).thenReturn(new MapLocation(20202, 20202));
+        when(rc.getFlag(9)).thenReturn(112);
+        Politician politic = new Politician(rc);
+        when(rc.canMove(any())).thenReturn(true);
+        politic.turn();
+        assertNull(politic.dest);
+    }
+
+    @Test
+    public void politicianDealsWithItsMothersDeathInAHealthyWay() throws GameActionException{
+        RobotController rc = getCommTestRC();
+        // simulate a failed call to the mothership
+        when(rc.getFlag(9)).thenThrow(new GameActionException(GameActionExceptionType.CANT_DO_THAT, "heck off"));
+        Politician politic = new Politician(rc);
+        assertEquals(9, politic.mothership);
+        politic.turn();
+        assertEquals(-1, politic.mothership);
+    }
+
+    private RobotController getCommTestRC() {
+        RobotController rc = mock(RobotController.class);
+        RobotPlayerTest.setupForMothership(rc, RobotType.POLITICIAN);
+        when(rc.senseNearbyRobots()).thenReturn(noNearbyArray);
+        when(rc.senseNearbyRobots(9, Team.B)).thenReturn(noNearbyArray);
+        when(rc.senseNearbyRobots(9, Team.NEUTRAL)).thenReturn(noNearbyArray);
+        when(rc.getLocation()).thenReturn(new MapLocation(20206, 20206));
+        when(rc.canSenseRobot(9)).thenReturn(true);
+        return rc;
     }
 
     @Test
     public void ifNeutralECDetectedThenEmpower() throws GameActionException {
         RobotController rc = mock(RobotController.class);
-        RobotPlayerTest.setupForMothership(rc, RobotType.ENLIGHTENMENT_CENTER);
+        RobotPlayerTest.setupForMothership(rc, RobotType.POLITICIAN);
         when(rc.getType()).thenReturn(RobotType.POLITICIAN);
         when(rc.getTeam()).thenReturn(Team.A);
-        when(rc.senseNearbyRobots(9, Team.B)).thenReturn(noNearbyArray);
-        when(rc.senseNearbyRobots(9, Team.NEUTRAL)).thenReturn(neutralECRobotInfoArray);
+        when(rc.senseNearbyRobots(9, Team.B)).thenReturn(enemyEC);
+        when(rc.senseNearbyRobots(9, Team.NEUTRAL)).thenReturn(noNearbyArray);
         when(rc.canEmpower(9)).thenReturn(true);
         when(rc.canMove(any())).thenReturn(true);
 
@@ -91,7 +192,7 @@ public class PoliticianTest {
     @Test
     public void politicianMovesIfNoEmpowerableRobots() throws GameActionException {
         RobotController rc = mock(RobotController.class);
-        RobotPlayerTest.setupForMothership(rc, RobotType.ENLIGHTENMENT_CENTER);
+        RobotPlayerTest.setupForMothership(rc, RobotType.POLITICIAN);
         when(rc.getType()).thenReturn(RobotType.POLITICIAN);
         when(rc.getTeam()).thenReturn(Team.A);
         // show no convertible units
@@ -110,6 +211,54 @@ public class PoliticianTest {
 
         verify(rc).move(dir.capture());
         assertNotNull(dir.getValue());
+    }
+
+    @Test
+    public void politicianDoesNotTryToMoveIfItCant() throws GameActionException {
+        RobotController rc = mock(RobotController.class);
+        RobotPlayerTest.setupForMothership(rc, RobotType.POLITICIAN);
+        when(rc.getType()).thenReturn(RobotType.POLITICIAN);
+        when(rc.getTeam()).thenReturn(Team.A);
+        // show no convertible units
+        when(rc.senseNearbyRobots()).thenReturn(noNearbyArray);
+        when(rc.senseNearbyRobots(9, Team.B)).thenReturn(noNearbyArray);
+        when(rc.senseNearbyRobots(9, Team.NEUTRAL)).thenReturn(noNearbyArray);
+        when(rc.canEmpower(9)).thenReturn(false);
+        when(rc.getLocation()).thenReturn(new MapLocation(20200, 20200));
+        when(rc.adjacentLocation(any())).thenReturn(new MapLocation(20200, 20200));
+        when(rc.onTheMap(any())).thenReturn(true);
+        when(rc.canMove(any())).thenReturn(false);
+
+        Politician robot = new Politician(rc);
+        robot.turn();
+        assertFalse(robot.empowered);
+
+        verify(rc, never()).move(dir.capture());
+        //assertNotNull(dir.getValue());
+    }
+
+    @Test
+    public void politicianPrefersToMoveTowardEnemyEC() throws GameActionException {
+        RobotController rc = mock(RobotController.class);
+        RobotPlayerTest.setupForMothership(rc, RobotType.POLITICIAN);
+        when(rc.getType()).thenReturn(RobotType.POLITICIAN);
+        when(rc.getTeam()).thenReturn(Team.A);
+        // show no convertible units
+        when(rc.senseNearbyRobots()).thenReturn(enemyEC);
+        when(rc.senseNearbyRobots(9, Team.B)).thenReturn(noNearbyArray);
+        when(rc.senseNearbyRobots(9, Team.NEUTRAL)).thenReturn(noNearbyArray);
+        when(rc.canEmpower(9)).thenReturn(false);
+        when(rc.getLocation()).thenReturn(new MapLocation(20200, 20200));
+        when(rc.adjacentLocation(any())).thenReturn(new MapLocation(20200, 20200));
+        when(rc.onTheMap(any())).thenReturn(true);
+        when(rc.canMove(any())).thenReturn(true);
+
+        Politician robot = new Politician(rc);
+        robot.turn();
+        assertFalse(robot.empowered);
+
+        verify(rc).move(dir.capture());
+        assertEquals(dir.getValue(), NORTHEAST);
     }
 
     @Test

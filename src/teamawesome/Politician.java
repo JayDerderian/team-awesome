@@ -20,7 +20,7 @@ public class Politician extends RobotPlayer {
     boolean juggernaut; // juggernaut Politicians will ignore all enemies and focus on neutral ECs
     boolean ECsighted;
     int sync;
-    MapLocation dest;
+    public MapLocation dest;
     int destAge;
     MapLocation myLoc;
 
@@ -80,7 +80,6 @@ public class Politician extends RobotPlayer {
                 homeFlag = -1;
             }
         }
-        //checkRolodex();
         Team enemy = rc.getTeam().opponent();
         int actionRadius = rc.getType().actionRadiusSquared;
         RobotInfo[] attackable = rc.senseNearbyRobots(actionRadius, enemy);
@@ -256,34 +255,9 @@ public class Politician extends RobotPlayer {
         } else {
             if(robot.getType() != RobotType.POLITICIAN)
                 dirWeight -= 0.5;
-            else if(!ECsighted){
-                updateContact(robot);
-                int flag = poliReadFlag(rc.getFlag(robot.getID()));
-                // strongly prefer to travel toward politicians that have sighted a neutral EC
-                if(flag == FlagConstants.NEUTRAL_ENLIGHTENMENT_CENTER_FLAG) {
-                    System.out.println("An ally found a neutral EC! Location: " +
-                            robot.getLocation());
-                    //dirWeight += 5;
-                }
-            }
             if(robot.getType() == RobotType.ENLIGHTENMENT_CENTER) mothership = robot.getID();
         }
         locations.put(robotDirection, dirWeight);
-    }
-
-
-
-    protected int poliReadFlag(int rawFlag) {
-        int flag;
-        int len = countDigis(rawFlag);
-        flag = rawFlag % 10;
-        if(flag == FlagConstants.NEUTRAL_ENLIGHTENMENT_CENTER_FLAG)
-            return FlagConstants.NEUTRAL_ENLIGHTENMENT_CENTER_FLAG;
-        if(flag == FlagConstants.NEED_HELP)
-            return FlagConstants.NEED_HELP;
-        if(flag == FlagConstants.ENEMY_ENLIGHTENMENT_CENTER_FLAG)
-            return FlagConstants.ENEMY_ENLIGHTENMENT_CENTER_FLAG;
-        else return FlagConstants.NEUTRAL;
     }
 }
 
