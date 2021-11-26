@@ -86,7 +86,7 @@ public class EnlightenmentCenter extends RobotPlayer{
         // finally check and defend against muckrakers
         for (RobotInfo robot:
                 robots) {
-            if(robot.getType() == RobotType.MUCKRAKER && robot.getTeam() != myTeam)
+            if(robot.getType() == RobotType.MUCKRAKER && robot.getTeam() != myTeam && round > 100)
                 toBuild = RobotType.POLITICIAN;
         }
 
