@@ -265,8 +265,8 @@ public class RobotPlayerTest {
         int x = 20245;
         int y = 20237;
         HashMap<Integer, MapLocation> res = testBot.parseFlag(neutralEC2, flag);
-        MapLocation loc = res.get(LOCATION_INFO);
         assertTrue(res.containsKey(LOCATION_INFO));
+        MapLocation loc = res.get(LOCATION_INFO);
         assertEquals(x, loc.x);
         assertEquals(y, loc.y);
     }

@@ -561,43 +561,6 @@ abstract public strictfp class RobotPlayer {
         return new MapLocation(x + motherLoc.x - 64, y + motherLoc.y - 64);
     }
 
-    /**
-     * Find and return a list of all enemy bots within your surroundings
-     *
-     * @param rc
-     * @return HashMap
-     */
-    public HashMap<Integer, MapLocation> findThreats(RobotController rc){
-        Team enemy = rc.getTeam().opponent();
-        HashMap<Integer, MapLocation> threats = new HashMap<>();
-        for (RobotInfo robot : rc.senseNearbyRobots()) {
-            if(robot.getTeam() == enemy){
-                threats.put(ENEMY_INFO, robot.getLocation());
-            }
-        }
-        if(threats.isEmpty())
-            threats.put(ERROR, new MapLocation(0, 0));
-        return threats;
-    }
-
-    /**
-     * Attempts to detect and store location info of a neutral EC
-     * within the vicinity of this bot
-     *
-     * @param rc
-     * @return HashMap
-     */
-    public HashMap<Integer, MapLocation> findNeutralECs (RobotController rc) {
-        HashMap<Integer, MapLocation> ecLoc = new HashMap<>();
-        for (RobotInfo robot : rc.senseNearbyRobots()) {
-            if(robot.getTeam() == Team.NEUTRAL ){
-                ecLoc.put(NEUTRAL_ENLIGHTENMENT_CENTER_FLAG, robot.getLocation());
-            }
-        }
-        if(ecLoc.isEmpty())
-            ecLoc.put(ERROR, new MapLocation(0,0));
-        return ecLoc;
-    }
 
     /**
      * Borrowed from examplefuncsplayer, Returns a random Direction.
